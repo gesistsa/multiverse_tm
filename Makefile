@@ -1,8 +1,6 @@
 res/keyATM: res data/toks.RDS
-	mkdir res/keyATM
+	mkdir -p res/keyATM
 	Rscript keyATM.R
-res:
-	mkdir res
 data/toks.RDS: data/un_corpus.RDS
 	Rscript toks.R
 data/un_corpus.RDS: data

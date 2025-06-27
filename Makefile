@@ -1,4 +1,7 @@
-res/keyATM: res data/toks.RDS
+res/seededlda: data/toks.RDS
+	mkdir -p res/seededlda
+	Rscript seededlda.R
+res/keyATM: data/toks.RDS
 	mkdir -p res/keyATM
 	Rscript keyATM.R
 data/toks.RDS: data/un_corpus.RDS

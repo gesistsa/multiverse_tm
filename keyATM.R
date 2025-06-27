@@ -31,6 +31,8 @@ condits <- expand.grid(lemmatize = c(TRUE, FALSE), stop = c(TRUE, FALSE), trim =
 
 saveRDS(condits, "data/keyATM_condits.RDS")
 
+set.seed(721831)
+
 for (i in seq_len(nrow(condits))) {
     print(paste0(i, "/", nrow(condits)))
     if (condits$lemmatize[i]) {

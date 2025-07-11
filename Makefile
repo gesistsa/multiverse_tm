@@ -1,18 +1,9 @@
-res/seededlda: data/toks.RDS
-	mkdir -p res/seededlda
-	Rscript seededlda.R
-res/keyATM: data/toks.RDS
-	mkdir -p res/keyATM
-	Rscript keyATM.R
-data/toks.RDS: data/un_corpus.RDS
-	Rscript toks.R
-data/un_corpus.RDS: data
-	Rscript read.R
-data:
-	mkdir data
-	tar -xzf UNGDC_1946-2024.tar.gz -C data
-	find . -name "._*" -delete
+rawdata/un:
+	mkdir rawdata/un
+	tar -xzf rawdata/UNGDC_1946-2024.tar.gz -C rawdata/un
+	find rawdata/un -name "._*" -delete
+rawdata:
+	mkdir rawdata
 clean:
-	rm -rf data
-
-.phony: data clean
+	rm -rf rawdata
+.phony: clean

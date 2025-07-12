@@ -1,3 +1,5 @@
+intermediate/un/runs/1: un_dfms
+	Rscript un02_train.R 1
 un_dfms : rawdata/un
 	mkdir -p intermediate/un
 	Rscript un01_read.R

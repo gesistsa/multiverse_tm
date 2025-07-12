@@ -1,6 +1,6 @@
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) == 0) {
-    stop("You must provide the current run number, e.g. Rscript un02_keyatm.R 1")
+    stop("You must provide the current run number, e.g. Rscript un02_train.R 1")
 }
 current_run <- args[1]
 

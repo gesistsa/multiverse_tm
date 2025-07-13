@@ -53,7 +53,7 @@ settings <- expand.grid(token_normalization = c("none","lemmatization","stemming
                         trimming = c(TRUE, FALSE), stringsAsFactors = FALSE) |>
     purrr::transpose()
 
-process_tokens <- function(setting, current_tokens, verbose = FALSE) {
+process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE) {
     ## print(setting)
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
@@ -99,7 +99,7 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE) {
 }
 
 ## Stupid but we only do it once
-purrr::walk(settings, process_tokens, current_tokens = ungd_tokens, verbose = DEBUG_MODE, .progress = !DEBUG_MODE)
+purrr::walk(settings, process_tokens, current_tokens = ungd_tokens, verbose = DEBUG_MODE, DEBUG_MODE = DEBUG_MODE, .progress = !DEBUG_MODE)
 
 ## DEBUG_MODE: test
 if (DEBUG_MODE) {

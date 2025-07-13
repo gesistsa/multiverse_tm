@@ -6,7 +6,7 @@ if ("--debug" %in% args) {
     DEBUG_MODE <- TRUE
     unlink(here("debug/un"), recursive = TRUE, force = TRUE)
     dir.create(here("debug/un"), recursive = TRUE, showWarnings = FALSE)
-    print("DEBUG MODE ENABLED. Please check the artefacts in debug/un")
+    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/un \n")
 } else {
     DEBUG_MODE <- FALSE
 }
@@ -34,8 +34,7 @@ ungd_corpus <- corpus(ungd_files, text_field = "text")
 if (DEBUG_MODE) {
     set.seed(1233)
     ungd_corpus <- corpus_sample(ungd_corpus, size = 300)
-    print("Only 300 documents are selected")
-    
+    cat("DEBUG: Only 300 documents are selected \n")    
 }
 
 ## Removed the stopword removal
@@ -108,29 +107,29 @@ if (DEBUG_MODE) {
     output_dir <- "debug/un"
     for (setting in settings) {
         filename <- paste0(rlang::hash(setting), ".RDS")
-        expect_true(file.exists(here(output_dir, filename)))
+        testthat::expect_true(file.exists(here(output_dir, filename)))
         current_dfm <- readRDS(here(output_dir, filename))
         features <- featnames(current_dfm)
         if (setting$token_normalization == "none") {
-            expect_true("accorded" %in% features)
+            testthat::expect_true("accorded" %in% features)
         }
         if (setting$token_normalization == "lemmatization") {
-            expect_false("accorded" %in% features)
-            expect_true("accord" %in% features)
+            testthat::expect_false("accorded" %in% features)
+            testthat::expect_true("accord" %in% features)
         }
         if (setting$token_normalization == "stemming") {
-            expect_false("debate" %in% features)
-            expect_true("debat" %in% features)
+            testthat::expect_false("debate" %in% features)
+            testthat::expect_true("debat" %in% features)
         }
         if (setting$stopword_removal) {
-            expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
+            testthat::expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
         } else {
-            expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))            
+            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))            
         }
         if (setting$trimming) {
-            expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
         } else {
-            expect_false(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_false(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
         }
     }
 }

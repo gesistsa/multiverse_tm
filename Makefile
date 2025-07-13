@@ -1,6 +1,6 @@
 intermediate/un/runs/1: un_dfms
 	Rscript un02_train.R 1
-un_dfms : rawdata/un
+un_dfms: rawdata/un
 	mkdir -p intermediate/un
 	Rscript un01_read.R
 rawdata/un: rawdata/UNGDC_1946-2024.tar.gz

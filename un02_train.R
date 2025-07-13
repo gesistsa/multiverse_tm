@@ -43,7 +43,9 @@ split_keywords <- lapply(sdg_keywords, strsplit, split = "_")
 stemmed_sdg_keywords <- list()
 
 for (i in seq_len(length(split_keywords))) {
-    stemmed_sdg_keywords[[i]] <- unique(vapply(lapply(split_keywords[[i]], SnowballC::wordStem), paste, collapse = "_", FUN.VALUE = character(1)))
+    stemmed_sdg_keywords[[i]] <- unique(vapply(lapply(split_keywords[[i]], SnowballC::wordStem),
+                                               paste, collapse = "_",
+                                               FUN.VALUE = character(1)))
 }
 
 names(stemmed_sdg_keywords) <- names(sdg_keywords)
@@ -56,7 +58,7 @@ names(stemmed_sdg_keywords) <- names(sdg_keywords)
 # col5: 1,2,3 = K original, alt1, alt2
 # col6: 1,2,3 = iter original, alt1, alt2
 
-combis <- expand.grid(c(1,2,3), c(1, 0), c(1, 0), c(1, 0), c(1,2,3), c(1,2,3)) %>% as.matrix
+combis <- expand.grid(c(1,2,3), c(1, 0), c(1, 0), c(1, 0), c(1,2,3), c(1,2,3)) |> as.matrix()
 attr(combis, "dimnames") <- NULL
 
 k <- c(1, 3, 5)

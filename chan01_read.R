@@ -15,7 +15,6 @@ library(quanteda)
 library(purrr)
 # ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
 
-
 final_data <- readRDS(here("rawdata/final_data.RDS"))
 
 current_tokens <- corpus(final_data$AB) |> 

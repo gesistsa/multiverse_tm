@@ -2,18 +2,18 @@ library(here)
 
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) == 0) {
-    stop("You must provide the current run number, e.g. Rscript un02_train.R 1")
+    stop("You must provide the current run number, e.g. Rscript jankin02_train.R 1")
 }
 current_run <- args[1]
 
 if (current_run == "--debug") {
     DEBUG_MODE <- TRUE
-    output_dir <- here("debug/un/runs/1")
+    output_dir <- here("debug/jankin/runs/1")
     unlink(output_dir, recursive = TRUE, force = TRUE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/un/runs/1 \n")
+    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/jankin/runs/1 \n")
 } else {
     DEBUG_MODE <- FALSE
-    output_dir <- here("intermediate/un/runs", current_run)
+    output_dir <- here("intermediate/jankin/runs", current_run)
 }
 
 library(keyATM)
@@ -45,8 +45,7 @@ sdg_keywords <- list(
     SDG17 = c("partnership", "international_cooperation", "global_partnership",  "development_goals","development_cooperation", "financing_development", "development_finance", "trade", "technology_transfer", "capacity_building")
 )
 
-
-## This is not working because we stemmed first, before doing bigram in un01
+## This is not working because we stemmed first, before doing bigram in jankin01
 ## sdg_keywords_stemmed <- lapply(sdg_keywords, SnowballC::wordStem)
 
 split_keywords <- lapply(sdg_keywords, strsplit, split = "_")
@@ -102,10 +101,10 @@ check_keywords <- function(docs, keywords) {
 train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords, DEBUG_MODE, .fix_seed = NULL, .return_output = FALSE) {
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
     if (!DEBUG_MODE) {
-        dfm_dir <- "intermediate/un"
+        dfm_dir <- "intermediate/jankin"
     } else {
         print(setting)
-        dfm_dir <- "debug/un"
+        dfm_dir <- "debug/jankin"
     }
     current_dfm <- readRDS(here(dfm_dir, dfm_filename))
     if (setting$token_normalization == "stemming") {
@@ -140,7 +139,7 @@ train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords,
         current_iter <- 100
     }
     if (is.null(.fix_seed)) {
-        random_seed <- sample(-65535:65536, 1)
+        random_seed <- sample(-65535:65535, 1)
     } else {
         random_seed <- .fix_seed
     }

@@ -4,9 +4,9 @@ library(here)
 
 if ("--debug" %in% args) {
     DEBUG_MODE <- TRUE
-    unlink(here("debug/un"), recursive = TRUE, force = TRUE)
-    dir.create(here("debug/un"), recursive = TRUE, showWarnings = FALSE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/un \n")
+    unlink(here("debug/jankin"), recursive = TRUE, force = TRUE)
+    dir.create(here("debug/jankin"), recursive = TRUE, showWarnings = FALSE)
+    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/jankin \n")
 } else {
     DEBUG_MODE <- FALSE
 }
@@ -17,14 +17,14 @@ library(stringr)
 # library(textstem) don't import it, but use it here
 library(purrr)
 
-stopifnot(dir.exists(here("rawdata/un/TXT")))
+stopifnot(dir.exists(here("rawdata/jankin/TXT")))
 
 ## Modified from the original RMD file
 
-ungd_files <- readtext(here("rawdata/un/TXT/*"), 
-                                 docvarsfrom = "filenames", 
-                                 dvsep="_", 
-                                 docvarnames = c("Country", "Session", "Year"))
+ungd_files <- readtext(here("rawdata/jankin/TXT/*"), 
+                       docvarsfrom = "filenames", 
+                       dvsep="_", 
+                       docvarnames = c("Country", "Session", "Year"))
 
 ungd_files$doc_id <- str_replace(ungd_files$doc_id , ".txt", "") |>
     str_replace("_\\d{2}", "")
@@ -88,9 +88,9 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
     if (!DEBUG_MODE) {
-        output_dir <- "intermediate/un/"
+        output_dir <- "intermediate/jankin"
     } else {
-        output_dir <- "debug/un"
+        output_dir <- "debug/jankin"
     }
     saveRDS(temp_dfm, here(output_dir, paste0(current_hash, ".RDS")))
     ## thank you for your 16G of ram
@@ -104,7 +104,7 @@ purrr::walk(settings, process_tokens, current_tokens = ungd_tokens, verbose = DE
 ## DEBUG_MODE: test
 if (DEBUG_MODE) {
     library(testthat)
-    output_dir <- "debug/un"
+    output_dir <- "debug/jankin"
     for (setting in settings) {
         filename <- paste0(rlang::hash(setting), ".RDS")
         testthat::expect_true(file.exists(here(output_dir, filename)))

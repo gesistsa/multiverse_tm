@@ -1,3 +1,5 @@
+intermediate/chan/runs/1: chan_dfms
+	Rscript chan02_train.R 1
 chan_dfms: rawdata/final_data.RDS
 	mkdir -p intermediate/chan
 	Rscript chan01_read.R

@@ -11,7 +11,4 @@ RUN R --slave -e 'install.packages(c("renv", "pak"))'
 
 RUN R --slave -e 'options(renv.config.pak.enabled = TRUE); renv::restore()'
 
-
-CMD ["make", "rawdata/UNGDC_1946-2024.tar.gz"]
-
-CMD ["Rscript" "jankin01.R", "--debug"]
+ENTRYPOINT ["/entrypoint.sh"]

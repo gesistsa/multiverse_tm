@@ -1,3 +1,7 @@
+rawdata/final_data.RDS:
+	mkdir -p rawdata
+	Rscript osf_download.R 3hazf rawdata
+	echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
 intermediate/jankin/runs/1: jankin_dfms
 	Rscript jankin02_train.R 1
 jankin_dfms: rawdata/jankin

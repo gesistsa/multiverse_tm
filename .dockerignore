@@ -1,3 +1,5 @@
+Dockerfile
+compose.yaml
 rawdata
 intermediate
 debug

@@ -27,7 +27,7 @@ The following data files should be in the `rawdata` directory.
 # Docker
 
 > [!WARNING]  
-> Warning: Building takes about 10 minutes ☠️ ☠️ ☠️
+> Warning: Building can take about 10 minutes ☠️ ☠️ ☠️
 
 The entire analysis can be run with Docker by using
 
@@ -35,8 +35,6 @@ The entire analysis can be run with Docker by using
 docker compose build
 docker compose up
 ```
-
-Note that `docker compose up` simply runs the `entrypoint.sh` script. So if modifications of commands are necessary, just edit the script which should not require rebuilding the docker container from scratch.
 
 # Project Dependencies
 
@@ -51,7 +49,9 @@ packages <- c(
     "purrr",
     "testthat",
     "keyATM",
-    "SnowballC"
+    "SnowballC",
+    "textstem",
+    "seededlda"
 )
 
 pak::pkg_install(packages)

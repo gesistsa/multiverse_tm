@@ -1,3 +1,6 @@
+chan_dfms: rawdata/final_data.RDS
+	mkdir -p intermediate/chan
+	Rscript chan01_read.R
 rawdata/final_data.RDS:
 	mkdir -p rawdata
 	Rscript osf_download.R 3hazf rawdata

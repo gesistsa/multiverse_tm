@@ -1,17 +1,14 @@
 FROM rocker/r-ver:4.5.0
-RUN echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' >>"${R_HOME}/etc/Rprofile.site"
 
 RUN apt update; apt install curl make xz-utils libcurl4-gnutls-dev libssl-dev libpoppler-cpp-dev zlib1g-dev libicu-dev libxml2-dev -y
 
+RUN R -e 'install.packages(c("renv", "pak"), lib=.Library)'
+
 WORKDIR /root/multiverse_tm
 
-COPY . .
+COPY renv.lock renv.lock
 
-RUN R --slave -e 'install.packages(c("renv", "pak"))'
-
-RUN R --slave -e 'options(renv.config.pak.enabled = TRUE); renv::restore()'
-
-CMD ["R", "--slave", "-e", "options(renv.config.pak.enabled = TRUE); renv::restore()"]
+RUN R -e "options(renv.config.pak.enabled = TRUE); renv::restore(lockfile = \"renv.lock\", library = .Library)"
 
 CMD ["make", "rawdata/UNGDC_1946-2024.tar.gz"]
 

@@ -10,6 +10,4 @@ COPY renv.lock renv.lock
 
 RUN R -e "options(renv.config.pak.enabled = TRUE); renv::restore(lockfile = \"renv.lock\", library = .Library)"
 
-CMD ["make", "rawdata/UNGDC_1946-2024.tar.gz"]
-
-CMD ["Rscript", "jankin01_read.R", "--debug"]
+CMD ["make", "debug"]

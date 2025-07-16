@@ -1,8 +1,13 @@
+chan: intermediate/chan/runs/1
+jankin: intermediate/jankin/runs/1
+
+all: chan jankin
+
 intermediate/chan/runs/1: chan_dfms
 	Rscript chan02_train.R 1
 chan_dfms: rawdata/final_data.RDS
 	mkdir -p intermediate/chan
-	Rscript chan01_read.R
+	Rscript chan01_read.R $(DEBUG)
 rawdata/final_data.RDS:
 	mkdir -p rawdata
 	Rscript osf_download.R 3hazf rawdata
@@ -11,7 +16,7 @@ intermediate/jankin/runs/1: jankin_dfms
 	Rscript jankin02_train.R 1
 jankin_dfms: rawdata/jankin
 	mkdir -p intermediate/jankin
-	Rscript jankin01_read.R
+	Rscript jankin01_read.R $(DEBUG)
 rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
 	mkdir -p rawdata/jankin
 	tar -xzf rawdata/UNGDC_1946-2024.tar.gz -C rawdata/jankin
@@ -23,3 +28,9 @@ rawdata/UNGDC_1946-2024.tar.gz:
 clean:
 	rm -rf rawdata
 .phony: clean jankin_dfms
+
+debug: DEBUG = --debug
+
+debug: chan_dfms jankin_dfms
+	Rscript jankin02_train.R ${DEBUG}
+	Rscript chan02_train.R ${DEBUG}

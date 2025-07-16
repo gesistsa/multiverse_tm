@@ -1,21 +1,37 @@
 # Setup
 
-Requires R 4.1.0 or newer
+**Requires R 4.1.0 or newer**
+
+There are two ways to manage your R environment so that the correct packages are installed:
+
+- Using an isolated environment with `renv`. We also use this to manage the dependencies for Docker
+- Freestyle and use your global environment. All required packages are listed in section "Project Dependencies".
 
 ## Environment using renv
 
-Ensure `renv` (version 1.1.4) and `pak` are installed:
+Ensure `renv` (version >= 1.1.4) and `pak` are installed:
 
 ```bash
-R --slave -e 'install.packages(c("renv", "pak"))'
+R -e 'install.packages(c("renv", "pak"))'
 ```
 
 Then you can activate and restore the environment in R by running:
 
 ```r
+options(renv.config.pak.enabled = TRUE)
 renv::activate()
 renv::restore()
 ```
+
+Now all packages should be installed for the virtual environment. If you need to add new dependencies, you can do the following:
+
+```r
+pak::pkg_install("<new package dependency")
+renv::snapshot()
+```
+
+This should update the `renv.lock` file with the new dependencies. Please also add the package you added to the section "Project Dependencies" at the bottom of this readme.
+
 
 ## Datasets
 

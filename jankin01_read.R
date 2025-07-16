@@ -11,7 +11,6 @@ if ("--debug" %in% args) {
     DEBUG_MODE <- FALSE
 }
 
-library(readtext)
 library(quanteda)
 library(stringr)
 # library(textstem) don't import it, but use it here
@@ -19,12 +18,13 @@ library(purrr)
 
 stopifnot(dir.exists(here("rawdata/jankin/TXT")))
 
+source(here("lib.R"))
+
 ## Modified from the original RMD file
 
-ungd_files <- readtext(here("rawdata/jankin/TXT/*"), 
-                       docvarsfrom = "filenames", 
-                       dvsep="_", 
-                       docvarnames = c("Country", "Session", "Year"))
+ungd_files <- read_text_base(here("rawdata/jankin/TXT/"),
+                             dvsep = "_",
+                             docvarnames = c("Country", "Session", "Year"))
 
 ungd_files$doc_id <- str_replace(ungd_files$doc_id , ".txt", "") |>
     str_replace("_\\d{2}", "")

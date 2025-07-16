@@ -15,6 +15,8 @@ library(quanteda)
 library(purrr)
 # ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
 
+source(here("lib.R"))
+
 final_data <- readRDS(here("rawdata/final_data.RDS"))
 
 current_tokens <- corpus(final_data$AB) |> 
@@ -44,7 +46,7 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
     }
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- textstem::lemmatize_words(ori_types)
+        lemma_types <- lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                          valuetype = "fixed")        
     }

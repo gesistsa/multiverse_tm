@@ -66,10 +66,11 @@ packages <- c(
     "stringr",
     "testthat",
     "keyATM",
-    "SnowballC"
+    "SnowballC",
     "osfr",
     "purrr",
     "seededlda",
+    "lexicon"
 )
 
 pak::pkg_install(packages)

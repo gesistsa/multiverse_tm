@@ -64,14 +64,12 @@ packages <- c(
     "here",
     "quanteda",
     "stringr",
-    "purrr",
     "testthat",
     "keyATM",
     "SnowballC"
     "osfr",
     "purrr",
     "seededlda",
-    "textstem"
 )
 
 pak::pkg_install(packages)

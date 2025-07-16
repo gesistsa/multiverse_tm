@@ -13,7 +13,6 @@ if ("--debug" %in% args) {
 
 library(quanteda)
 library(stringr)
-# library(textstem) don't import it, but use it here
 library(purrr)
 
 stopifnot(dir.exists(here("rawdata/jankin/TXT")))
@@ -70,7 +69,7 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
                       verbose = verbose)
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- textstem::lemmatize_words(ori_types)
+        lemma_types <- lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                       valuetype = "fixed")        
     }

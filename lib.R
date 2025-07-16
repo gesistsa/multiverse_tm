@@ -33,3 +33,44 @@ read_text_base <- function(input_path, dvsep, docvarnames) {
 ## for (i in sample(seq_len(quanteda::ndoc(x)), 100)) {
 ##     testthat::expect_equal(x[i], y[i])
 ## }
+
+
+#' A replacement of textstem::lemmatize_words
+lemmatize_words <- function(tokens) {
+    token_matches <- match(tokens, lexicon::hash_lemmas[[1]])
+    tokens[!is.na(token_matches)] <- lexicon::hash_lemmas[
+        token_matches[!is.na(token_matches)],
+    ][[2]]
+    return(tokens)
+}
+
+## To prove that the lemmatizations are the same
+
+## ungd_files <- readtext::readtext(
+##     here::here("rawdata/jankin/TXT/"),
+##     dvsep = "_",
+##     docvarnames = c("Country", "Session", "Year")
+## )
+
+## ungd_files$doc_id <- stringr::str_replace(ungd_files$doc_id, ".txt", "") |>
+##     stringr::str_replace("_\\d{2}", "")
+
+## ungd_corpus <- quanteda::corpus(ungd_files, text_field = "text")
+
+## ungd_tokens <- quanteda::tokens(
+##     ungd_corpus,
+##     what = "word",
+##     remove_punct = TRUE,
+##     remove_symbols = TRUE,
+##     remove_numbers = TRUE,
+##     remove_url = TRUE,
+##     split_hyphens = FALSE,
+##     verbose = TRUE
+## ) |>
+##     quanteda::tokens_tolower()
+
+## ori_types <- attr(ungd_tokens, "types")
+## textstem_lemmatized <- textstem::lemmatize_words(ori_types)
+## our_lemmatized  <- lemmatize_words(ori_types)
+
+## testthat::expect_identical(textstem_lemmatized, our_lemmatized)

@@ -1,0 +1,12 @@
+services:
+  r:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: .
+        target: /root/multiverse_tm
+    environment:
+      - INSIDEDOCKER=1
+      

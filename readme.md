@@ -62,7 +62,6 @@ Major dependencies are listed below:
 ```r
 packages <- c(
     "here",
-    "readtext",
     "quanteda",
     "stringr",
     "purrr",

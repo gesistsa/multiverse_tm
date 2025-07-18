@@ -1,36 +1,26 @@
-args <- commandArgs(trailingOnly=TRUE)
+args <- tmmv$parse_args_read(slug = "jankin")
 
 library(here)
 
-if ("--debug" %in% args) {
-    DEBUG_MODE <- TRUE
-    unlink(here("debug/jankin"), recursive = TRUE, force = TRUE)
-    dir.create(here("debug/jankin"), recursive = TRUE, showWarnings = FALSE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/jankin \n")
-} else {
-    DEBUG_MODE <- FALSE
-}
+stopifnot(dir.exists(here("rawdata/jankin/TXT")))
 
 library(quanteda)
 library(stringr)
 library(purrr)
 
-stopifnot(dir.exists(here("rawdata/jankin/TXT")))
-
-source(here("lib.R"))
 
 ## Modified from the original RMD file
 
-ungd_files <- read_text_base(here("rawdata/jankin/TXT/"),
-                             dvsep = "_",
-                             docvarnames = c("Country", "Session", "Year"))
+ungd_files <- tmmv$read_text_base(here("rawdata/jankin/TXT/"),
+                                  dvsep = "_",
+                                  docvarnames = c("Country", "Session", "Year"))
 
 ungd_files$doc_id <- str_replace(ungd_files$doc_id , ".txt", "") |>
     str_replace("_\\d{2}", "")
 
 ungd_corpus <- corpus(ungd_files, text_field = "text") 
 
-if (DEBUG_MODE) {
+if (args$debug) {
     set.seed(1233)
     ungd_corpus <- corpus_sample(ungd_corpus, size = 300)
     cat("DEBUG: Only 300 documents are selected \n")    
@@ -43,7 +33,7 @@ ungd_tokens <- tokens(ungd_corpus, what = "word",
                  remove_numbers = TRUE,
                  remove_url = TRUE,
                  split_hyphens = FALSE,
-                 verbose = DEBUG_MODE) |>
+                 verbose = args$debug) |>
     tokens_tolower()
 
 
@@ -52,8 +42,9 @@ settings <- expand.grid(token_normalization = c("none","lemmatization","stemming
                         trimming = c(TRUE, FALSE), stringsAsFactors = FALSE) |>
     purrr::transpose()
 
-process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE) {
+process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)
+    verbose <- args$debug
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
             tokens_select(stopwords("english"), selection = "remove",
@@ -69,7 +60,7 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
                       verbose = verbose)
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- lemmatize_words(ori_types)
+        lemma_types <- tmmv$lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                       valuetype = "fixed")        
     }
@@ -86,22 +77,21 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
     }
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
-    if (!DEBUG_MODE) {
-        output_dir <- "intermediate/jankin"
-    } else {
-        output_dir <- "debug/jankin"
-    }
-    saveRDS(temp_dfm, here(output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(temp_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
     ## thank you for your 16G of ram
     gc()
     invisible(NULL)
 }
 
 ## Stupid but we only do it once
-purrr::walk(settings, process_tokens, current_tokens = ungd_tokens, verbose = DEBUG_MODE, DEBUG_MODE = DEBUG_MODE, .progress = !DEBUG_MODE)
+purrr::walk(settings,
+            process_tokens,
+            current_tokens = ungd_tokens,
+            args = args,
+            .progress = !args$debug)
 
 ## DEBUG_MODE: test
-if (DEBUG_MODE) {
+if (args$debug) {
     library(testthat)
     output_dir <- "debug/jankin"
     for (setting in settings) {

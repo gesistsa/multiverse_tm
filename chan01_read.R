@@ -1,21 +1,13 @@
+args <- tmmv$parse_args_read(slug = "chan")
+
 library(here)
-args <- commandArgs(trailingOnly=TRUE)
-if ("--debug" %in% args) {
-    DEBUG_MODE <- TRUE
-    unlink(here("debug/chan"), recursive = TRUE, force = TRUE)
-    dir.create(here("debug/chan"), recursive = TRUE, showWarnings = FALSE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/chan \n")
-} else {
-    DEBUG_MODE <- FALSE
-}
 
 stopifnot(file.exists(here("rawdata/final_data.RDS")))
 
 library(quanteda)
 library(purrr)
-# ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
 
-source(here("lib.R"))
+# ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
 
 final_data <- readRDS(here("rawdata/final_data.RDS"))
 
@@ -26,7 +18,7 @@ current_tokens <- corpus(final_data$AB) |>
            split_hyphens = TRUE) |>
     tokens_tolower()
 
-if (DEBUG_MODE) {
+if (args$debug) {
     set.seed(1233)
     current_tokens <- tokens_sample(current_tokens, size = 300)
     cat("DEBUG: Only 300 documents are selected \n")    
@@ -37,8 +29,9 @@ settings <- expand.grid(token_normalization = c("none","lemmatization","stemming
                         trimming = c(TRUE, FALSE), stringsAsFactors = FALSE) |>
     purrr::transpose()
 
-process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE) {
+process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)
+    verbose <- args$debug
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
             tokens_select(stopwords("english"), selection = "remove",
@@ -46,7 +39,7 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
     }
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- lemmatize_words(ori_types)
+        lemma_types <- tmmv$lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                          valuetype = "fixed")        
     }
@@ -64,23 +57,22 @@ process_tokens <- function(setting, current_tokens, verbose = FALSE, DEBUG_MODE)
     }
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
-    if (!DEBUG_MODE) {
-        output_dir <- "intermediate/chan"
-    } else {
-        output_dir <- "debug/chan"
-    }
-    saveRDS(current_dfm, here(output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
     ## thank you for your 16G of ram
     gc()
     invisible(NULL)
 }
 
-purrr::walk(settings, process_tokens, current_tokens = current_tokens, verbose = DEBUG_MODE, DEBUG_MODE = DEBUG_MODE, .progress = !DEBUG_MODE)
+purrr::walk(settings,
+            process_tokens,
+            current_tokens = current_tokens,
+            args = args,
+            .progress = !args$debug)
 
 ## DEBUG_MODE: test
-if (DEBUG_MODE) {
+if (args$debug) {
     library(testthat)
-    output_dir <- "debug/chan"
+    output_dir <- args$output_dir
     for (setting in settings) {
         ## print(setting)
         filename <- paste0(rlang::hash(setting), ".RDS")

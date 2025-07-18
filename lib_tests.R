@@ -1,10 +1,12 @@
+## We need to source it here
 source(here::here("lib.R"))
 
 test_readtext_base <- function() {
-    x <- quanteda::corpus(read_text_base(here::here("rawdata/jankin/TXT/"),
-                                         dvsep = "_", 
-                                         docvarnames = c("Country", "Session", "Year")))
-
+    x <- quanteda::corpus(
+                       tmmv$read_text_base(here::here("rawdata/jankin/TXT/"),
+                                           dvsep = "_", 
+                                           docvarnames = c("Country", "Session", "Year")))
+    
     ungd_files <- readtext::readtext(here::here("rawdata/jankin/TXT/*"), 
                                      docvarsfrom = "filenames", 
                                      dvsep="_", 
@@ -40,7 +42,7 @@ test_lemmatize_words <- function() {
     
     ori_types <- attr(ungd_tokens, "types")
     textstem_lemmatized <- textstem::lemmatize_words(ori_types)
-    our_lemmatized  <- lemmatize_words(ori_types)    
+    our_lemmatized  <- tmmv$lemmatize_words(ori_types)    
     testthat::expect_identical(textstem_lemmatized, our_lemmatized)    
 }
 

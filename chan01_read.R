@@ -1,4 +1,4 @@
-args <- tmmv$parse_args_read(slug = "chan")
+args <- tmmv.parse_args_read(slug = "chan")
 
 library(here)
 
@@ -39,7 +39,7 @@ process_tokens <- function(setting, current_tokens, args) {
     }
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- tmmv$lemmatize_words(ori_types)
+        lemma_types <- tmmv.lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                          valuetype = "fixed")        
     }

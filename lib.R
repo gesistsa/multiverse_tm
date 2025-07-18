@@ -1,8 +1,6 @@
-tmmv <- list()
-
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
-tmmv$read_text_base <- function(input_path, dvsep, docvarnames) {
+tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
     txt_files <- list.files(input_path, recursive = TRUE)
     txt_content <- vapply(txt_files,
                           function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
@@ -21,7 +19,7 @@ tmmv$read_text_base <- function(input_path, dvsep, docvarnames) {
 }
 
 #' A replacement of textstem::lemmatize_words
-tmmv$lemmatize_words <- function(tokens) {
+tmmv.lemmatize_words <- function(tokens) {
     token_matches <- match(tokens, lexicon::hash_lemmas[[1]])
     tokens[!is.na(token_matches)] <- lexicon::hash_lemmas[
         token_matches[!is.na(token_matches)],
@@ -29,7 +27,7 @@ tmmv$lemmatize_words <- function(tokens) {
     return(tokens)
 }
 
-tmmv$parse_args <- function(args = commandArgs()) {
+tmmv.parse_args <- function(args = commandArgs()) {
     output <- list()
     output$debug <- "--debug" %in% args
     args <- setdiff(args, "--debug")
@@ -49,8 +47,8 @@ tmmv$parse_args <- function(args = commandArgs()) {
     return(output)
 }
 
-tmmv$parse_args_read <- function(slug = "chan") {
-    args <- tmmv$parse_args()
+tmmv.parse_args_read <- function(slug = "chan") {
+    args <- tmmv.parse_args()
     if (!args$debug) {
         args$output_dir <- paste0("intermediate/", slug)
         return(args)

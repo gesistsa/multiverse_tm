@@ -1,4 +1,4 @@
-args <- tmmv$parse_args_read(slug = "jankin")
+args <- tmmv.parse_args_read(slug = "jankin")
 
 library(here)
 
@@ -11,7 +11,7 @@ library(purrr)
 
 ## Modified from the original RMD file
 
-ungd_files <- tmmv$read_text_base(here("rawdata/jankin/TXT/"),
+ungd_files <- tmmv.read_text_base(here("rawdata/jankin/TXT/"),
                                   dvsep = "_",
                                   docvarnames = c("Country", "Session", "Year"))
 
@@ -60,7 +60,7 @@ process_tokens <- function(setting, current_tokens, args) {
                       verbose = verbose)
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
-        lemma_types <- tmmv$lemmatize_words(ori_types)
+        lemma_types <- tmmv.lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
                                       valuetype = "fixed")        
     }

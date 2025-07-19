@@ -33,13 +33,13 @@ tmmv.parse_args <- function(args = commandArgs()) {
     args <- setdiff(args, "--debug")
     args_index <- which(args == "--args")
     if (identical(args_index, integer(0))) {
-        output$args <- NA
+        output$args <- NULL
     } else {
         if (args_index[1] == length(args)) {
-            output$args <- NA
+            output$args <- NULL
         } else {
             output$args <- args[seq(args_index+1,
-                                    length(args))]            
+                                    length(args))]
         }
     }
     filearg <- grep("--file=", args, value = TRUE)[1]
@@ -49,6 +49,7 @@ tmmv.parse_args <- function(args = commandArgs()) {
 
 tmmv.parse_args_read <- function(slug = "chan") {
     args <- tmmv.parse_args()
+    args$slug <- slug
     if (!args$debug) {
         args$output_dir <- paste0("intermediate/", slug)
         return(args)
@@ -58,6 +59,33 @@ tmmv.parse_args_read <- function(slug = "chan") {
     dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
     cat("DEBUG MODE ENABLED. Please check the artefacts in",
         args$output_dir,
-        "\n")        
+        "\n")
+    return(args)
+}
+
+tmmv.parse_args_train <- function(slug = "chan") {
+    args <- tmmv.parse_args()
+    args$slug <- slug    
+    if (!args$debug && is.null(args$arg)) {
+        msg <- paste("You must provide the current run number, e.g. Rscript",
+                     args$filename,
+                     "1")
+        stop(msg, call. = FALSE)
+    }
+    if (!args$debug) {
+        args$current_run <- args$args[1]
+        args$prefix <- "intermediate"
+    } else {
+        args$current_run <- "1"
+        args$prefix <- "debug"
+        output_display <- paste0(args$prefix, "/1/", slug, "/1")
+        cat("DEBUG MODE ENABLED. Please check the artefacts in",
+            output_display,
+            "\n")
+        unlink(here::here(args$prefix, slug, args$current_run), recursive = TRUE, force = TRUE)
+    }
+    args$output_dir <- here::here(args$prefix, slug, args$current_run)
+    dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
+    stopifnot(dir.exists(args$output_dir))
     return(args)
 }

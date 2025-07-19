@@ -1,29 +1,11 @@
+args <- tmmv.parse_args_train(slug = "jankin")
+
 library(here)
-
-args <- commandArgs(trailingOnly=TRUE)
-if (length(args) == 0) {
-    stop("You must provide the current run number, e.g. Rscript jankin02_train.R 1")
-}
-current_run <- args[1]
-
-if (current_run == "--debug") {
-    DEBUG_MODE <- TRUE
-    output_dir <- here("debug/jankin/runs/1")
-    unlink(output_dir, recursive = TRUE, force = TRUE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/jankin/runs/1 \n")
-} else {
-    DEBUG_MODE <- FALSE
-    output_dir <- here("intermediate/jankin/runs", current_run)
-}
-
 library(keyATM)
 library(quanteda)
 library(SnowballC)
 library(seededlda)
 library(purrr)
-
-dir.create(output_dir, recursive = TRUE)
-stopifnot(dir.exists(output_dir))
 
 sdg_keywords <- list(
     SDG1 = c("poverty", "extreme_poverty", "poor", "socioeconomic", "income", "living_standards", "living_standard"),
@@ -69,7 +51,7 @@ settings <- expand.grid(token_normalization = c("none","lemmatization","stemming
                         stringsAsFactors = FALSE) |>
     purrr::transpose()
 
-if (DEBUG_MODE) {
+if (args$debug) {
     settings <- sample(settings, 10)
     cat("DEBUG MODE: Only 10 randomly selected settings will be checked.\n")
     cat("Rerun if you want more checks.\n")
@@ -98,15 +80,9 @@ check_keywords <- function(docs, keywords) {
     return(check_zero)
 }
 
-train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords, DEBUG_MODE, .fix_seed = NULL, .return_output = FALSE) {
+train_model <- function(setting, args, sdg_keywords, stemmed_sdg_keywords, .fix_seed = NULL, .return_output = FALSE) {
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
-    if (!DEBUG_MODE) {
-        dfm_dir <- "intermediate/jankin"
-    } else {
-        print(setting)
-        dfm_dir <- "debug/jankin"
-    }
-    current_dfm <- readRDS(here(dfm_dir, dfm_filename))
+    current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
     if (setting$token_normalization == "stemming") {
         current_dict <- stemmed_sdg_keywords        
     } else {
@@ -120,7 +96,7 @@ train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords,
     # find fully pruned topics
     ATM_docs <- keyATM_read(current_dfm)
     available_topics <- check_keywords(ATM_docs, current_dict)
-    if (DEBUG_MODE) {
+    if (args$debug) {
         cat("Available topics: ", length(available_topics), "\n")
     }
     n_fully_pruned_topics <- length(current_dict) - length(available_topics)
@@ -134,7 +110,7 @@ train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords,
     } else {
         current_iter <- iter_seededlda[setting$iteration_setting]        
     }
-    if (DEBUG_MODE) {
+    if (args$debug) {
         cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current_iter, "\n")
         current_iter <- 100
     }
@@ -143,7 +119,7 @@ train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords,
     } else {
         random_seed <- .fix_seed
     }
-    if (DEBUG_MODE) {
+    if (args$debug) {
         cat("Current seed: ", random_seed, "\n")
     }
     output <- list()
@@ -157,35 +133,34 @@ train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords,
                       model = "base",  
                       options = list(iterations = current_iter,
                                      prune = TRUE,
-                                     verbose = DEBUG_MODE))
+                                     verbose = args$debug))
     } else {
         output$mod <- textmodel_seededlda(x = current_dfm,
                                           dictionary = quanteda::dictionary(current_dict),
                                           valuetype = "fixed",
                                           max_iter = current_iter,
                                           residual = current_k,
-                                          verbose = DEBUG_MODE)
+                                          verbose = args$debug)
     }
     if (.return_output) {
         return(output)
     }
     current_hash <- rlang::hash(setting)
-    saveRDS(output, file.path(output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
 }
 
 purrr::walk(settings, train_model,
-            output_dir = output_dir,
+            args = args,
             sdg_keywords = sdg_keywords,
             stemmed_sdg_keywords = stemmed_sdg_keywords,
-            DEBUG_MODE = DEBUG_MODE,
-            .progress = !DEBUG_MODE)
+            .progress = !args$debug)
 
-if (DEBUG_MODE) {
+if (args$debug) {
     library(testthat)
     for (setting in settings) {
         current_hash <- rlang::hash(setting)
-        testthat::expect_true(file.exists(file.path(output_dir, paste0(current_hash, ".RDS"))))
-        output <- readRDS(file.path(output_dir, paste0(current_hash, ".RDS")))
+        testthat::expect_true(file.exists(file.path(args$output_dir, paste0(current_hash, ".RDS"))))
+        output <- readRDS(file.path(args$output_dir, paste0(current_hash, ".RDS")))
         if (setting$alternative_model) {
             testthat::expect_true("textmodel_lda" %in% class(output$mod))
         } else {
@@ -201,13 +176,12 @@ if (DEBUG_MODE) {
     repro_settings <- sample(settings, 2)
     for (setting in repro_settings) {
         current_hash <- rlang::hash(setting)
-        testthat::expect_true(file.exists(file.path(output_dir, paste0(current_hash, ".RDS"))))
-        output <- readRDS(file.path(output_dir, paste0(current_hash, ".RDS")))
+        testthat::expect_true(file.exists(file.path(args$output_dir, paste0(current_hash, ".RDS"))))
+        output <- readRDS(file.path(args$output_dir, paste0(current_hash, ".RDS")))
         new_output <- train_model(setting,
-                                  output_dir = output_dir,
+                                  args = args,
                                   sdg_keywords = sdg_keywords,
                                   stemmed_sdg_keywords = stemmed_sdg_keywords,
-                                  DEBUG_MODE = DEBUG_MODE,
                                   .fix_seed = output$random_seed,
                                   .return_output = TRUE)
         testthat::expect_equal(output$mod$theta[,1], new_output$mod$theta[,1])

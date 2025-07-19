@@ -1,4 +1,5 @@
 args <- tmmv.parse_args_read(slug = "jankin")
+settings <- tmmv.get_settings(full = FALSE, args = args)
 
 library(here)
 
@@ -7,7 +8,6 @@ stopifnot(dir.exists(here("rawdata/jankin/TXT")))
 library(quanteda)
 library(stringr)
 library(purrr)
-
 
 ## Modified from the original RMD file
 
@@ -35,9 +35,6 @@ ungd_tokens <- tokens(ungd_corpus, what = "word",
                  split_hyphens = FALSE,
                  verbose = args$debug) |>
     tokens_tolower()
-
-
-settings <- tmmv.get_settings(full = FALSE)
 
 process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)

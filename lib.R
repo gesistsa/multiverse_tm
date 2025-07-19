@@ -84,7 +84,7 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
         args$current_run <- "1"
         args$prefix <- "debug"
         output_display <- paste0(args$prefix, "/1/", slug, "/1")
-        message("DEBUG MODE ENABLED. Please check the artefacts in",
+        message("DEBUG MODE ENABLED. Please check the artefacts in ",
             output_display,
             "\n")
         unlink(here::here(args$prefix, slug, args$current_run), recursive = TRUE, force = TRUE)
@@ -96,7 +96,7 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
 }
 
 ## for #14
-tmmv.get_settings <- function(full = TRUE) {
+tmmv.get_settings <- function(full = TRUE, args = NULL, .nothing_quit = TRUE) {
     settings <- list(token_normalization = c("none","lemmatization","stemming"),
                      stopword_removal = c(TRUE, FALSE),
                      trimming = c(TRUE, FALSE))
@@ -105,7 +105,18 @@ tmmv.get_settings <- function(full = TRUE) {
         settings$k_setting = c(1,2,3) #K original, alt1, alt2
         settings$iteration_setting = c(1,2,3) #iter original, alt1, alt2
     }
-    return(purrr::transpose(expand.grid(settings, stringsAsFactors = FALSE)))
+    output <- purrr::transpose(expand.grid(settings, stringsAsFactors = FALSE))
+    ## no filtering
+    if (is.null(args) || (!is.null(args) && args$debug)) {
+        return(output)
+    }
+    ## filtering
+    all_artefacts <- list.files(args$output_dir, pattern = "\\.RDS$")
+    output <- purrr::discard(output, function(x) paste0(rlang::hash(x), ".RDS") %in% all_artefacts)
+    if (length(output) == 0 && .nothing_quit) {
+        quit("no", status = 0)
+    }
+    return(output)
 }
 
 #' generate all parameters for TM training

@@ -1,4 +1,5 @@
 args <- tmmv.parse_args_read(slug = "chan")
+settings <- tmmv.get_settings(full = FALSE, args = args)
 
 library(here)
 
@@ -23,8 +24,6 @@ if (args$debug) {
     current_tokens <- tokens_sample(current_tokens, size = 300)
     cat("DEBUG: Only 300 documents are selected \n")
 }
-
-settings <- tmmv.get_settings(full = FALSE)
 
 process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)

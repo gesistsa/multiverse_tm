@@ -11,9 +11,9 @@ txt_broken <- strsplit(txt_content, " ")
 
 txt_shuffled <- lapply(txt_broken, function(x) paste0(sample(x), collapse = " "))
 
-dir.create("testdata")
+dir.create("testdata/TXT", recursive = TRUE)
 
 for (i in seq_along(txt_shuffled)) {
-    dir.create(file.path("testdata", dirname(txt_files[i])), showWarnings = FALSE)
-    writeLines(txt_shuffled[[i]], file.path("testdata", txt_files[i]))
+    dir.create(file.path("testdata/TXT", dirname(txt_files[i])), showWarnings = FALSE)
+    writeLines(txt_shuffled[[i]], file.path("testdata/TXT", txt_files[i]))
 }

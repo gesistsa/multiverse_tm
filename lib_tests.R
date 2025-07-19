@@ -55,6 +55,42 @@ test_get_settings <- function() {
     testthat::expect_true(is.character(y[[1]]$token_normalization))
 }
 
+test_get_settings_filter <- function() {
+    withr::with_tempdir({
+        wd <- getwd()
+        args <- list()
+        args$output_dir <- wd
+        args$debug <- FALSE
+        x <- tmmv.get_settings(full = TRUE, args = args)
+        for (i in sample(seq_along(x), 10)) {
+            saveRDS(iris, file.path(wd, paste0(rlang::hash(x[[i]]), ".RDS")))
+        }
+        y1 <- tmmv.get_settings(full = TRUE, args = args)
+        testthat::expect_true(length(x) - length(y1) == 10)
+        args2 <- args
+        args2$debug <- TRUE
+        y2 <- tmmv.get_settings(full = TRUE, args = args2)
+        testthat::expect_false(length(x) - length(y2) == 10)
+    })
+    withr::with_tempdir({
+        wd <- getwd()
+        args <- list()
+        args$output_dir <- wd
+        args$debug <- FALSE
+        x <- tmmv.get_settings(full = FALSE, args = args)
+        for (i in sample(seq_along(x), 10)) {
+            saveRDS(iris, file.path(wd, paste0(rlang::hash(x[[i]]), ".RDS")))
+        }
+        y1 <- tmmv.get_settings(full = FALSE, args = args)
+        testthat::expect_true(length(x) - length(y1) == 10)
+        args2 <- args
+        args2$debug <- TRUE
+        y2 <- tmmv.get_settings(full = FALSE, args = args2)
+        testthat::expect_false(length(x) - length(y2) == 10)
+    })
+
+}
+    
 test_get_current <- function() {
     settings <- tmmv.get_settings()
     args <- list()
@@ -111,8 +147,8 @@ test_get_current <- function() {
 
 testthat::test_that("tests", {
     test_get_settings()
+    test_get_settings_filter()
     test_get_current()
-
     if (dir.exists(here::here("testdata/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()

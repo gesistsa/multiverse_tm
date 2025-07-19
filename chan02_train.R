@@ -1,4 +1,5 @@
 args <- tmmv.parse_args_train(slug = "chan")
+settings <- tmmv.get_settings(full = TRUE, args = args)
 
 library(here)
 library(keyATM)
@@ -8,8 +9,6 @@ library(seededlda)
 library(purrr)
 
 # ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
-
-settings <- tmmv.get_settings(full = TRUE)
 
 if (args$debug) {
     settings <- sample(settings, 10)

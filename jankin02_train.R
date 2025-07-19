@@ -1,4 +1,5 @@
 args <- tmmv.parse_args_train(slug = "jankin")
+settings <- tmmv.get_settings(full = TRUE, args = args)
 
 library(here)
 library(keyATM)
@@ -41,8 +42,6 @@ for (i in seq_len(length(split_keywords))) {
 }
 
 names(stemmed_sdg_keywords) <- names(sdg_keywords)
-
-settings <- tmmv.get_settings(full = TRUE)
 
 if (args$debug) {
     settings <- sample(settings, 10)

@@ -58,7 +58,7 @@ tmmv.parse_args_read <- function(slug = "chan") {
     args$output_dir <- paste0("debug/", slug)
     unlink(args$output_dir, recursive = TRUE, force = TRUE)
     dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in",
+    message("DEBUG MODE ENABLED. Please check the artefacts in",
         args$output_dir,
         "\n")
     return(args)
@@ -84,7 +84,7 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
         args$current_run <- "1"
         args$prefix <- "debug"
         output_display <- paste0(args$prefix, "/1/", slug, "/1")
-        cat("DEBUG MODE ENABLED. Please check the artefacts in",
+        message("DEBUG MODE ENABLED. Please check the artefacts in",
             output_display,
             "\n")
         unlink(here::here(args$prefix, slug, args$current_run), recursive = TRUE, force = TRUE)
@@ -141,7 +141,7 @@ tmmv.get_current <- function(setting, args,
         current$iter <- alternative_iter[setting$iteration_setting]        
     }
     if (args$debug) {
-        cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current$iter, "\n")
+        message("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current$iter, "\n")
         current$iter <- 100
     }
     if (is.null(.fix_seed)) {
@@ -150,7 +150,7 @@ tmmv.get_current <- function(setting, args,
         current$random_seed <- .fix_seed
     }
     if (args$debug) {
-        cat("Current seed: ", current$random_seed, "\n")
+        message("Current seed: ", current$random_seed, "\n")
     }
     return(current)
 }

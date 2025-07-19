@@ -54,10 +54,67 @@ test_get_settings <- function() {
     testthat::expect_false(is.factor(y[[1]]$token_normalization))
     testthat::expect_true(is.character(y[[1]]$token_normalization))
 }
-    
-test_get_settings()
 
-if (dir.exists(here::here("testdata/TXT"))) {
-    test_readtext_base()
-    test_lemmatize_words()
+test_get_current <- function() {
+    settings <- tmmv.get_settings()
+    args <- list()
+    args$debug <- FALSE
+    a_iter <- c(800, 300, 100)
+    b_iter <- c(8000, 3000, 1000)
+    k <- c(7, 2, 1)
+    a_keywords <- list(videogame = c("metroid", "castlevania"))
+    b_keywords <- list(boring = c("llm", "ai", "css"))
+    for (i in seq_along(settings)) {
+        setting <- settings[[i]]
+        current <- tmmv.get_current(setting,
+                                    args = args,
+                                    keywords = a_keywords,
+                                    stemmed_keywords = b_keywords,
+                                    k = k,
+                                    original_iter = a_iter,
+                                    alternative_iter = b_iter,
+                                    .fix_seed = NULL)
+        testthat::expect_equal(k[setting$k_setting], current$k)
+        if (!setting$alternative_model) {
+            testthat::expect_equal(a_iter[setting$iteration_setting], current$iter)
+        } else {
+            testthat::expect_equal(b_iter[setting$iteration_setting], current$iter)            
+        }
+        if (setting$token_normalization == "stemming") {
+            testthat::expect_equal(names(current$keywords), "boring")
+        } else {
+            testthat::expect_equal(names(current$keywords), "videogame")
+        }
+    }
+    current <- tmmv.get_current(settings[[1]],
+                                args = args,
+                                keywords = a_keywords,
+                                stemmed_keywords = b_keywords,
+                                k = k,
+                                original_iter = a_iter,
+                                alternative_iter = b_iter,
+                                .fix_seed = 721)
+    testthat::expect_equal(current$random_seed, 721)
+
+    args2 <- args
+    args2$debug <- TRUE
+    current <- tmmv.get_current(settings[[1]],
+                                args = args2,
+                                keywords = a_keywords,
+                                stemmed_keywords = b_keywords,
+                                k = k,
+                                original_iter = a_iter,
+                                alternative_iter = b_iter,
+                                .fix_seed = 721)
+    testthat::expect_equal(100, current$iter)
 }
+
+testthat::test_that("tests", {
+    test_get_settings()
+    test_get_current()
+
+    if (dir.exists(here::here("testdata/TXT"))) {
+        test_readtext_base()
+        test_lemmatize_words()
+    }    
+})

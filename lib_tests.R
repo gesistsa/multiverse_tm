@@ -143,6 +143,28 @@ test_get_current <- function() {
                                 alternative_iter = b_iter,
                                 .fix_seed = 721)
     testthat::expect_equal(100, current$iter)
+
+    ## without providing stemmed_keywords
+    setting2 <- settings[[1]]
+    setting2$token_normalization <- "stemming"
+    current <- tmmv.get_current(setting2,
+                                args = args2,
+                                keywords = a_keywords,
+                                k = k,
+                                original_iter = a_iter,
+                                alternative_iter = b_iter,
+                                .fix_seed = 721)
+    testthat::expect_equal(names(current$keywords), "videogame")
+    setting2 <- settings[[1]]
+    setting2$token_normalization <- "none"
+    current <- tmmv.get_current(setting2,
+                                args = args2,
+                                keywords = a_keywords,
+                                k = k,
+                                original_iter = a_iter,
+                                alternative_iter = b_iter,
+                                .fix_seed = 721)
+    testthat::expect_equal(names(current$keywords), "videogame")
 }
 
 testthat::test_that("tests", {

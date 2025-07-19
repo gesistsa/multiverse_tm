@@ -83,7 +83,7 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
     } else {
         args$current_run <- "1"
         args$prefix <- "debug"
-        output_display <- paste0(args$prefix, "/1/", slug, "/1")
+        output_display <- paste0(args$prefix, "/", slug, "/1")
         message("DEBUG MODE ENABLED. Please check the artefacts in ",
             output_display,
             "\n")
@@ -139,10 +139,10 @@ tmmv.get_current <- function(setting, args,
     }
 
     current <- list()
-    if (setting$token_normalization == "stemming") {
-        current$keywords = stemmed_keywords
+    if (setting$token_normalization != "stemming" || is.null(stemmed_keywords)) {
+        current$keywords <- keywords
     } else {
-        current$keywords = keywords
+        current$keywords <- stemmed_keywords
     }
     current$k <- k[setting$k]
     if (!setting$alternative || is.null(alternative_iter)) {

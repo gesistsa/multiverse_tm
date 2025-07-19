@@ -1,29 +1,11 @@
+args <- tmmv.parse_args_train(slug = "jankin")
+
 library(here)
-
-args <- commandArgs(trailingOnly=TRUE)
-if (length(args) == 0) {
-    stop("You must provide the current run number, e.g. Rscript jankin02_train.R 1")
-}
-current_run <- args[1]
-
-if (current_run == "--debug") {
-    DEBUG_MODE <- TRUE
-    output_dir <- here("debug/jankin/runs/1")
-    unlink(output_dir, recursive = TRUE, force = TRUE)
-    cat("DEBUG MODE ENABLED. Please check the artefacts in debug/jankin/runs/1 \n")
-} else {
-    DEBUG_MODE <- FALSE
-    output_dir <- here("intermediate/jankin/runs", current_run)
-}
-
 library(keyATM)
 library(quanteda)
 library(SnowballC)
 library(seededlda)
 library(purrr)
-
-dir.create(output_dir, recursive = TRUE)
-stopifnot(dir.exists(output_dir))
 
 sdg_keywords <- list(
     SDG1 = c("poverty", "extreme_poverty", "poor", "socioeconomic", "income", "living_standards", "living_standard"),
@@ -60,16 +42,9 @@ for (i in seq_len(length(split_keywords))) {
 
 names(stemmed_sdg_keywords) <- names(sdg_keywords)
 
-settings <- expand.grid(token_normalization = c("none","lemmatization","stemming"),
-                        stopword_removal = c(TRUE, FALSE),
-                        trimming = c(TRUE, FALSE),
-                        alternative_model = c(TRUE, FALSE),
-                        k_setting = c(1,2,3), #K original, alt1, alt2
-                        iteration_setting = c(1,2,3), #iter original, alt1, alt2
-                        stringsAsFactors = FALSE) |>
-    purrr::transpose()
+settings <- tmmv.get_settings(full = TRUE)
 
-if (DEBUG_MODE) {
+if (args$debug) {
     settings <- sample(settings, 10)
     cat("DEBUG MODE: Only 10 randomly selected settings will be checked.\n")
     cat("Rerun if you want more checks.\n")
@@ -98,94 +73,74 @@ check_keywords <- function(docs, keywords) {
     return(check_zero)
 }
 
-train_model <- function(setting, output_dir, sdg_keywords, stemmed_sdg_keywords, DEBUG_MODE, .fix_seed = NULL, .return_output = FALSE) {
+train_model <- function(setting, args, sdg_keywords, stemmed_sdg_keywords, .fix_seed = NULL, .return_output = FALSE) {
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
-    if (!DEBUG_MODE) {
-        dfm_dir <- "intermediate/jankin"
-    } else {
-        print(setting)
-        dfm_dir <- "debug/jankin"
-    }
-    current_dfm <- readRDS(here(dfm_dir, dfm_filename))
-    if (setting$token_normalization == "stemming") {
-        current_dict <- stemmed_sdg_keywords        
-    } else {
-        current_dict <- sdg_keywords        
-    }
-    k <- c(1, 3, 5)
-    iter_keyATM <- c(1500, round(1500 * 0.8), round(1500 * 1.2))
-    iter_seededlda <- c(2000, round(2000 * 0.8), round(2000 * 1.2))
-    current_k <- k[setting$k_setting]
+    current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
 
+    current <- tmmv.get_current(setting = setting,
+                                args = args,
+                                keywords = sdg_keywords,
+                                stemmed_keywords = stemmed_sdg_keywords,
+                                k = c(1, 3, 5),
+                                original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
+                                alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
+                                .fix_seed = .fix_seed)
+    print(setting)
+    print(current)
     # find fully pruned topics
     ATM_docs <- keyATM_read(current_dfm)
-    available_topics <- check_keywords(ATM_docs, current_dict)
-    if (DEBUG_MODE) {
+    available_topics <- check_keywords(ATM_docs, current$keywords)
+    if (args$debug) {
         cat("Available topics: ", length(available_topics), "\n")
     }
-    n_fully_pruned_topics <- length(current_dict) - length(available_topics)
+    n_fully_pruned_topics <- length(current$keywords) - length(available_topics)
     if (n_fully_pruned_topics > 0) {
         # compensate the fully pruned topics by adding it to the current_k
-        current_k <- current_k + n_fully_pruned_topics        
-        current_dict <- current_dict[available_topics]
+        current$k <- current$k + n_fully_pruned_topics
+        current$keywords <- current$keywords[available_topics]
     }
-    if (!setting$alternative_model) {
-        current_iter <- iter_keyATM[setting$iteration_setting]
-    } else {
-        current_iter <- iter_seededlda[setting$iteration_setting]        
-    }
-    if (DEBUG_MODE) {
-        cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current_iter, "\n")
-        current_iter <- 100
-    }
-    if (is.null(.fix_seed)) {
-        random_seed <- sample(-65535:65535, 1)
-    } else {
-        random_seed <- .fix_seed
-    }
-    if (DEBUG_MODE) {
-        cat("Current seed: ", random_seed, "\n")
-    }
+
     output <- list()
-    output$random_seed <- random_seed
+    output$random_seed <- current$random_seed
     output$setting <- setting
-    set.seed(random_seed)
+
+    set.seed(current$random_seed)
+
     if (!setting$alternative_model) {
-        output$mod <- keyATM(docs = ATM_docs,    
-                      no_keyword_topics = current_k,
-                      keywords = current_dict, 
-                      model = "base",  
-                      options = list(iterations = current_iter,
+        output$mod <- keyATM(docs = ATM_docs,
+                      no_keyword_topics = current$k,
+                      keywords = current$keywords,
+                      model = "base",
+                      options = list(iterations = current$iter,
                                      prune = TRUE,
-                                     verbose = DEBUG_MODE))
+                                     verbose = args$debug))
     } else {
         output$mod <- textmodel_seededlda(x = current_dfm,
-                                          dictionary = quanteda::dictionary(current_dict),
+                                          dictionary = quanteda::dictionary(current$keywords),
                                           valuetype = "fixed",
-                                          max_iter = current_iter,
-                                          residual = current_k,
-                                          verbose = DEBUG_MODE)
+                                          max_iter = current$iter,
+                                          residual = current$k,
+                                          verbose = args$debug)
     }
     if (.return_output) {
         return(output)
     }
     current_hash <- rlang::hash(setting)
-    saveRDS(output, file.path(output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
 }
 
 purrr::walk(settings, train_model,
-            output_dir = output_dir,
+            args = args,
             sdg_keywords = sdg_keywords,
             stemmed_sdg_keywords = stemmed_sdg_keywords,
-            DEBUG_MODE = DEBUG_MODE,
-            .progress = !DEBUG_MODE)
+            .progress = !args$debug)
 
-if (DEBUG_MODE) {
+if (args$debug) {
     library(testthat)
     for (setting in settings) {
         current_hash <- rlang::hash(setting)
-        testthat::expect_true(file.exists(file.path(output_dir, paste0(current_hash, ".RDS"))))
-        output <- readRDS(file.path(output_dir, paste0(current_hash, ".RDS")))
+        testthat::expect_true(file.exists(file.path(args$output_dir, paste0(current_hash, ".RDS"))))
+        output <- readRDS(file.path(args$output_dir, paste0(current_hash, ".RDS")))
         if (setting$alternative_model) {
             testthat::expect_true("textmodel_lda" %in% class(output$mod))
         } else {
@@ -201,13 +156,12 @@ if (DEBUG_MODE) {
     repro_settings <- sample(settings, 2)
     for (setting in repro_settings) {
         current_hash <- rlang::hash(setting)
-        testthat::expect_true(file.exists(file.path(output_dir, paste0(current_hash, ".RDS"))))
-        output <- readRDS(file.path(output_dir, paste0(current_hash, ".RDS")))
+        testthat::expect_true(file.exists(file.path(args$output_dir, paste0(current_hash, ".RDS"))))
+        output <- readRDS(file.path(args$output_dir, paste0(current_hash, ".RDS")))
         new_output <- train_model(setting,
-                                  output_dir = output_dir,
+                                  args = args,
                                   sdg_keywords = sdg_keywords,
                                   stemmed_sdg_keywords = stemmed_sdg_keywords,
-                                  DEBUG_MODE = DEBUG_MODE,
                                   .fix_seed = output$random_seed,
                                   .return_output = TRUE)
         testthat::expect_equal(output$mod$theta[,1], new_output$mod$theta[,1])

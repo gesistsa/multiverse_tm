@@ -18,12 +18,12 @@ ungd_files <- tmmv.read_text_base(here("rawdata/jankin/TXT/"),
 ungd_files$doc_id <- str_replace(ungd_files$doc_id , ".txt", "") |>
     str_replace("_\\d{2}", "")
 
-ungd_corpus <- corpus(ungd_files, text_field = "text") 
+ungd_corpus <- corpus(ungd_files, text_field = "text")
 
 if (args$debug) {
     set.seed(1233)
     ungd_corpus <- corpus_sample(ungd_corpus, size = 300)
-    cat("DEBUG: Only 300 documents are selected \n")    
+    cat("DEBUG: Only 300 documents are selected \n")
 }
 
 ## Removed the stopword removal
@@ -37,10 +37,7 @@ ungd_tokens <- tokens(ungd_corpus, what = "word",
     tokens_tolower()
 
 
-settings <- expand.grid(token_normalization = c("none","lemmatization","stemming"),
-                        stopword_removal = c(TRUE, FALSE),
-                        trimming = c(TRUE, FALSE), stringsAsFactors = FALSE) |>
-    purrr::transpose()
+settings <- tmmv.get_settings(full = FALSE)
 
 process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)
@@ -54,18 +51,18 @@ process_tokens <- function(setting, current_tokens, args) {
     current_tokens <- current_tokens |>
         tokens_select(c("[\\d-]", "[[:punct:]]", "^.{1}$", "us",
                         "united_nations", "united", "nations"),
-                      selection = "remove", 
-                      valuetype="regex", 
+                      selection = "remove",
+                      valuetype="regex",
                       min_nchar = 2L,
                       verbose = verbose)
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
         lemma_types <- tmmv.lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
-                                      valuetype = "fixed")        
+                                      valuetype = "fixed")
     }
     if (setting$token_normalization == "stemming") {
-        current_tokens <- tokens_wordstem(current_tokens)        
+        current_tokens <- tokens_wordstem(current_tokens)
     }
     temp_dfm <- current_tokens |>
         tokens_select(min_nchar = 2) |>
@@ -113,7 +110,7 @@ if (args$debug) {
         if (setting$stopword_removal) {
             testthat::expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))            
+            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))
         }
         if (setting$trimming) {
             testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)

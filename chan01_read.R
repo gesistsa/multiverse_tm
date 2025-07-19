@@ -21,13 +21,10 @@ current_tokens <- corpus(final_data$AB) |>
 if (args$debug) {
     set.seed(1233)
     current_tokens <- tokens_sample(current_tokens, size = 300)
-    cat("DEBUG: Only 300 documents are selected \n")    
+    cat("DEBUG: Only 300 documents are selected \n")
 }
 
-settings <- expand.grid(token_normalization = c("none","lemmatization","stemming"),
-                        stopword_removal = c(TRUE, FALSE),
-                        trimming = c(TRUE, FALSE), stringsAsFactors = FALSE) |>
-    purrr::transpose()
+settings <- tmmv.get_settings(full = FALSE)
 
 process_tokens <- function(setting, current_tokens, args) {
     ## print(setting)
@@ -41,10 +38,10 @@ process_tokens <- function(setting, current_tokens, args) {
         ori_types <- attr(current_tokens, "types")
         lemma_types <- tmmv.lemmatize_words(ori_types)
         current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
-                                         valuetype = "fixed")        
+                                         valuetype = "fixed")
     }
     if (setting$token_normalization == "stemming") {
-        current_tokens <- tokens_wordstem(current_tokens)        
+        current_tokens <- tokens_wordstem(current_tokens)
     }
     current_dfm <- dfm(current_tokens)
     if (setting$trimming) {
@@ -93,7 +90,7 @@ if (args$debug) {
         if (setting$stopword_removal) {
             testthat::expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))            
+            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))
         }
         if (setting$trimming) {
             testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)

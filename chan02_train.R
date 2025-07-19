@@ -9,14 +9,7 @@ library(purrr)
 
 # ref: https://osf.io/jdx6n (NB: it was written for quanteda < 3)
 
-settings <- expand.grid(token_normalization = c("none","lemmatization","stemming"),
-                        stopword_removal = c(TRUE, FALSE),
-                        trimming = c(TRUE, FALSE),
-                        alternative_model = c(TRUE, FALSE),
-                        k_setting = c(1,2,3), #K original, alt1, alt2
-                        iteration_setting = c(1,2,3), #iter original, alt1, alt2
-                        stringsAsFactors = FALSE) |>
-    purrr::transpose()
+settings <- tmmv.get_settings(full = TRUE)
 
 if (args$debug) {
     settings <- sample(settings, 10)
@@ -27,47 +20,37 @@ if (args$debug) {
 train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE) {
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
     current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
-    k <- c(39, 35, 43)
-    iter_keyATM <- c(1500, round(1500 * 0.8), round(1500 * 1.2))
-    iter_seededlda <- c(2000, round(2000 * 0.8), round(2000 * 1.2))
-    current_k <- k[setting$k_setting]
-    if (!setting$alternative_model) {
-        current_iter <- iter_keyATM[setting$iteration_setting]
-    } else {
-        current_iter <- iter_seededlda[setting$iteration_setting]        
-    }
-    if (args$debug) {
-        cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current_iter, "\n")
-        current_iter <- 100
-    }
-    if (is.null(.fix_seed)) {
-        random_seed <- sample(-65535:65535, 1)
-    } else {
-        random_seed <- .fix_seed
-    }
-    if (args$debug) {
-        cat("Current seed: ", random_seed, "\n")
-    }
+
+    current <- tmmv.get_current(setting = setting,
+                                args = args,
+                                keywords = list(socialmedia = c("facebook", "twitter", "blog*", "sns*", "tweet*", "blog*")),
+                                k = c(39, 35, 43),
+                                original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
+                                alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
+                                .fix_seed = .fix_seed)
+
     output <- list()
-    output$random_seed <- random_seed
+    output$random_seed <- current$random_seed
     output$setting <- setting
-    set.seed(random_seed)
-    dict <- dictionary(list(socialmedia = c("facebook", "twitter", "blog*", "sns*", "tweet*", "blog*")))
+    dict <- dictionary(current$keywords)
+    
+    set.seed(current$random_seed)
+
     if (!setting$alternative_model) {
         key_docs <- keyATM_read(current_dfm)
         key_kw <- read_keywords(dictionary = dict, docs = key_docs)
         output$mod <- keyATM(key_docs,
-                             no_keyword_topics = current_k,
+                             no_keyword_topics = current$k,
                              keywords = key_kw,
                              model = "base",
-                             options = list(iterations = current_iter,
+                             options = list(iterations = current$iter,
                                             verbose = args$debug))
     } else {
         output$mod <- textmodel_seededlda(x = current_dfm,
                                           dictionary = dict,
                                           valuetype = "glob",
-                                          max_iter = current_iter,
-                                          residual = current_k,
+                                          max_iter = current$iter,
+                                          residual = current$k,
                                           verbose = args$debug)
     }
     if (.return_output) {
@@ -104,6 +87,8 @@ if (args$debug) {
         current_hash <- rlang::hash(setting)
         testthat::expect_true(file.exists(file.path(args$output_dir, paste0(current_hash, ".RDS"))))
         output <- readRDS(file.path(args$output_dir, paste0(current_hash, ".RDS")))
+        print("seed:")
+        print(output$random_seed)
         new_output <- train_model(setting,
                                   args = args,
                                   .fix_seed = output$random_seed,

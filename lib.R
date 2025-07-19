@@ -44,6 +44,7 @@ tmmv.parse_args <- function(args = commandArgs()) {
     }
     filearg <- grep("--file=", args, value = TRUE)[1]
     output$filename <- gsub("--file=", "", filearg)
+    class(args) <- append(class(args), "tmmv_args")
     return(output)
 }
 
@@ -63,9 +64,13 @@ tmmv.parse_args_read <- function(slug = "chan") {
     return(args)
 }
 
-tmmv.parse_args_train <- function(slug = "chan") {
-    args <- tmmv.parse_args()
-    args$slug <- slug    
+tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
+    if (debug) {        
+        args <- tmmv.parse_args(c("/usr/lib/R/bin/exec/R","--no-echo","--no-restore", "--file=fake.R", "--args", "--debug"))
+    } else {
+        args <- tmmv.parse_args()
+    }
+    args$slug <- slug
     if (!args$debug && is.null(args$arg)) {
         msg <- paste("You must provide the current run number, e.g. Rscript",
                      args$filename,
@@ -88,4 +93,64 @@ tmmv.parse_args_train <- function(slug = "chan") {
     dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
     stopifnot(dir.exists(args$output_dir))
     return(args)
+}
+
+## for #14
+tmmv.get_settings <- function(full = TRUE) {
+    settings <- list(token_normalization = c("none","lemmatization","stemming"),
+                     stopword_removal = c(TRUE, FALSE),
+                     trimming = c(TRUE, FALSE))
+    if (full) {
+        settings$alternative_model = c(TRUE, FALSE)
+        settings$k_setting = c(1,2,3) #K original, alt1, alt2
+        settings$iteration_setting = c(1,2,3) #iter original, alt1, alt2
+    }
+    return(purrr::transpose(expand.grid(settings, stringsAsFactors = FALSE)))
+}
+
+#' generate all parameters for TM training
+#' @param keywords LIST, not quanteda::dictionary
+#' @param stemmed_keywords LIST!
+tmmv.get_current <- function(setting, args,
+                             keywords = NULL, stemmed_keywords = NULL,
+                             k, original_iter, alternative_iter = NULL,
+                             .fix_seed = NULL) {
+    stopifnot(length(k) == 3)
+    stopifnot(length(original_iter) == 3)
+    if (!is.null(alternative_iter)) {
+        stopifnot(length(alternative_iter) == 3)        
+    }
+    if (!is.null(keywords)) {
+        stopifnot(is.list(keywords))
+    }
+    if (!is.null(stemmed_keywords)) {
+        stopifnot(is.list(stemmed_keywords))
+    }
+
+    current <- list()
+    if (setting$token_normalization == "stemming") {
+        current$keywords = stemmed_keywords
+    } else {
+        current$keywords = keywords
+    }
+    current$k <- k[setting$k]
+    if (!setting$alternative || is.null(alternative_iter)) {
+        current$iter <- original_iter[setting$iteration_setting]
+    }
+    if (setting$alternative && !is.null(alternative_iter)) {
+        current$iter <- alternative_iter[setting$iteration_setting]        
+    }
+    if (args$debug) {
+        cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current$iter, "\n")
+        current$iter <- 100
+    }
+    if (is.null(.fix_seed)) {
+        current$random_seed <- sample(-65535:65535, 1)
+    } else {
+        current$random_seed <- .fix_seed
+    }
+    if (args$debug) {
+        cat("Current seed: ", current$random_seed, "\n")
+    }
+    return(current)
 }

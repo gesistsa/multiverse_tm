@@ -42,14 +42,7 @@ for (i in seq_len(length(split_keywords))) {
 
 names(stemmed_sdg_keywords) <- names(sdg_keywords)
 
-settings <- expand.grid(token_normalization = c("none","lemmatization","stemming"),
-                        stopword_removal = c(TRUE, FALSE),
-                        trimming = c(TRUE, FALSE),
-                        alternative_model = c(TRUE, FALSE),
-                        k_setting = c(1,2,3), #K original, alt1, alt2
-                        iteration_setting = c(1,2,3), #iter original, alt1, alt2
-                        stringsAsFactors = FALSE) |>
-    purrr::transpose()
+settings <- tmmv.get_settings(full = TRUE)
 
 if (args$debug) {
     settings <- sample(settings, 10)
@@ -83,63 +76,50 @@ check_keywords <- function(docs, keywords) {
 train_model <- function(setting, args, sdg_keywords, stemmed_sdg_keywords, .fix_seed = NULL, .return_output = FALSE) {
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
     current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
-    if (setting$token_normalization == "stemming") {
-        current_dict <- stemmed_sdg_keywords        
-    } else {
-        current_dict <- sdg_keywords        
-    }
-    k <- c(1, 3, 5)
-    iter_keyATM <- c(1500, round(1500 * 0.8), round(1500 * 1.2))
-    iter_seededlda <- c(2000, round(2000 * 0.8), round(2000 * 1.2))
-    current_k <- k[setting$k_setting]
 
+    current <- tmmv.get_current(setting = setting,
+                                args = args,
+                                keywords = sdg_keywords,
+                                stemmed_keywords = stemmed_sdg_keywords,
+                                k = c(1, 3, 5),
+                                original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
+                                alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
+                                .fix_seed = .fix_seed)
+    print(setting)
+    print(current)
     # find fully pruned topics
     ATM_docs <- keyATM_read(current_dfm)
-    available_topics <- check_keywords(ATM_docs, current_dict)
+    available_topics <- check_keywords(ATM_docs, current$keywords)
     if (args$debug) {
         cat("Available topics: ", length(available_topics), "\n")
     }
-    n_fully_pruned_topics <- length(current_dict) - length(available_topics)
+    n_fully_pruned_topics <- length(current$keywords) - length(available_topics)
     if (n_fully_pruned_topics > 0) {
         # compensate the fully pruned topics by adding it to the current_k
-        current_k <- current_k + n_fully_pruned_topics        
-        current_dict <- current_dict[available_topics]
+        current$k <- current$k + n_fully_pruned_topics
+        current$keywords <- current$keywords[available_topics]
     }
-    if (!setting$alternative_model) {
-        current_iter <- iter_keyATM[setting$iteration_setting]
-    } else {
-        current_iter <- iter_seededlda[setting$iteration_setting]        
-    }
-    if (args$debug) {
-        cat("DEBUG MODE: Iteration setting is 100 (min. keyATM), should be: ", current_iter, "\n")
-        current_iter <- 100
-    }
-    if (is.null(.fix_seed)) {
-        random_seed <- sample(-65535:65535, 1)
-    } else {
-        random_seed <- .fix_seed
-    }
-    if (args$debug) {
-        cat("Current seed: ", random_seed, "\n")
-    }
+
     output <- list()
-    output$random_seed <- random_seed
+    output$random_seed <- current$random_seed
     output$setting <- setting
-    set.seed(random_seed)
+
+    set.seed(current$random_seed)
+
     if (!setting$alternative_model) {
-        output$mod <- keyATM(docs = ATM_docs,    
-                      no_keyword_topics = current_k,
-                      keywords = current_dict, 
-                      model = "base",  
-                      options = list(iterations = current_iter,
+        output$mod <- keyATM(docs = ATM_docs,
+                      no_keyword_topics = current$k,
+                      keywords = current$keywords,
+                      model = "base",
+                      options = list(iterations = current$iter,
                                      prune = TRUE,
                                      verbose = args$debug))
     } else {
         output$mod <- textmodel_seededlda(x = current_dfm,
-                                          dictionary = quanteda::dictionary(current_dict),
+                                          dictionary = quanteda::dictionary(current$keywords),
                                           valuetype = "fixed",
-                                          max_iter = current_iter,
-                                          residual = current_k,
+                                          max_iter = current$iter,
+                                          residual = current$k,
                                           verbose = args$debug)
     }
     if (.return_output) {

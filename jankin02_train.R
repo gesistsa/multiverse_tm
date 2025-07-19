@@ -85,8 +85,6 @@ train_model <- function(setting, args, sdg_keywords, stemmed_sdg_keywords, .fix_
                                 original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
                                 alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
                                 .fix_seed = .fix_seed)
-    print(setting)
-    print(current)
     # find fully pruned topics
     ATM_docs <- keyATM_read(current_dfm)
     available_topics <- check_keywords(ATM_docs, current$keywords)

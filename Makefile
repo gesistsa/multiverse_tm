@@ -27,10 +27,13 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
 clean:
 	rm -rf rawdata
-.phony: clean jankin_dfms
+.phony: clean jankin_dfms test_lib
 
 debug: DEBUG = --debug
 
 debug: chan_dfms jankin_dfms
 	Rscript jankin02_train.R ${DEBUG}
 	Rscript chan02_train.R ${DEBUG}
+
+test:
+	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"

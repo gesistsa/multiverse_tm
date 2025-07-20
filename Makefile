@@ -3,6 +3,10 @@ jankin: intermediate/jankin/runs/1
 
 all: chan jankin
 
+rawdata/german-gsd-ud-2.5-191206.udpipe:
+	mkdir -p rawdata
+	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe" -o rawdata/german-gsd-ud-2.5-191206.udpipe
+	echo "cf7058257ada6f24ecb0a241f10cc918  rawdata/german-gsd-ud-2.5-191206.udpipe" | md5sum -c
 intermediate/chan/runs/1: chan_dfms
 	Rscript chan02_train.R 1
 chan_dfms: rawdata/final_data.RDS

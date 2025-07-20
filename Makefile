@@ -35,5 +35,5 @@ debug: chan_dfms jankin_dfms
 	Rscript jankin02_train.R ${DEBUG}
 	Rscript chan02_train.R ${DEBUG}
 
-test_lib:
-	Rscript --no-init-file -e "testthat::test_file('lib_tests.R')"
+test:
+	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"

@@ -70,7 +70,8 @@ packages <- c(
     "osfr",
     "purrr",
     "seededlda",
-    "lexicon"
+    "lexicon",
+    "brms"
 )
 
 pak::pkg_install(packages)

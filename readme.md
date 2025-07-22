@@ -76,3 +76,7 @@ packages <- c(
 
 pak::pkg_install(packages)
 ```
+
+# Options
+
+There are options that one can customize; see `.Rprofile`.

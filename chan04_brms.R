@@ -42,7 +42,7 @@ train_brms <- function(setting, theta, iter = 4000, .fix_seed = NULL) {
     tw_brms <- brm(rt_count ~ OA*as.factor(G12)+Q1*as.factor(G12)+trending*as.factor(G12)+offset(log(time))+(1|JI),
                    data = final_data,
                    family = zero_inflated_negbinomial(),
-                   cores = 6,
+                   cores = getOption("tmmv.cores", 1),
                    control = list(adapt_delta = 0.80),
                    iter = iter, prior = weaklyinformative_prior)
 

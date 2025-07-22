@@ -80,6 +80,7 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
     if (!args$debug) {
         args$current_run <- args$args[1]
         args$prefix <- "intermediate"
+        args$output_dir <- here::here(args$prefix, slug, "runs", args$current_run)
     } else {
         args$current_run <- "1"
         args$prefix <- "debug"
@@ -88,8 +89,8 @@ tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
             output_display,
             "\n")
         unlink(here::here(args$prefix, slug, args$current_run), recursive = TRUE, force = TRUE)
+        args$output_dir <- here::here(args$prefix, slug, args$current_run)
     }
-    args$output_dir <- here::here(args$prefix, slug, args$current_run)
     dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
     stopifnot(dir.exists(args$output_dir))
     return(args)

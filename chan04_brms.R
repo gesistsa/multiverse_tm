@@ -44,7 +44,7 @@ train_brms <- function(setting, theta, iter = 4000, .fix_seed = NULL) {
                    family = zero_inflated_negbinomial(),
                    cores = 6,
                    control = list(adapt_delta = 0.80),
-                   iter = iter, prior = weaklyinformative_prior) -> tw_brms
+                   iter = iter, prior = weaklyinformative_prior)
 
     output <- list()
     ## too big!

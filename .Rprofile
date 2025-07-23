@@ -5,3 +5,8 @@ if (Sys.getenv("INSIDEDOCKER") == "" && renv_available) {
 }
 
 source(here::here("lib.R"))
+
+## Options for this project
+
+## # of cores for brms and co.
+options(tmmv.cores = 6)

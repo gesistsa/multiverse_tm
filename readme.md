@@ -70,8 +70,13 @@ packages <- c(
     "osfr",
     "purrr",
     "seededlda",
-    "lexicon"
+    "lexicon",
+    "brms"
 )
 
 pak::pkg_install(packages)
 ```
+
+# Options
+
+There are options that one can customize; see `.Rprofile`.

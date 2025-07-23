@@ -3,6 +3,10 @@ jankin: intermediate/jankin/runs/1
 
 all: chan jankin
 
+intermediate/chan/runs/1/brms: intermediate/chan/runs/1/theta/theta
+	Rscript chan04_brms.R 1
+intermediate/chan/runs/1/theta/theta: intermediate/chan/runs/1
+	Rscript chan03_theta.R 1
 intermediate/chan/runs/1: chan_dfms
 	Rscript chan02_train.R 1
 chan_dfms: rawdata/final_data.RDS

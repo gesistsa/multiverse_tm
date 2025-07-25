@@ -1,8 +1,11 @@
+all: chan jankin czymara
+
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
+czymara: intermediate/czymara/runs/1
 
-all: chan jankin
-
+intermediate/czymara/runs/1: czymara_dfms
+	Rscript czymara02_train.R 1
 czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe
 	mkdir -p intermediate/czymara
 	Rscript czymara01_read.R $(DEBUG)
@@ -46,9 +49,9 @@ clean:
 
 debug: DEBUG = --debug
 
-debug: chan_dfms jankin_dfms
+debug: chan_dfms jankin_dfms czymara_dfms
 	Rscript jankin02_train.R ${DEBUG}
 	Rscript chan02_train.R ${DEBUG}
-
+	Rscript czymara02_train.R ${DEBUG}
 test:
 	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"

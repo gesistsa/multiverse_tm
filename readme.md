@@ -65,7 +65,9 @@ The following data files should be in the `rawdata` directory.
 
 * [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0) (use `make rawdata/UNGDC_1946-2024.tar.gz` to download and check)
 * [`rawdata/final_data.RDS`](https://osf.io/3hazf) (use `make rawdata/final_data.RDS` to download and check)
-
+* [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034) (You must request it via GESIS BASIS)
+* `rawdata/stopwords-de.txt` (use `make rawdata/stopwords-de.txt` to download and check)
+* `rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` (use `make rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` to download and check)
 
 # Docker
 
@@ -97,7 +99,10 @@ packages <- c(
     "purrr",
     "seededlda",
     "lexicon",
-    "brms"
+    "brms",
+    "stm",
+    "haven",
+    "udpipe"
 )
 
 pak::pkg_install(packages)

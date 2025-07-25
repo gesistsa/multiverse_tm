@@ -3,6 +3,13 @@ jankin: intermediate/jankin/runs/1
 
 all: chan jankin
 
+czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe
+	mkdir -p intermediate/czymara
+	Rscript czymara01_read.R $(DEBUG)
+rawdata/stopwords-de.txt:
+	mkdir -p rawdata
+	curl -L "https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt" -o rawdata/stopwords-de.txt
+	echo "fa7875d925fb7eccbb082a6cd6e2c37d  rawdata/stopwords-de.txt" | md5sum -c
 rawdata/german-gsd-ud-2.5-191206.udpipe:
 	mkdir -p rawdata
 	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe" -o rawdata/german-gsd-ud-2.5-191206.udpipe
@@ -31,7 +38,7 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
 clean:
 	rm -rf rawdata
-.phony: clean jankin_dfms test_lib
+.phony: clean jankin_dfms chan_dfms czymara_dfms test_lib
 
 debug: DEBUG = --debug
 

@@ -9,6 +9,8 @@ There are two ways to manage your R environment so that the correct packages are
 
 ## Environment using renv
 
+### Linux
+
 Ensure `renv` (version >= 1.1.4) and `pak` are installed:
 
 ```bash
@@ -22,6 +24,30 @@ options(renv.config.pak.enabled = TRUE)
 renv::activate()
 renv::restore()
 ```
+
+### Windows
+
+> [!NOTE]
+> Although we expect the R scripts in this codebase to work across all platforms, it requires a lot of tooling outside of R (e.g., cURL, make) that is readily available on Unix-like systems. Your milage with Windows will vary and additional tweaking may be required. In case of doubt, we recommend using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
+
+Ensure `renv` (version >= 1.1.4) and [Rtools](https://cran.r-project.org/bin/windows/Rtools/) are installed.
+
+*Protip:* You can install RTools with winget. Open a PowerShell and enter `winget install rtools`
+
+Installing `renv`:
+
+```bash
+R -e 'install.packages("renv")'
+```
+
+Then you can activate and restore the environment in R by running:
+
+```r
+renv::activate()
+renv::restore()
+```
+
+### Adding new dependencies
 
 Now all packages should be installed for the virtual environment. If you need to add new dependencies, you can do the following:
 

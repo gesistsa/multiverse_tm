@@ -146,10 +146,10 @@ tmmv.get_current <- function(setting, args,
         current$keywords <- stemmed_keywords
     }
     current$k <- k[setting$k]
-    if (!setting$alternative || is.null(alternative_iter)) {
+    if (!setting$alternative_model || is.null(alternative_iter)) {
         current$iter <- original_iter[setting$iteration_setting]
     }
-    if (setting$alternative && !is.null(alternative_iter)) {
+    if (setting$alternative_model && !is.null(alternative_iter)) {
         current$iter <- alternative_iter[setting$iteration_setting]        
     }
     if (args$debug) {

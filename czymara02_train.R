@@ -75,6 +75,7 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
                                   )
     }
     output$theta <- unify_theta(output$mod, trimmed_dfm, current_dfm)
+    output$docvars <- trimmed_dfm@docvars
     if (.return_output) {
         return(output)
     }

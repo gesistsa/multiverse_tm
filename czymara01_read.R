@@ -10,22 +10,28 @@ stopifnot(file.exists(here("rawdata/german-gsd-ud-2.5-191206.udpipe")))
 library(quanteda)
 library(haven)
 library(udpipe)
+library(dplyr)
+library(stringr)
+
 ## foreign::read.dta doesn't work
 input <- haven::read_dta(here("rawdata/Corona-Survey_full.dta"))
 
-input$gender <- NA
-input$gender[input$DE03 == 1] <- "male"
-input$gender[input$DE03 == 2] <- "female"
+## NOTE1 we do it here rather than
+## https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L114C22-L114C61
 
-# The original code is not sufficient.
+# NOTE2 The original code is not sufficient.
 # https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L71
 
-data_priv <- input[input$OF01_01 != "" & !stringr::str_detect(input$OF01_01, "^[[:space:]]+$"), ]
-
-## we do it here rather than
-## https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L114C22-L114C61
-data_priv <- data_priv[complete.cases(data_priv$gender),]
-
+data_priv <- input |>
+    mutate(gender = case_match(DE03,
+                               1 ~ "male",
+                               2 ~ "female",
+                               .default = NA_character_)) |>
+    filter(!is.na(gender)) |> ##NOTE1
+    mutate(OF01_01 = stringr::str_trim(OF01_01)) |>
+    filter(OF01_01 != "" &
+           !stringr::str_detect(OF01_01, "^[[:space:]]+$")) ##NOTE2
+    
 corpus_priv <- corpus(as.character(data_priv$OF01_01),
                       docvars = data.frame(gender = data_priv$gender,
                                            id = data_priv$CASE))
@@ -38,30 +44,41 @@ parsed_content_df <- as.data.frame(parsed_content)
 
 ## there are some words with more than one lemma
 ## e.g. sich -> er/es/sie
-library(dplyr)
-parsed_content_df[,c("lemma"), drop = FALSE] |> count(lemma, sort = TRUE) |> filter(stringr::str_detect(lemma, "\\|"))
+
+parsed_content_df |>
+    select(lemma) |>
+    count(lemma, sort = TRUE) |>
+    filter(stringr::str_detect(lemma, "\\|"))
 
 ## for "sich", it's better to put to back to "sich"
 ## it's not always removed as a stopword, choosing one gender can be problematic, given the original research questions
-parsed_content_df |> select(token, lemma) |> filter(lemma == "er|es|sie")
+parsed_content_df |>
+    select(token, lemma) |>
+    filter(lemma == "er|es|sie")
 
 parsed_content_df_fixed <- parsed_content_df
 
 parsed_content_df_fixed$lemma[parsed_content_df_fixed$lemma == "er|es|sie"] <- "sich"
 
 ## for other we can just choose the first one
-parsed_content_df_fixed[,c("lemma"), drop = FALSE] |> count(lemma, sort = TRUE) |> filter(stringr::str_detect(lemma, "\\|"))
-
-get_first <- function(x) {
-    strsplit(x, "\\|")[[1]][1]
-}
+parsed_content_df_fixed[,c("lemma"), drop = FALSE] |>
+    count(lemma, sort = TRUE) |>
+    filter(stringr::str_detect(lemma, "\\|"))
 
 ## NAs are contractions
 parsed_content_df_fixed[is.na(parsed_content_df_fixed$lemma), c("token", "lemma")]
 
 parsed_content_df_fixed <- parsed_content_df_fixed[!is.na(parsed_content_df_fixed$lemma),]
 
-parsed_content_df_fixed$lemma[stringr::str_detect(parsed_content_df_fixed$lemma, "\\|")] <- purrr::map_chr(parsed_content_df_fixed$lemma[stringr::str_detect(parsed_content_df_fixed$lemma, "\\|")], get_first)
+
+
+parsed_content_df_fixed$lemma[stringr::str_detect(parsed_content_df_fixed$lemma, "\\|")] <-
+    purrr::map_chr(
+               parsed_content_df_fixed$lemma[
+                                           stringr::str_detect(
+                                                        parsed_content_df_fixed$lemma, "\\|")],
+               \(x) { strsplit(x, "\\|")[[1]][1]}
+           )
 
 ## all cleaned
 parsed_content_df_fixed[,c("lemma"), drop = FALSE] |> count(lemma, sort = TRUE) |> filter(stringr::str_detect(lemma, "\\|"))
@@ -109,8 +126,8 @@ current_tokens_list<- list()
 current_tokens_list[["normal"]] <- toks_priv
 current_tokens_list[["lemmatized"]] <- lemma_toks_priv
 
-stopWords_de <- read.table(here("rawdata/stopwords-de.txt"), encoding = "UTF-8", colClasses=c("character"))$V1
-all_stopwords <- c(stopWords_de, stopwords("german"))
+stopwords_de <- read.table(here("rawdata/stopwords-de.txt"), encoding = "UTF-8", colClasses=c("character"))$V1
+all_stopwords <- c(stopwords_de, stopwords("german"))
 
 
 ## The data is not that big; we don't need that

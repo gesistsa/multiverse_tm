@@ -16,10 +16,12 @@ library(stringr)
 ## foreign::read.dta doesn't work
 input <- haven::read_dta(here("rawdata/Corona-Survey_full.dta"))
 
-## NOTE1 we do it here rather than
-## https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L114C22-L114C61
+# NOTE1 we do it here rather than
+# https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L114C22-L114C61
 
-# NOTE2 The original code is not sufficient.
+# NOTE2 To prevent the implicit conversion of factor by stm and weighted lda
+
+# NOTE3 The original code is not sufficient.
 # https://github.com/czymara/perceiving-COVID19-in-Germany/blob/e18fc33485d6cc50ec0e0f66822a7c4223166805/2.1_topicmodels_gender_03.R#L71
 
 data_priv <- input |>
@@ -28,9 +30,10 @@ data_priv <- input |>
                                2 ~ "female",
                                .default = NA_character_)) |>
     filter(!is.na(gender)) |> ##NOTE1
+    mutate(gender = factor(gender, levels = c("male", "female"))) |> #NOTE2
     mutate(OF01_01 = stringr::str_trim(OF01_01)) |>
     filter(OF01_01 != "" &
-           !stringr::str_detect(OF01_01, "^[[:space:]]+$")) ##NOTE2
+           !stringr::str_detect(OF01_01, "^[[:space:]]+$")) ##NOTE3
     
 corpus_priv <- corpus(as.character(data_priv$OF01_01),
                       docvars = data.frame(gender = data_priv$gender,

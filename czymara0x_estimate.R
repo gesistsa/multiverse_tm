@@ -71,6 +71,7 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
                                   )
     }
     output$theta <- unify_theta(output$mod, trimmed_dfm, current_dfm)
+    output$docvars <- trimmed_dfm@docvars
     if (.return_output) {
         return(output)
     }
@@ -82,45 +83,49 @@ first_setting <- settings[[1]]
 second_setting <- settings[[1]]
 second_setting$alternative_model <- !second_setting$alternative_model
 
-mod1 <- train_model(first_setting, args = args, .return_output = TRUE, .fix_seed = 123)
-mod2 <- train_model(second_setting, args = args, .return_output = TRUE, .fix_seed = 123)
+mod1 <- train_model(first_setting, args = args, .return_output = TRUE, .fix_seed = 1111)
+mod2 <- train_model(second_setting, args = args, .return_output = TRUE, .fix_seed = 1111)
 
 top_words(mod1$mod)
 summary(mod2$mod)
 
-strata_topic <- by_strata_DocTopic(mod1$mod, by_var = "gendermale", labels = c("male", "female"))
+strata_topic <- by_strata_DocTopic(mod1$mod, by_var = "genderfemale", labels = c("male", "female"))
 
 summary(strata_topic)
 
 theta1 <- strata_topic$theta[[1]]
 theta2 <- strata_topic$theta[[2]]
 
-theta_diff <- theta1[, 1:8] - theta2[, 1:8]
+theta_diff <- theta2[, 1:8] - theta1[, 1:8]
 
 theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.05, 0.5, 0.95))
 
-
-## damn needa produce it again
-dfm_filename <- paste0(rlang::hash(first_setting[1:3]), ".RDS")
-current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
-rowsum_priv <- apply(current_dfm, 1, sum)
-trimmed_dfm <- current_dfm[rowsum_priv != 0, ]
-
-est <- estimateEffect(1:8~gender, stmobj = mod2$mod, metadata = trimmed_dfm@docvars)
-
-
-plot(est, covariate = "gender",
-     model = mod2$mod, method = "difference",
-     cov.value1 = "male", cov.value2 = "female"
-     )
-
-
-#7
-sapply(1:8, function(x) cor(mod2$theta[,8], mod1$theta[,x], method = "spearman")) |> which.max()
+top_words(mod1$mod)
 
 summary(mod2$mod)
 
-## the effect size is similar ~0.03
-theta_diff_quantile[,7]
+est <- estimateEffect(1:8~gender, stmobj = mod2$mod, metadata = mod2$docvars)
 
-used_covariates <- covariates_get(mod1$mod)
+
+## Note that by default stm is 1 - 2
+## https://github.com/bstewart/stm/blob/dbabf3405c660452bffc8bd1aaf72f7ea3867319/R/plottingutilfns.R#L168
+res <- plot(est, covariate = "gender",
+            model = mod2$mod, method = "difference",
+            cov.value1 = "female", cov.value2 = "male", omit.plot = TRUE
+            )
+
+res$means
+
+res$means[[8]]
+res$cis[[8]]
+
+#1
+sapply(1:8, function(x) cor(mod2$theta[,8], mod1$theta[,x], method = "spearman")) |> which.max()
+
+
+theta_diff_quantile[,1]
+
+top_words(mod1$mod)[1]
+
+
+labeltopics(mod2$mod)$frex[8,]

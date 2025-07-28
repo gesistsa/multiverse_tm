@@ -1,8 +1,8 @@
 
 # Setup
 
-**Requires R 4.1.0 or newer** We tested our code on R 4.5.0 and R 4.5.1
-on Ubuntu Linux.
+**Requires R 4.1.0 or newer** We tested our code on R 4.5.1 on Ubuntu
+Linux 22.04.
 
 There are two ways to manage your R environment so that the correct
 packages are installed:

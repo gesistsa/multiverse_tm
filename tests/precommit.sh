@@ -6,7 +6,7 @@ NEED_RERENDERING=false
 for FILE in $STAGED_FILES
 do
     if [[ "$FILE" == "renv.lock" || "$FILE" == "readme.rmd" ]]; then
-	$NEED_RERENDERING=true
+	NEED_RERENDERING=true
 	break
     fi
 done

@@ -33,11 +33,13 @@ renv::restore()
 
 ### Windows
 
-> \[!NOTE\] Although we expect the R scripts in this codebase to work
-> across all platforms, it requires a lot of tooling outside of R (e.g.,
-> cURL, make) that is readily available on Unix-like systems. Your
-> milage with Windows will vary and additional tweaking may be required.
-> In case of doubt, we recommend using [Windows Subsystem for
+> [!NOTE]
+>
+> Although we expect the R scripts in this codebase to work across all
+> platforms, it requires a lot of tooling outside of R (e.g., cURL,
+> make) that is readily available on Unix-like systems. Your milage with
+> Windows will vary and additional tweaking may be required. In case of
+> doubt, we recommend using [Windows Subsystem for
 > Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
 
 Ensure `renv` (version \>= 1.1.4) and
@@ -140,8 +142,6 @@ pak::pkg_install(packages)
 # Options
 
 There are options that one can customize; see `.Rprofile`.
-
-------------------------------------------------------------------------
 
 [^1]: There are also additional dependencies for developers: `withr` and
     `quarto`

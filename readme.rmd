@@ -1,5 +1,5 @@
 ---
-output: github_document
+format: gfm
 ---
 
 # Setup
@@ -31,8 +31,9 @@ renv::restore()
 
 ### Windows
 
-> [!NOTE]
-> Although we expect the R scripts in this codebase to work across all platforms, it requires a lot of tooling outside of R (e.g., cURL, make) that is readily available on Unix-like systems. Your milage with Windows will vary and additional tweaking may be required. In case of doubt, we recommend using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
+::: {.callout-note}
+Although we expect the R scripts in this codebase to work across all platforms, it requires a lot of tooling outside of R (e.g., cURL, make) that is readily available on Unix-like systems. Your milage with Windows will vary and additional tweaking may be required. In case of doubt, we recommend using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
+:::
 
 Ensure `renv` (version >= 1.1.4) and [Rtools](https://cran.r-project.org/bin/windows/Rtools/) are installed.
 
@@ -75,8 +76,9 @@ The following data files should be in the `rawdata` directory.
 
 # Docker
 
-> [!WARNING]  
-> Warning: Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
+::: {.callout-warning}
+Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
+:::
 
 The entire analysis can be run with Docker by using
 
@@ -102,6 +104,4 @@ cat(paste0("```r\nPackages <- c(\n",
 
 There are options that one can customize; see `.Rprofile`.
 
----
-
-[^1]: There are also additional dependencies for developers: `withr` and `rmarkdown`
+[^1]: There are also additional dependencies for developers: `withr` and `quarto`

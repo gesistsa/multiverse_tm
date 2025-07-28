@@ -10,3 +10,6 @@ source(here::here("lib.R"))
 
 ## # of cores for brms and co.
 options(tmmv.cores = 6)
+
+## # of parallel sessions for running jankin02_train.R
+options(tmmv.jankin.workers = 4)

@@ -14,7 +14,7 @@ done
 if $NEED_RERENDERING; then
     if ! make rmd; then
 	echo "Error: 'make rmd' failed. Aborting commit."
-	exit 1 # Exit with a non-zero status to abort the commit
+	exit 1
     fi
     git add readme.md
     exit 0

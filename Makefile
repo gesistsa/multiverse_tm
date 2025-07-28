@@ -4,6 +4,9 @@ chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 
+results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
+	mkdir -p results/aggregated/chan
+	Rscript chan05_combine.R 1
 intermediate/czymara/runs/1: czymara_dfms
 	Rscript czymara02_train.R 1
 czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe

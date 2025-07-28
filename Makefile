@@ -45,7 +45,7 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
 clean:
 	rm -rf rawdata
-.phony: clean jankin_dfms chan_dfms czymara_dfms test_lib
+.phony: clean jankin_dfms chan_dfms czymara_dfms test rmd
 
 debug: DEBUG = --debug
 
@@ -55,3 +55,7 @@ debug: chan_dfms jankin_dfms czymara_dfms
 	Rscript czymara02_train.R ${DEBUG}
 test:
 	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"
+
+rmd:
+	Rscript --no-init-file -e "rmarkdown::render('readme.rmd', output_file = 'readme.md')"
+	rm readme.html

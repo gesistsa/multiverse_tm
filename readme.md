@@ -1,4 +1,5 @@
 
+
 # Setup
 
 **Requires R 4.1.0 or newer** We tested our code on R 4.5.1 on Ubuntu
@@ -7,10 +8,10 @@ Linux 22.04.
 There are two ways to manage your R environment so that the correct
 packages are installed:
 
-  - Using an isolated environment with `renv`. We also use this to
-    manage the dependencies for Docker
-  - Freestyle and use your global environment. All required packages are
-    listed in section “Project Dependencies”.
+- Using an isolated environment with `renv`. We also use this to manage
+  the dependencies for Docker
+- Freestyle and use your global environment. All required packages are
+  listed in section “Project Dependencies”.
 
 ## Environment using renv
 
@@ -32,7 +33,7 @@ renv::restore()
 
 ### Windows
 
-> \[\!NOTE\] Although we expect the R scripts in this codebase to work
+> \[!NOTE\] Although we expect the R scripts in this codebase to work
 > across all platforms, it requires a lot of tooling outside of R (e.g.,
 > cURL, make) that is readily available on Unix-like systems. Your
 > milage with Windows will vary and additional tweaking may be required.
@@ -76,22 +77,23 @@ Dependencies” at the bottom of this readme.
 
 The following data files should be in the `rawdata` directory.
 
-  - [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
-    (use `make rawdata/UNGDC_1946-2024.tar.gz` to download and check)
-  - [`rawdata/final_data.RDS`](https://osf.io/3hazf) (use `make
-    rawdata/final_data.RDS` to download and check)
-  - [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
-    (You must request it via GESIS BASIS)
-  - `rawdata/stopwords-de.txt` (use `make rawdata/stopwords-de.txt` to
-    download and check)
-  - `rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` (use `make
-    rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` to download and
-    check)
+- [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
+  (use `make rawdata/UNGDC_1946-2024.tar.gz` to download and check)
+- [`rawdata/final_data.RDS`](https://osf.io/3hazf) (use
+  `make rawdata/final_data.RDS` to download and check)
+- [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
+  (You must request it via GESIS BASIS)
+- `rawdata/stopwords-de.txt` (use `make rawdata/stopwords-de.txt` to
+  download and check)
+- `rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` (use
+  `make rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` to download and
+  check)
 
 # Docker
 
-> \[\!WARNING\]  
-> Warning: Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
+> [!WARNING]
+>
+> Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
 
 The entire analysis can be run with Docker by using
 
@@ -105,13 +107,14 @@ analysis steps.
 
 # Project Dependencies
 
-Major dependencies are listed below \[1\]:
+Major dependencies are listed below [^1]:
 
 ``` r
 Packages <- c(
     "brms",
     "dplyr",
     "furrr",
+    "ggplot2",
     "haven",
     "here",
     "keyATM",
@@ -121,6 +124,7 @@ Packages <- c(
     "quanteda",
     "renv",
     "rlang",
+    "rmarkdown",
     "seededlda",
     "SnowballC",
     "stm",
@@ -137,7 +141,7 @@ pak::pkg_install(packages)
 
 There are options that one can customize; see `.Rprofile`.
 
------
+------------------------------------------------------------------------
 
-1.  There are also additional dependencies for developers: `withr` and
-    `rmarkdown`
+[^1]: There are also additional dependencies for developers: `withr` and
+    `quarto`

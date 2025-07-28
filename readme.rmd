@@ -1,5 +1,5 @@
 ---
-output: github_document
+format: gfm
 ---
 
 # Setup
@@ -75,8 +75,9 @@ The following data files should be in the `rawdata` directory.
 
 # Docker
 
-> [!WARNING]  
-> Warning: Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
+::: {.callout-warning}
+Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
+:::
 
 The entire analysis can be run with Docker by using
 
@@ -104,4 +105,4 @@ There are options that one can customize; see `.Rprofile`.
 
 ---
 
-[^1]: There are also additional dependencies for developers: `withr` and `rmarkdown`
+[^1]: There are also additional dependencies for developers: `withr` and `quarto`

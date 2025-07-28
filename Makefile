@@ -43,9 +43,6 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	mkdir -p rawdata
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
-clean:
-	rm -rf rawdata
-.phony: clean jankin_dfms chan_dfms czymara_dfms test rmd
 
 debug: DEBUG = --debug
 
@@ -53,9 +50,17 @@ debug: chan_dfms jankin_dfms czymara_dfms
 	Rscript jankin02_train.R ${DEBUG}
 	Rscript chan02_train.R ${DEBUG}
 	Rscript czymara02_train.R ${DEBUG}
+
+# Developers only
 test:
 	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"
-
 rmd:
 	Rscript --no-init-file -e "rmarkdown::render('readme.rmd', output_file = 'readme.md')"
 	rm readme.html
+deploy-hook:
+	cp tests/precommit.sh .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+clean:
+	rm -rf rawdata
+
+.phony: clean jankin_dfms chan_dfms czymara_dfms test rmd

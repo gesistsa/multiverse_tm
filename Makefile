@@ -4,6 +4,9 @@ chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 
+results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
+	mkdir -p results/aggregated/chan
+	Rscript chan05_combine.R 1
 intermediate/czymara/runs/1: czymara_dfms
 	Rscript czymara02_train.R 1
 czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe
@@ -43,9 +46,6 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	mkdir -p rawdata
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
-clean:
-	rm -rf rawdata
-.phony: clean jankin_dfms chan_dfms czymara_dfms test_lib
 
 debug: DEBUG = --debug
 
@@ -53,5 +53,16 @@ debug: chan_dfms jankin_dfms czymara_dfms
 	Rscript jankin02_train.R ${DEBUG}
 	Rscript chan02_train.R ${DEBUG}
 	Rscript czymara02_train.R ${DEBUG}
+
+# Developers only
 test:
 	Rscript --no-init-file -e "testthat::test_file('tests/lib_tests.R')"
+rmd:
+	Rscript --no-init-file -e "quarto::quarto_render('readme.rmd', output_file = 'readme.md')"
+deploy-hook:
+	cp tests/precommit.sh .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+clean:
+	rm -rf rawdata
+
+.phony: clean jankin_dfms chan_dfms czymara_dfms test rmd

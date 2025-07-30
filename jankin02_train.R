@@ -6,7 +6,7 @@ library(keyATM)
 library(quanteda)
 library(SnowballC)
 library(seededlda)
-library(purrr)
+library(furrr)
 
 sdg_keywords <- list(
     SDG1 = c("poverty", "extreme_poverty", "poor", "socioeconomic", "income", "living_standards", "living_standard"),
@@ -126,11 +126,17 @@ train_model <- function(setting, args, sdg_keywords, stemmed_sdg_keywords, .fix_
     saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
 }
 
-purrr::walk(settings, train_model,
-            args = args,
-            sdg_keywords = sdg_keywords,
-            stemmed_sdg_keywords = stemmed_sdg_keywords,
-            .progress = !args$debug)
+if (args$debug) {
+    plan(sequential)
+} else {
+    plan(multisession, workers = getOption("tmmv.jankin.workers", 1))
+}
+
+furrr::future_walk(settings, train_model,
+                   args = args,
+                   sdg_keywords = sdg_keywords,
+                   stemmed_sdg_keywords = stemmed_sdg_keywords,
+                   .progress = !args$debug)
 
 if (args$debug) {
     library(testthat)

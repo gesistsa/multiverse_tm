@@ -4,6 +4,9 @@ chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 
+results/aggregated/czymara/1.csv: intermediate/czymara/1
+	mkdir -p results/aggregated/czymara
+	Rscript czymara03_combine.R 1
 results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
 	mkdir -p results/aggregated/chan
 	Rscript chan05_combine.R 1

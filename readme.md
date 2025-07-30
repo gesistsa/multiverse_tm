@@ -114,6 +114,7 @@ Major dependencies are listed below [^1]:
 ``` r
 Packages <- c(
     "brms",
+    "cowplot",
     "dplyr",
     "furrr",
     "ggplot2",
@@ -132,6 +133,7 @@ Packages <- c(
     "stm",
     "stringr",
     "testthat",
+    "tidyr",
     "tools",
     "udpipe"
 )

@@ -43,12 +43,12 @@ overall |> arrange(Estimate) |>
 #   Specification Curve Analyses.
 #   Available from https://CRAN.R-project.org/package=specr
 
-library("cowplot")
+library(cowplot)
 # library("dplyr")
 # library("ggplot2")
 # library("here")
-library("stringr")
-library("tidyr")
+library(stringr)
+library(tidyr)
 
 results <- read.csv(here("results", "aggregated", "chan", "1.csv"))
 

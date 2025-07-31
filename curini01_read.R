@@ -120,7 +120,7 @@ current_tokens_list[["lemmatized"]] <- lemma_toks
 
 ## from the original code
 
-stopwords_it <- c(stopwords("italian"), "l", "d", "dell", "dall", "afganistan", "libano", "kosovo", "iraq", "libia", "albania")
+all_stopwords <- c(stopwords("italian"), "l", "d", "dell", "dall", "afganistan", "libano", "kosovo", "iraq", "libia", "albania")
 
 process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     ## print(setting)
@@ -157,3 +157,39 @@ purrr::walk(settings,
             all_stopwords = all_stopwords,
             args = args,
             .progress = !args$debug)
+
+## DEBUG_MODE: test
+if (args$debug) {
+    library(testthat)
+    output_dir <- args$output_dir
+    for (setting in settings) {
+        ## print(setting)
+        filename <- paste0(rlang::hash(setting), ".RDS")
+        testthat::expect_true(file.exists(here(output_dir, filename)))
+        current_dfm <- readRDS(here(output_dir, filename))
+        features <- featnames(current_dfm)
+        if (setting$token_normalization == "none") {
+            ## plural of "afghano" (male person from Afghanistan)
+            testthat::expect_true("afghani" %in% features)
+        }
+        if (setting$token_normalization == "lemmatization") {
+            testthat::expect_false("afghani" %in% features)
+            testthat::expect_true("afghano" %in% features)
+        }
+        if (setting$token_normalization == "stemming") {
+            testthat::expect_false("afghani" %in% features)
+            testthat::expect_true("afghan" %in% features)
+        }
+        if (setting$stopword_removal) {
+            testthat::expect_false(all(purrr::map_lgl(all_stopwords, ~. %in% features)))
+        } else {
+            testthat::expect_true(any(purrr::map_lgl(all_stopwords, ~. %in% features)))
+        }
+
+        if (setting$trimming) {
+            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+        } else {
+            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) > ndoc(lemma_corpus) / 2)
+        }
+    }
+}

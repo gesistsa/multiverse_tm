@@ -4,6 +4,13 @@ chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 
+curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe
+	mkdir -p intermediate/czymara
+	Rscript curini01_read.R $(DEBUG)
+rawdata/italian-isdt-ud-2.5-191206.udpipe:
+	mkdir -p rawdata
+	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe" -o rawdata/italian-isdt-ud-2.5-191206.udpipe
+	echo "0ca1865e00ec3f20c3dcc22c022955a0  rawdata/italian-isdt-ud-2.5-191206.udpipe" | md5sum -c
 results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
 	mkdir -p results/aggregated/chan
 	Rscript chan05_combine.R 1

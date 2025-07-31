@@ -1,13 +1,23 @@
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
-tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
-    txt_files <- list.files(input_path, recursive = TRUE)
-    txt_content <- vapply(txt_files,
-                          function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
+tmmv.read_text_base <- function(input_path, dvsep, docvarnames, archive = FALSE) {
+    if (!archive) {
+        txt_files <- list.files(input_path, recursive = TRUE)
+        txt_content <- vapply(txt_files,
+                              function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
                                             collapse = "\n"),
-                          character(1))
+                              character(1))
+    } else {
+        txt_files <- archive::archive(input_path)$path
+        txt_content <- vapply(txt_files, function(x)
+            paste(suppressWarnings(readLines(
+                archive::archive_read(archive = input_path, file = x))),
+                collapse = "\n"), character(1))
+    }
+
     output <- data.frame(text = txt_content, stringsAsFactors = FALSE)
     output$doc_id <- basename(txt_files)
+
     meta <- strsplit(tools::file_path_sans_ext(output$doc_id), dvsep, fixed = TRUE)
     
     meta_df <- as.data.frame(do.call(rbind, meta))

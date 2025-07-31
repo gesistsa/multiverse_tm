@@ -29,7 +29,7 @@ myText$text <-  gsub("�no�","no",myText$text)
 myText$text <-  gsub("�No�","no",myText$text)
 
 
-meta.pr <- read.csv(here("rawdata", "meta_table.csv"), 1)
+meta.pr <- read.table(here("rawdata", "meta_table.tab"), header = TRUE)
 
 meta.pr$Name <- as.character(meta.pr$Name )
 meta.pr <- meta.pr[,-2]

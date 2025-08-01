@@ -74,21 +74,21 @@ tmmv.parse_args_read <- function(slug = "chan") {
     return(args)
 }
 
-tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
+tmmv.parse_args_train <- function(slug = "chan", debug = FALSE, .current_run = NULL) {
     if (debug) {        
         args <- tmmv.parse_args(c("/usr/lib/R/bin/exec/R","--no-echo","--no-restore", "--file=fake.R", "--args", "--debug"))
     } else {
         args <- tmmv.parse_args()
     }
     args$slug <- slug
-    if (!args$debug && is.null(args$arg)) {
+    if (!args$debug && is.null(args$arg) && is.null(.current_run)) {
         msg <- paste("You must provide the current run number, e.g. Rscript",
                      args$filename,
                      "1")
         stop(msg, call. = FALSE)
     }
     if (!args$debug) {
-        args$current_run <- args$args[1]
+        args$current_run <- ifelse(is.null(.current_run), args$args[1], .current_run)
         args$prefix <- "intermediate"
         args$output_dir <- here::here(args$prefix, slug, "runs", args$current_run)
     } else {

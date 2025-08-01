@@ -5,6 +5,7 @@ library(here)
 library(keyATM)
 library(quanteda)
 library(purrr)
+library(furrr)
 library(seededlda)
 
 if (args$debug) {
@@ -111,9 +112,16 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
     saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
 }
 
-purrr::walk(settings, train_model,
-            args = args,
-            .progress = !args$debug)
+if (args$debug) {
+    plan(sequential)
+} else {
+    plan(multisession, workers = getOption("tmmv.cores", 1))
+}
+
+furrr::future_walk(settings, train_model,
+                   args = args,
+                   .progress = !args$debug,
+                   .options = furrr_options(seed = NULL))
 
 if (args$debug) {
     library(testthat)

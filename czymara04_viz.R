@@ -27,7 +27,8 @@ plot_a <- results |>
                size = 1) +
     theme_minimal() +
     scale_color_identity() +
-    theme(strip.text = element_blank(),
+    theme(# strip.text = element_blank(),
+          plot.background = element_rect("white"),
           axis.line = element_line("black", linewidth = .5),
           legend.position = "none",
           panel.spacing = unit(0.75, "lines"),
@@ -38,8 +39,11 @@ plot_a <- results |>
                     size = 0.6,
                     fatten = 1) +
     geom_hline(yintercept = 0,
-               colour = "black",
-               linetype = "dotted")
+               colour = "#000000",
+               linetype = "dotted") +
+    facet_wrap(~anchor_variant, nrow = 3)
+
+ggsave(here("plots/czymara_anchor_variants.png"), plot=plot_a, width = 2000, height = 3000, units = "px")
 
 value <- key <- NULL
 choices = c("Tok. Norm.", "Stopword Rem.", "Trim.", "Alt. Model",

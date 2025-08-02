@@ -10,8 +10,6 @@ library(lmtest)
 library(purrr)
 library(here)
 
-args$lm_dir <- file.path(args$output_dir, "lm")
-
 settings <- tmmv.get_settings(full = TRUE)
 
 get_theta_by_topic_name <- function(topic_name, mod) {

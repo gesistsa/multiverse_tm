@@ -1,4 +1,4 @@
-args <- tmmv.parse_args_train(slug = "curini", .current_run = 1)
+args <- tmmv.parse_args_train(slug = "curini")
 
 if (args$debug) {
     stop("No debug mode!")

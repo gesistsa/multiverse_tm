@@ -6,8 +6,7 @@ library(quanteda)
 library(udpipe)
 
 myText <- tmmv.read_text_base(here("rawdata/zip_texts.rar"),
-                              dvsep = "_", docvarnames = c("Party", "Mission"),
-                              archive = TRUE)
+                              dvsep = "_", docvarnames = c("Party", "Mission"))
 
 myText$doc_id <- gsub(".txt", "", myText$doc_id)
 

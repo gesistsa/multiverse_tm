@@ -1,13 +1,14 @@
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
-tmmv.read_text_base <- function(input_path, dvsep, docvarnames, archive = FALSE) {
-    if (!archive) {
+tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
+    if (dir.exists(input_path)) {
         txt_files <- list.files(input_path, recursive = TRUE)
         txt_content <- vapply(txt_files,
                               function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
                                             collapse = "\n"),
                               character(1))
     } else {
+        ## assume to be an archive
         txt_files <- archive::archive(input_path)$path
         txt_content <- vapply(txt_files, function(x)
             paste(suppressWarnings(readLines(

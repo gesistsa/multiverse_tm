@@ -5,6 +5,9 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+results/aggregated/curini/1.csv: intermediate/curini/runs/1
+	mkdir -p results/aggregated/curini
+	Rscript curini03_regression.R 1
 intermediate/curini/runs/1: curini_dfms
 	Rscript curini02_train.R 1	
 curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab

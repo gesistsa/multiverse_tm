@@ -59,6 +59,7 @@ anchor_theta <- anchor_mod$theta[,max_topic_index]
 get_effect_size_mod <- function(setting, anchor_theta) {
     current_mod <- readRDS(here(args$output_dir,
                                 paste0(rlang::hash(setting), ".RDS")))
+    set.seed(current_mod$random_seed)
     k <- ncol(current_mod$theta)
     set.seed(current_mod$random_seed)
     if (setting$alternative_model) {

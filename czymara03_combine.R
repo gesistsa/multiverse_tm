@@ -59,9 +59,7 @@ anchor_theta <- anchor_mod$theta[,max_topic_index]
 get_effect_size_mod <- function(setting, anchor_theta) {
     current_mod <- readRDS(here(args$output_dir,
                                 paste0(rlang::hash(setting), ".RDS")))
-    set.seed(current_mod$random_seed)
     k <- ncol(current_mod$theta)
-    set.seed(current_mod$random_seed)
     if (setting$alternative_model) {
 
         strata_topic <- keyATM::by_strata_DocTopic(current_mod$mod, by_var = "genderfemale", labels = c("male", "female"))
@@ -103,6 +101,7 @@ if (args$debug) {
 
 output_path <- here::here("results", "aggregated", args$slug, paste0(args$current_run, ".csv"))
 
+## Note that it uses the random seed from L41
 res <- furrr::future_map(settings, get_effect_size_mod,
                          anchor_theta = anchor_theta,
                          .progress = TRUE,

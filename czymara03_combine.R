@@ -40,7 +40,7 @@ anchor_mod <- readRDS(here(args$output_dir, paste0(rlang::hash(anchor_setting), 
 
 set.seed(anchor_mod$random_seed)
 
-est <- estimateEffect(1:8~gender, stmobj = anchor_mod$mod, metadata = anchor_mod$docvars)
+est <- stm::estimateEffect(~gender, stmobj = anchor_mod$mod, metadata = anchor_mod$docvars)
 
 
 ## Note that by default stm is 1 - 2
@@ -56,14 +56,14 @@ anchor_theta <- anchor_mod$theta[,max_topic_index]
 ## as.character(corpus_priv[which.max(anchor_theta)])
 ## docvars(corpus_priv, "gender")[which.max(anchor_theta)]
 
-read_mod <- function(setting, anchor_theta) {
+get_effect_size_mod <- function(setting, anchor_theta) {
     current_mod <- readRDS(here(args$output_dir,
                                 paste0(rlang::hash(setting), ".RDS")))
     k <- ncol(current_mod$theta)
     set.seed(current_mod$random_seed)
     if (setting$alternative_model) {
 
-        strata_topic <- by_strata_DocTopic(current_mod$mod, by_var = "genderfemale", labels = c("male", "female"))
+        strata_topic <- keyATM::by_strata_DocTopic(current_mod$mod, by_var = "genderfemale", labels = c("male", "female"))
         theta1 <- strata_topic$theta[[1]]
         theta2 <- strata_topic$theta[[2]]
 
@@ -78,7 +78,7 @@ read_mod <- function(setting, anchor_theta) {
                              Q97.5 = theta_diff_quantile[2, anchor_index])
         rownames(output) <- NULL
     } else {
-        est <- estimateEffect(~gender, stmobj = current_mod$mod, metadata = current_mod$docvars)
+        est <- stm::estimateEffect(~gender, stmobj = current_mod$mod, metadata = current_mod$docvars)
         res <- plot(est, covariate = "gender",
                     model = current_mod$mod, method = "difference",
                     cov.value1 = "female", cov.value2 = "male",
@@ -102,6 +102,9 @@ if (args$debug) {
 
 output_path <- here::here("results", "aggregated", args$slug, paste0(args$current_run, ".csv"))
 
-res <- furrr::future_map(settings, read_mod, anchor_theta = anchor_theta, .progress = TRUE, .options = furrr_options(seed = NULL)) |>
+res <- furrr::future_map(settings, get_effect_size_mod,
+                         anchor_theta = anchor_theta,
+                         .progress = TRUE,
+                         .options = furrr_options(seed = NULL)) |>
     purrr::list_rbind() |>
     write.csv(output_path, row.names = FALSE)

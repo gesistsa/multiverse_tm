@@ -24,6 +24,9 @@ rawdata/meta_table.tab:
 rawdata/zip_texts.rar:
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/4291434" -o rawdata/zip_texts.rar
 	echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
+results/aggregated/czymara/1.csv: intermediate/czymara/1
+	mkdir -p results/aggregated/czymara
+	Rscript czymara03_combine.R 1
 results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
 	mkdir -p results/aggregated/chan
 	Rscript chan05_combine.R 1

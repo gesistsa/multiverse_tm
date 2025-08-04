@@ -177,3 +177,16 @@ tmmv.get_current <- function(setting, args,
     }
     return(current)
 }
+
+#' return the column index in theta, which the column vector
+#' has the highest spearman's correlation with anchor_theta
+tmmv.find_anchor <- function(anchor_theta, theta) {
+    stopifnot(length(anchor_theta) == nrow(theta))
+    cor_coefs <- vapply(seq_len(ncol(theta)),
+                        FUN = function(x)
+                            cor(anchor_theta,
+                                theta[,x],
+                                method = "spearman"),
+                        FUN.VALUE = numeric(1))
+    return(which.max(cor_coefs))
+}

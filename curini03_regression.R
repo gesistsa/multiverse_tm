@@ -92,13 +92,15 @@ cbind(purrr::list_rbind(purrr::map(settings, as.data.frame)),
     write.csv(output_path, row.names = FALSE)
 
 
-generate_conditional_effect <- function(res, i) {
+hashes <- purrr::map_chr(settings, \(x) rlang::hash(x))
+
+generate_conditional_effect <- function(res, hash) {
     .f = function(x, mod, data) {
         new_data <- data
         new_data$LR <- x
         mean(predict(mod, new_data, type = "response"))
     }
-    data.frame(i = i, LR = seq(0, 10, 0.5),
+    data.frame(hash = hash, LR = seq(0, 10, 0.5),
                pred_multi100 = purrr::map_dbl(seq(0, 10, 0.5),
                                               .f,
                                               mod = res$mod,
@@ -108,7 +110,7 @@ generate_conditional_effect <- function(res, i) {
 output_path <- here::here("results", "aggregated", args$slug, paste0("condit_", args$current_run, ".csv"))
 
 condit_effect <- purrr::map2(res,
-                             seq_along(res),
+                             hashes,
                              generate_conditional_effect) |>
     purrr::list_rbind() |>
     write.csv(output_path, row.names = FALSE)

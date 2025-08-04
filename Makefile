@@ -5,6 +5,9 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+tvinneremi_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
+	mkdir -p intermediate/tvinneremi
+	Rscript tvinneremi01_read.R 1
 rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe:
 	mkdir -p rawdata
 	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe" -o rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe

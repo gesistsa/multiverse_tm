@@ -195,8 +195,39 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
 purrr::walk(settings,
             process_tokens,
             current_tokens_list = current_tokens_list,
-            all_stopwords = all_stopwords,
             args = args,
             .progress = !args$debug)
 
 
+## DEBUG_MODE: test
+if (args$debug) {
+    library(testthat)
+    output_dir <- args$output_dir
+    for (setting in settings) {
+        ## print(setting)
+        filename <- paste0(rlang::hash(setting), ".RDS")
+        testthat::expect_true(file.exists(here(output_dir, filename)))
+        current_dfm <- readRDS(here(output_dir, filename))
+        features <- featnames(current_dfm)
+        if (setting$token_normalization == "none") {
+            testthat::expect_true("konsekvensene" %in% features)
+        }
+        if (setting$token_normalization == "lemmatization") {
+            testthat::expect_true("konsekvens" %in% features)
+        }
+        if (setting$token_normalization == "stemming") {
+            testthat::expect_true("konsekv" %in% features)
+        }
+        if (setting$stopword_removal) {
+            testthat::expect_false(all(purrr::map_lgl(stopwords("norwegian"), ~. %in% features)))
+        } else {
+            testthat::expect_true(any(purrr::map_lgl(stopwords("norwegian"), ~. %in% features)))
+        }
+        docfreqs <- topfeatures(current_dfm, length(features), scheme = "docfreq")
+        if (setting$trimming) {
+            testthat::expect_true(tail(docfreqs, 1) == 6)
+        } else {
+            testthat::expect_true(tail(docfreqs, 1) < 6)
+        }
+    }
+}

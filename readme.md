@@ -75,21 +75,48 @@ This should update the `renv.lock` file with the new dependencies.
 Please also add the package you added to the section “Project
 Dependencies” at the bottom of this readme.
 
-## Datasets
+# Studies and Data
 
-The following data files should be in the `rawdata` directory.
+All selected studies make the data and source code publicly available.
+The required data files from each study should be in the `rawdata`
+directory. Most files can be downloaded automatically by using
+`make rawdata/<filename>`. For example, to download the text data for
+Curini and Vignoli (2021) use `make rawdata/zip_texts.rar`.
 
-- [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
-  (use `make rawdata/UNGDC_1946-2024.tar.gz` to download and check)
-- [`rawdata/final_data.RDS`](https://osf.io/3hazf) (use
-  `make rawdata/final_data.RDS` to download and check)
-- [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
-  (You must request it via GESIS BASIS)
-- `rawdata/stopwords-de.txt` (use `make rawdata/stopwords-de.txt` to
-  download and check)
-- `rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` (use
-  `make rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` to download and
-  check)
+- Chan, Zeng, and Schäfer (2022): Data and code is available on
+  [OSF](https://osf.io/ycx6j/)
+  - Text data: [`rawdata/final_data.RDS`](https://osf.io/3hazf)
+- Curini and Vignoli (2021): Data and code is on [Harvard
+  Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LAXHS3)
+  - Text data:
+    [`rawdata/zip_texts.rar`](https://dataverse.harvard.edu/api/access/datafile/4291434)
+  - Meta data:
+    [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+  - Lemmatization model:
+    [`rawdata/italian-isdt-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe)
+- Czymara, Langenkamp, and Cano (2020): Data is available upon request
+  via
+  [GESIS](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034),
+  source code repository is on
+  [Github](https://github.com/czymara/perceiving-COVID19-in-Germany) and
+  [OSF](https://osf.io/6s7rp/)
+  - Text / survey data:
+    [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
+    (You must request it via GESIS BASIS)
+  - Stop word list:
+    [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
+  - Lemmatization model:
+    [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
+- Jankin, Baturo, and Dasandi (2024): Data available via [Harvard
+  Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) and code via
+  [PRIO](https://www.prio.org/journals/jpr/replicationdata), see entry
+  at section 2025 (62) Issue 4.
+  - Text data:
+    [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
+  - Meta data:
+    [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+- Takano, Matsuo, and Kawano (2023): Data and code available via
+  [OSF](https://osf.io/6ktey/)
 
 # Docker
 
@@ -147,6 +174,59 @@ pak::pkg_install(packages)
 # Options
 
 There are options that one can customize; see `.Rprofile`.
+
+# References
+
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
+
+<div id="ref-chan:2022:WT" class="csl-entry">
+
+Chan, Chung-hong, Jing Zeng, and Mike S. Schäfer. 2022. “Whose Research
+Benefits More from Twitter? On Twitter-Worthiness of Communication
+Research and Its Role in Reinforcing Disparities of the Field.” Edited
+by Pablo Dorta-González. *PLOS ONE* 17 (12): e0278840.
+<https://doi.org/10.1371/journal.pone.0278840>.
+
+</div>
+
+<div id="ref-curini:2021:CMU" class="csl-entry">
+
+Curini, Luigi, and Valerio Vignoli. 2021. “Committed Moderates and
+Uncommitted Extremists: Ideological Leaning and Parties’ Narratives on
+Military Interventions in Italy.” *Foreign Policy Analysis* 17 (3).
+<https://doi.org/10.1093/fpa/orab016>.
+
+</div>
+
+<div id="ref-czymara:2020:C" class="csl-entry">
+
+Czymara, Christian S., Alexander Langenkamp, and Tomás Cano. 2020.
+“Cause for Concerns: Gender Inequality in Experiencing the COVID-19
+Lockdown in Germany.” *European Societies* 23 (sup1): S68–81.
+<https://doi.org/10.1080/14616696.2020.1808692>.
+
+</div>
+
+<div id="ref-jankin:2024:W" class="csl-entry">
+
+Jankin, Slava, Alexander Baturo, and Niheer Dasandi. 2024. “Words to
+Unite Nations: The Complete United Nations General Debate Corpus,
+1946–Present.” *Journal of Peace Research*, November.
+<https://doi.org/10.1177/00223433241275335>.
+
+</div>
+
+<div id="ref-takano:2023:awe" class="csl-entry">
+
+Takano, Ryota, Akiko Matsuo, and Kazuaki Kawano. 2023. “Development of a
+Japanese Version of the Awe Experience Scale (AWE-s): A Structural Topic
+Modeling Approach.” *F1000Research* 12: 515.
+<https://doi.org/10.12688/f1000research.134275.2>.
+
+</div>
+
+</div>
 
 [^1]: There are also additional dependencies for developers: `withr` and
     `quarto`

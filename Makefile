@@ -5,6 +5,14 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe:
+	mkdir -p rawdata
+	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe" -o rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe
+	echo "82b781c39ea701ff30b3ced7f3600da9  rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe" | md5sum -c
+rawdata/ncp-stm-data.csv:
+	mkdir -p rawdata
+	curl -L "https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28689/KO9T0Z" -o rawdata/ncp-stm-data.csv
+	echo "6072f1004cc368c476f7de3c28021d6d  rawdata/ncp-stm-data.csv" | md5sum -c
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
 	Rscript curini03_regression.R 1

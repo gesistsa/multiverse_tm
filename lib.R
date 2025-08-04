@@ -1,13 +1,24 @@
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
 tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
-    txt_files <- list.files(input_path, recursive = TRUE)
-    txt_content <- vapply(txt_files,
-                          function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
+    if (dir.exists(input_path)) {
+        txt_files <- list.files(input_path, recursive = TRUE)
+        txt_content <- vapply(txt_files,
+                              function(x) paste(suppressWarnings(readLines(file.path(input_path, x))),
                                             collapse = "\n"),
-                          character(1))
+                              character(1))
+    } else {
+        ## assume to be an archive
+        txt_files <- archive::archive(input_path)$path
+        txt_content <- vapply(txt_files, function(x)
+            paste(suppressWarnings(readLines(
+                archive::archive_read(archive = input_path, file = x))),
+                collapse = "\n"), character(1))
+    }
+
     output <- data.frame(text = txt_content, stringsAsFactors = FALSE)
     output$doc_id <- basename(txt_files)
+
     meta <- strsplit(tools::file_path_sans_ext(output$doc_id), dvsep, fixed = TRUE)
     
     meta_df <- as.data.frame(do.call(rbind, meta))
@@ -64,21 +75,21 @@ tmmv.parse_args_read <- function(slug = "chan") {
     return(args)
 }
 
-tmmv.parse_args_train <- function(slug = "chan", debug = FALSE) {
+tmmv.parse_args_train <- function(slug = "chan", debug = FALSE, .current_run = NULL) {
     if (debug) {        
         args <- tmmv.parse_args(c("/usr/lib/R/bin/exec/R","--no-echo","--no-restore", "--file=fake.R", "--args", "--debug"))
     } else {
         args <- tmmv.parse_args()
     }
     args$slug <- slug
-    if (!args$debug && is.null(args$arg)) {
+    if (!args$debug && is.null(args$arg) && is.null(.current_run)) {
         msg <- paste("You must provide the current run number, e.g. Rscript",
                      args$filename,
                      "1")
         stop(msg, call. = FALSE)
     }
     if (!args$debug) {
-        args$current_run <- args$args[1]
+        args$current_run <- ifelse(is.null(.current_run), args$args[1], .current_run)
         args$prefix <- "intermediate"
         args$output_dir <- here::here(args$prefix, slug, "runs", args$current_run)
     } else {

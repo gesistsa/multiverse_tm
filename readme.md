@@ -113,6 +113,7 @@ Major dependencies are listed below [^1]:
 
 ``` r
 Packages <- c(
+    "archive",
     "brms",
     "cowplot",
     "dplyr",
@@ -122,12 +123,14 @@ Packages <- c(
     "here",
     "keyATM",
     "lexicon",
+    "lmtest",
     "osfr",
     "purrr",
     "quanteda",
     "renv",
     "rlang",
     "rmarkdown",
+    "sandwich",
     "seededlda",
     "SnowballC",
     "stm",

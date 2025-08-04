@@ -1,9 +1,29 @@
-all: chan jankin czymara
+all: chan jankin czymara curini
 
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
+curini: intermediate/curini/runs/1
 
+results/aggregated/curini/1.csv: intermediate/curini/runs/1
+	mkdir -p results/aggregated/curini
+	Rscript curini03_regression.R 1
+intermediate/curini/runs/1: curini_dfms
+	Rscript curini02_train.R 1	
+curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab
+	mkdir -p intermediate/czymara
+	Rscript curini01_read.R $(DEBUG)
+rawdata/italian-isdt-ud-2.5-191206.udpipe:
+	mkdir -p rawdata
+	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe" -o rawdata/italian-isdt-ud-2.5-191206.udpipe
+	echo "0ca1865e00ec3f20c3dcc22c022955a0  rawdata/italian-isdt-ud-2.5-191206.udpipe" | md5sum -c
+rawdata/meta_table.tab:
+	mkdir -p rawdata
+	curl -L "https://dataverse.harvard.edu/api/access/datafile/4291441" -o rawdata/meta_table.tab
+	echo "84603176197dbde65c103e454379ae1f  rawdata/meta_table.tab" | md5sum -c
+rawdata/zip_texts.rar:
+	curl -L "https://dataverse.harvard.edu/api/access/datafile/4291434" -o rawdata/zip_texts.rar
+	echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
 results/aggregated/czymara/1.csv: intermediate/czymara/1
 	mkdir -p results/aggregated/czymara
 	Rscript czymara03_combine.R 1

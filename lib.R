@@ -190,3 +190,21 @@ tmmv.find_anchor <- function(anchor_theta, theta) {
                         FUN.VALUE = numeric(1))
     return(which.max(cor_coefs))
 }
+
+#' This function unifies the theta so that the output theta always
+#' has the same nrow as current_dfm
+#' The raison d'être is that stm discards empty rows sliently
+#' But doesn't retain the rownames
+tmmv.unify_theta <- function(mod, trimmed_dfm, current_dfm) {
+    theta <- mod$theta
+    rownames(theta) <- docnames(trimmed_dfm)
+
+    excluded_docs <- setdiff(docnames(current_dfm), docnames(trimmed_dfm))
+    k <- ncol(theta)
+    fake_theta <- matrix(rep(1/k, length(excluded_docs) * k), nrow = length(excluded_docs), ncol = k)
+    rownames(fake_theta) <- excluded_docs
+    final_theta <- rbind(theta, fake_theta)
+
+    final_theta <- final_theta[match(rownames(current_dfm),rownames(final_theta)) ,]
+    return(final_theta)
+}

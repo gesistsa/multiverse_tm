@@ -74,7 +74,8 @@ if (args$debug) {
 
 furrr::future_walk(settings, train_model,
                    args = args,
-                   .progress = !args$debug)
+                   .progress = !args$debug,
+                   .options = furrr_options(seed = NULL))
 
 if (args$debug) {
     library(testthat)

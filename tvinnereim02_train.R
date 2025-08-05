@@ -1,4 +1,4 @@
-args <- tmmv.parse_args_train(slug = "tvinneremi", .current_run = 1)
+args <- tmmv.parse_args_train(slug = "tvinnereim", .current_run = 1)
 settings <- tmmv.get_settings(full = TRUE, args = args)
 
 library(here)

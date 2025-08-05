@@ -1,10 +1,13 @@
-all: chan jankin czymara curini
+all: chan jankin czymara curini tvinnereim
 
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
+tvinnereim: intermediate/tvinnereim/runs/1
 
+intermediate/tvinnereim/runs/1: tvinnereim_dfms
+	Rscript tvinnereim02_train.R 1
 tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
 	mkdir -p intermediate/tvinnereim
 	Rscript tvinnereim01_read.R 1

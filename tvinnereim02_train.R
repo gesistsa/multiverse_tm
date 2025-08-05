@@ -6,6 +6,7 @@ library(keyATM)
 library(quanteda)
 library(purrr)
 library(stm)
+library(furrr)
 
 if (args$debug) {
     settings <- sample(settings, 10)
@@ -65,10 +66,15 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
     current_hash <- rlang::hash(setting)
     saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
 }
+if (args$debug) {
+    plan(sequential)
+} else {
+    plan(multisession, workers = getOption("tmmv.cores", 1))
+}
 
-purrr::walk(settings, train_model,
-            args = args,
-            .progress = !args$debug)
+furrr::future_walk(settings, train_model,
+                   args = args,
+                   .progress = !args$debug)
 
 if (args$debug) {
     library(testthat)

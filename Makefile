@@ -11,7 +11,7 @@ results/aggregated/curini/1.csv: intermediate/curini/runs/1
 intermediate/curini/runs/1: curini_dfms
 	Rscript curini02_train.R 1	
 curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab
-	mkdir -p intermediate/czymara
+	mkdir -p intermediate/curini
 	Rscript curini01_read.R $(DEBUG)
 rawdata/italian-isdt-ud-2.5-191206.udpipe:
 	mkdir -p rawdata

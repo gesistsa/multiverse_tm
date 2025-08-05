@@ -81,7 +81,8 @@ All selected studies make the data and source code publicly available.
 The required data files from each study should be in the `rawdata`
 directory. Most files can be downloaded automatically by using
 `make rawdata/<filename>`. For example, to download the text data for
-Curini and Vignoli (2021) use `make rawdata/zip_texts.rar`.
+Curini and Vignoli (2021) use `make rawdata/zip_texts.rar`. Below is a
+list of the selected studies and their required datafiles:
 
 - Chan, Zeng, and Schäfer (2022): Data and code is available on
   [OSF](https://osf.io/ycx6j/)

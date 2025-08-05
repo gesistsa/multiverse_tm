@@ -1,4 +1,4 @@
-args <- tmmv.parse_args_train(slug = "jankin", .current_run = 1)
+args <- tmmv.parse_args_train(slug = "jankin")
 settings <- tmmv.get_settings(full = TRUE)
 
 library(here)

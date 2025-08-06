@@ -1,6 +1,8 @@
 ---
 format: gfm
+bibliography: references.bib
 ---
+
 
 # Setup
 
@@ -63,16 +65,25 @@ renv::snapshot()
 
 This should update the `renv.lock` file with the new dependencies. Please also add the package you added to the section "Project Dependencies" at the bottom of this readme.
 
+# Studies and Data
 
-## Datasets
+All selected studies make the data and source code publicly available. The required data files from each study should be in the `rawdata` directory. Most files can be downloaded automatically by using `make rawdata/<filename>`. For example, to download the text data for @curini:2021:CMU use `make rawdata/zip_texts.rar`. Below is a list of the selected studies and their required datafiles:
 
-The following data files should be in the `rawdata` directory.
+- @chan:2022:WT: Data and code is available on [OSF](https://osf.io/ycx6j/)
+  - Text data: [`rawdata/final_data.RDS`](https://osf.io/3hazf)
+- @curini:2021:CMU: Data and code is on [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LAXHS3)
+  - Text data: [`rawdata/zip_texts.rar`](https://dataverse.harvard.edu/api/access/datafile/4291434)
+  - Meta data: [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+  - Lemmatization model: [`rawdata/italian-isdt-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe)
+- @czymara:2020:C: Data is available upon request via [GESIS](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034), source code repository is on [Github](https://github.com/czymara/perceiving-COVID19-in-Germany) and [OSF](https://osf.io/6s7rp/) 
+  - Text / survey data: [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034) (You must request it via GESIS BASIS)
+  - Stop word list: [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
+  - Lemmatization model: [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
+- @jankin:2024:W: Data available via [Harvard Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) and code via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see entry at section 2025 (62) Issue 4.
+  - Text data: [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
+  - Meta data: [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+- @takano:2023:awe: Data and code available via [OSF](https://osf.io/6ktey/)
 
-* [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0) (use `make rawdata/UNGDC_1946-2024.tar.gz` to download and check)
-* [`rawdata/final_data.RDS`](https://osf.io/3hazf) (use `make rawdata/final_data.RDS` to download and check)
-* [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034) (You must request it via GESIS BASIS)
-* `rawdata/stopwords-de.txt` (use `make rawdata/stopwords-de.txt` to download and check)
-* `rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` (use `make rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe` to download and check)
 
 # Docker
 
@@ -105,3 +116,5 @@ cat(paste0("```r\nPackages <- c(\n",
 There are options that one can customize; see `.Rprofile`.
 
 [^1]: There are also additional dependencies for developers: `withr` and `quarto`
+
+# References

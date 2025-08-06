@@ -28,7 +28,7 @@ results/aggregated/curini/1.csv: intermediate/curini/runs/1
 intermediate/curini/runs/1: curini_dfms
 	Rscript curini02_train.R 1	
 curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab
-	mkdir -p intermediate/czymara
+	mkdir -p intermediate/curini
 	Rscript curini01_read.R $(DEBUG)
 rawdata/italian-isdt-ud-2.5-191206.udpipe:
 	mkdir -p rawdata
@@ -73,6 +73,9 @@ rawdata/final_data.RDS:
 	mkdir -p rawdata
 	Rscript osf_download.R 3hazf rawdata
 	echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
+intermediata/jankin/runs/1/theta: intermediate/jankin/runs/1
+	mkdir -p intermediate/jankin/runs/1/theta
+	Rscript jankin03_combine.R 1
 intermediate/jankin/runs/1: jankin_dfms
 	Rscript jankin02_train.R 1
 jankin_dfms: rawdata/jankin

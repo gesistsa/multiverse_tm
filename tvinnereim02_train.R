@@ -14,6 +14,9 @@ if (args$debug) {
     cat("Rerun if you want more checks.\n")
 }
 
+# note: the init.type for STM is "LDA" is because the paper was published in 2015
+# and stm made "spectral" the default in 2017. Tvinnereim didn't set init.type
+# we should assume it to be "LDA"
 train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE) {
 
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
@@ -39,7 +42,7 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
 
         output$mod <- stm(trimmed_dfm,
                           K = current$k,
-                          init.type = "Spectral",
+                          init.type = "LDA", # See note above
                           max.em.its = current$iter,
                           prevalence = ~concern+humanmade+efficacy+edu3+gender+age,
                           verbose = args$debug,

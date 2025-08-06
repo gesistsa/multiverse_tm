@@ -6,6 +6,9 @@ czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 tvinnereim: intermediate/tvinnereim/runs/1
 
+results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
+	mkdir -p results/aggregated/tvinnereim
+	Rscript tvinnereim03_combine.R 1
 intermediate/tvinnereim/runs/1: tvinnereim_dfms
 	Rscript tvinnereim02_train.R 1
 tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv

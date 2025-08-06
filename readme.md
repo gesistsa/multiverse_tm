@@ -118,7 +118,7 @@ list of the selected studies and their required datafiles:
     [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)
-- Tvinnereim and Fløttum (2015) Data and code availble via
+- Tvinnereim and Fløttum (2015): Data and code availble via
   [OSF](https://doi.org/10.7910/DVN/28689)
   - Text data:
     [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)

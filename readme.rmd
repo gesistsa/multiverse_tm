@@ -83,7 +83,7 @@ All selected studies make the data and source code publicly available. The requi
   - Text data: [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
   - Meta data: [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - @takano:2023:awe: Data and code available via [OSF](https://osf.io/6ktey/)
-- @tvinnereim:2015:E Data and code availble via [OSF](https://doi.org/10.7910/DVN/28689)
+- @tvinnereim:2015:E: Data and code availble via [OSF](https://doi.org/10.7910/DVN/28689)
   - Text data: [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
   - Lemmatization model: [`rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe)
   

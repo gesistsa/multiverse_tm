@@ -5,6 +5,10 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+rawdata/japanese-gsd-ud-2.5-191206.udpipe:
+	mkdir -p rawdata
+	curl -L  "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/japanese-gsd-ud-2.5-191206.udpipe" -o rawdata/japanese-gsd-ud-2.5-191206.udpipe
+	echo "04f3a6c55d3c0c4fb0be250327a64aee  rawdata/japanese-gsd-ud-2.5-191206.udpipe" | md5sum -c
 rawdata/data_cleaned.csv:
 	mkdir -p rawdata
 	Rscript -e "tmmv.osf_download('ecmt6')"

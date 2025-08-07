@@ -54,7 +54,7 @@ chan_dfms: rawdata/final_data.RDS
 	Rscript chan01_read.R $(DEBUG)
 rawdata/final_data.RDS:
 	mkdir -p rawdata
-	Rscript osf_download.R 3hazf rawdata
+	Rscript -e "tmmv.osf_download('3hazf')"
 	echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
 intermediata/jankin/runs/1/theta: intermediate/jankin/runs/1
 	mkdir -p intermediate/jankin/runs/1/theta

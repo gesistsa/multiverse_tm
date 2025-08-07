@@ -158,6 +158,7 @@ Packages <- c(
     "renv",
     "rlang",
     "rmarkdown",
+    "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
     "sandwich",
     "seededlda",
     "SnowballC",

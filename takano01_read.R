@@ -64,7 +64,12 @@ data_nlp_sum <- bind_rows(data %>%
                                           accommodation, AWES, ID))
 
 retTerm2 <- docDF(data_nlp_sum, "ins_1" , type = 1,
-                  pos = NULL, minFreq = 1)
+                  pos = NULL, minFreq = 1) ## default Genkei = 0, i.e. lemmatize
+
+## so Genkei = 1: token_normalization = "none"
+
+## print(docDF(data.frame(text = "自然は偉大でかなわないと思いました。"), "text", type = 1, pos = NULL, minFreq = 1, Genkei = 1))
+## print(docDF(data.frame(text = "自然は偉大でかなわないと思いました。"), "text", type = 1, pos = NULL, minFreq = 1, Genkei = 0))
 
 retTerm2 |> select(-TERM, -POS1, -POS2) |> as.matrix() |> t() -> dtm_raw
 
@@ -74,10 +79,10 @@ stopifnot(nrow(colinfo) == ncol(dtm_raw))
 
 as.dfm(dtm_raw)
 
-library(udpipe)
+## library(udpipe)
 
-japanese_model <- udpipe_load_model(here("rawdata", "japanese-gsd-ud-2.5-191206.udpipe"))
+## japanese_model <- udpipe_load_model(here("rawdata", "japanese-gsd-ud-2.5-191206.udpipe"))
 
-parsed_content <- udpipe_annotate(japanese_model, data_nlp_sum$ins_1)
+## parsed_content <- udpipe_annotate(japanese_model, data_nlp_sum$ins_1)
 
-parsed_content_df <- as.data.frame(parsed_content)
+## parsed_content_df <- as.data.frame(parsed_content)

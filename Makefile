@@ -5,6 +5,14 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+rawdata/data_cleaned.csv:
+	mkdir -p rawdata
+	Rscript -e "tmmv.osf_download('ecmt6')"
+	echo "a3caa1f91acb327b2d026601ff2a8a0c  rawdata/data_cleaned.csv" | md5sum -c
+rawdata/data_pilot_cleaned.csv:
+	mkdir -p rawdata
+	Rscript -e "tmmv.osf_download('k6h39')"
+	echo "4a0dfd051130d096f7fd07315a38bfc4  rawdata/data_pilot_cleaned.csv" | md5sum -c
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
 	Rscript curini03_regression.R 1

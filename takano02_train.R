@@ -1,4 +1,4 @@
-args <- tmmv.parse_args_train(slug = "takano", .current_run = 1)
+args <- tmmv.parse_args_train(slug = "takano")
 settings <- tmmv.get_settings(full = TRUE, args = args)
 
 settings <- settings |>

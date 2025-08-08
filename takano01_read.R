@@ -136,3 +136,32 @@ purrr::walk(settings,
             current_tokens_list = current_tokens_list,
             args = args,
             .progress = !args$debug)
+
+if (args$debug) {
+    library(testthat)
+    all_stopwords <- c(",", "ない", "ある", "いい", "いう", "おる", "くだ", "しれる", "やる")
+    for (setting in settings) {
+        ## print(setting)
+        output_dir <- args$output_dir
+        filename <- paste0(rlang::hash(setting), ".RDS")
+        testthat::expect_true(file.exists(here(output_dir, filename)))
+        current_dfm <- readRDS(here(output_dir, filename))
+        features <- featnames(current_dfm)
+        if (setting$token_normalization == "none") {
+            testthat::expect_true("思い" %in% features)
+        }
+        if (setting$token_normalization == "lemmatization") {
+            testthat::expect_true("思う" %in% features)
+        }
+        if (setting$stopword_removal) {
+            testthat::expect_false(all(purrr::map_lgl(all_stopwords, ~. %in% features)))
+        } else {
+            testthat::expect_true(any(purrr::map_lgl(all_stopwords, ~. %in% features)))
+        }
+        if (setting$trimming) {
+            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 100)
+        } else {
+            testthat::expect_false(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 100)
+        }    
+    }
+}

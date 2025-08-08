@@ -252,9 +252,8 @@ df_outliers_settings <- df_box_outliers |>
 p_ribbon_models <- df_median_models |>
     ggplot(aes(x = year, y = median)) +
     geom_ribbon(
-        data = df_box,
-        aes(ymin = first_quartile, ymax = third_quartile),
-        alpha = 0.2
+        aes(ymin = first_quartile, ymax = third_quartile, fill = model),
+        alpha = 0.3
     ) +
     geom_jitter(
         data = df_outliers_settings,
@@ -266,6 +265,9 @@ p_ribbon_models <- df_median_models |>
     theme_minimal() +
     theme(plot.background = element_rect("white"), legend.position = "bottom") +
     scale_color_manual(
+        values = c(tmmv.colors$berrypurple, tmmv.colors$orange)
+    ) +
+    scale_fill_manual(
         values = c(tmmv.colors$berrypurple, tmmv.colors$orange)
     ) +
     facet_wrap(~Topic, ncol = 3)

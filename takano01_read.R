@@ -1,3 +1,6 @@
+args <- tmmv.parse_args_read(slug = "takano")
+settings <- tmmv.get_settings(full = FALSE, args = args)
+
 ## 　 　 　 　 |＼　　 　 　 　 　 ／|
 ## 　 　 　 　 |＼＼　　 　 　 ／／|
 ## 　　　　 　 : 　,>　｀´￣｀´　<　 ′
@@ -7,10 +10,16 @@
 ## . 　 　 　 /　个 . ＿　 ＿ . 个 ',
 ## 　　　＿/ 　 il 　 ,'　　　 '.　 li　 ',＿_
 
+
+## we can't do stemming
+settings <- settings |>
+    purrr::keep(\(x) x$token_normalization != "stemming")
+
 library(dplyr)
 library(RMeCab)
 library(here)
 library(quanteda)
+library(purrr)
 
 pilotdata <- read.csv(here("rawdata", "data_pilot_cleaned.csv"))
 pilotdata <- pilotdata %>% 
@@ -63,26 +72,67 @@ data_nlp_sum <- bind_rows(data %>%
                                           connectedness, vastness, physiological,
                                           accommodation, AWES, ID))
 
-retTerm2 <- docDF(data_nlp_sum, "ins_1" , type = 1,
-                  pos = NULL, minFreq = 1) ## default Genkei = 0, i.e. lemmatize
-
+## default Genkei = 0, i.e. lemmatize
 ## so Genkei = 1: token_normalization = "none"
 
 ## print(docDF(data.frame(text = "自然は偉大でかなわないと思いました。"), "text", type = 1, pos = NULL, minFreq = 1, Genkei = 1))
 ## print(docDF(data.frame(text = "自然は偉大でかなわないと思いました。"), "text", type = 1, pos = NULL, minFreq = 1, Genkei = 0))
 
-retTerm2 |> select(-TERM, -POS1, -POS2) |> as.matrix() |> t() -> dtm_raw
+process_text <- function(data_nlp_sum, lemmatize = TRUE) {
+    stfu_docDF <- purrr::quietly(docDF)
+    terms_df <- stfu_docDF(
+        data_nlp_sum, "ins_1" , type = 1,
+        pos = NULL, minFreq = 1,
+        Genkei = as.numeric(!lemmatize))$result
+    dfm_raw <- terms_df |>
+        select(-TERM, -POS1, -POS2) |>
+        as.matrix() |>
+        t()
+    colinfo <- terms_df |>
+        select(TERM, POS1, POS2)
+    stopifnot(nrow(colinfo) == ncol(dfm_raw))
+    output <- list()
+    output$dfm <- as.dfm(dfm_raw)
+    docvars(output$dfm) <- select(data_nlp_sum, -ins_1)
+    output$meta <- colinfo
+    return(output)
+}
 
-colinfo <- retTerm2 |> select(TERM, POS1, POS2)
+current_tokens_list<- list()
+current_tokens_list[["normal"]] <- process_text(data_nlp_sum, lemmatize = FALSE)
+current_tokens_list[["lemmatized"]] <- process_text(data_nlp_sum, lemmatize = TRUE)
 
-stopifnot(nrow(colinfo) == ncol(dtm_raw))
+process_tokens <- function(setting, current_tokens_list, args) {
+    if (setting$token_normalization == "lemmatization") {
+        current_tokens <- current_tokens_list[["lemmatized"]]
+    } else {
+        current_tokens <- current_tokens_list[["normal"]]
+    }
+    mask <- rep(FALSE, ncol(current_tokens$dfm))
+    if (setting$stopword_removal) {
+        mask <- mask |
+            (current_tokens$meta$TERM %in% c (",", "ない", "ある", "いい", "いう",
+                                              "おる", "くだ", "しれる", "やる"))        
+    }
+    if (setting$trimming) {
+        ## 
+        mask <- mask | docfreq(current_tokens$dfm) < 3 | docfreq(current_tokens$dfm) > 100
+        ## trim POS
+        mask <- mask | !(current_tokens$meta$POS1 %in% c("動詞","名詞", "形容詞"))
+        ## trim POS2
+        mask <- mask | (current_tokens$meta$POS2 %in% c("数", "代名詞","接尾","非自立"))        
+    }
+    current_dfm <- current_tokens$dfm[,!mask]
+    colnames(current_dfm) <- current_tokens$meta$TERM[!mask]
+    current_hash <- rlang::hash(setting)
+    ##print(current_hash)
+    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    gc()
+    invisible(NULL)
+}
 
-as.dfm(dtm_raw)
-
-## library(udpipe)
-
-## japanese_model <- udpipe_load_model(here("rawdata", "japanese-gsd-ud-2.5-191206.udpipe"))
-
-## parsed_content <- udpipe_annotate(japanese_model, data_nlp_sum$ins_1)
-
-## parsed_content_df <- as.data.frame(parsed_content)
+purrr::walk(settings,
+            process_tokens,
+            current_tokens_list = current_tokens_list,
+            args = args,
+            .progress = !args$debug)

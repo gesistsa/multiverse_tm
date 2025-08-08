@@ -5,6 +5,11 @@ jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 
+intermediate/takano/runs/1: takano_dfms
+	Rscript takano02_train.R 1
+takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv
+	mkdir -p intermediate/takano
+	Rscript takano01_read.R $(DEBUG)	
 rawdata/data_cleaned.csv:
 	mkdir -p rawdata
 	Rscript -e "tmmv.osf_download('ecmt6')"

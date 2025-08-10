@@ -77,7 +77,7 @@ data_nlp_sum <- bind_rows(data |>
 ## print(docDF(data.frame(text = "自然は偉大でかなわないと思いました。"), "text", type = 1, pos = NULL, minFreq = 1, Genkei = 0))
 
 process_text <- function(data_nlp_sum, lemmatize = TRUE) {
-    stfu_docDF <- purrr::quietly(docDF)
+    stfu_docDF <- purrr::quietly(RMeCab::docDF)
     terms_df <- stfu_docDF(
         data_nlp_sum, "ins_1" , type = 1,
         pos = NULL, minFreq = 1,

@@ -2,30 +2,24 @@ library(here)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(furrr)
-
-tmmv.colors <- list(
-    lightblue = "#1E8CC8",
-    berrypurple = "#642878",
-    orange = "#F08741"
-)
+library(purrr)
 
 # Restore meta data
 settings <- tmmv.get_settings()
-names(settings) <- unlist(lapply(settings, rlang::hash))
+names(settings) <- map_chr(settings, rlang::hash)
 
-dfm_filenames <- unique(unlist(lapply(settings, \(x) rlang::hash(x[1:3]))))
 
-dfms <- sapply(
-    dfm_filenames,
-    \(x) {
-        dfm_filename <- paste0(x, ".RDS")
-        dfm <- readRDS(here("intermediate", "jankin", dfm_filename))
-        return(rownames(dfm))
-    },
-    simplify = FALSE
-)
+dfm_filenames <- unique(map_chr(settings, \(x) rlang::hash(x[1:3])))
 
+dfms <- dfm_filenames |>
+    set_names() |>
+    map(
+        \(x) {
+            dfm_filename <- paste0(x, ".RDS")
+            dfm <- readRDS(here("intermediate", "jankin", dfm_filename))
+            return(rownames(dfm))
+        }
+    )
 
 multiverse <- readRDS(here(
     "intermediate",
@@ -50,7 +44,7 @@ reformat_theta_matrix <- function(x, setting_hash) {
     return(x)
 }
 
-future::plan(future::multisession, workers = 8)
+future::plan(future::multisession, workers = getOption("tmmv.cores", 1))
 
 multiverse <- furrr::future_map2(
     multiverse,
@@ -105,7 +99,7 @@ df_agg$Topic <- factor(
 
 
 settings_df <- bind_rows(
-    sapply(settings, as.data.frame, simplify = FALSE),
+    map(settings, as.data.frame, simplify = FALSE),
     .id = "setting_hash"
 )
 
@@ -127,6 +121,16 @@ jankin_settings <- list(
 stopifnot(rlang::hash(jankin_settings) %in% names(settings))
 
 # Spaghetti Plots - OR: Jankin VS The Multiverse
+# Caption: 
+
+# Mean topic proportions aggregated across all documents within each year, 
+# estimated from keyword-seeded topic models under 216 different settings (grey lines). 
+# Each panel shows one topic, with variation across settings. 
+# The blue line highlights estimates from the original configuration by Jankin et al.
+
+year_breaks <- scale_x_continuous(breaks = c(1946, 1960, 1980, 2000, 2022))
+theme_settings <- theme(plot.background = element_rect("white"), legend.position = "bottom")
+
 
 p_spaghetti_full <- df_agg |>
     ggplot(aes(x = year, y = Proportion, group = setting_hash)) +
@@ -134,24 +138,24 @@ p_spaghetti_full <- df_agg |>
     geom_line(
         data = df_agg[df_agg$setting_hash == rlang::hash(jankin_settings), ],
         color = tmmv.colors$lightblue,
-        linewidth = 2,
+        linewidth = 1,
     ) +
     theme_minimal() +
-    theme(plot.background = element_rect("white")) +
-    facet_wrap(~Topic, ncol = 3, axis = "all_y")
+    theme_settings +
+    year_breaks +
+    facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 ggsave(
-    "plots/jankins_spaghetti_full.png",
+    here("plots", "jankins_spaghetti_full.png"),
     plot = p_spaghetti_full,
     width = 3000,
     height = 4500,
     units = "px"
 )
 
+# Focus on same examples as Jankin et al
 # Climate Change: SDG 13
-# In contrast, there is little engagement with climate change (SDG-13)
-# until the 1990s, before rising sharply in the 2000s to become the topic with one of the highest distributions in countries’ UNGD statements.
-# peace and inclusive societies (SDG-16)
+# inclusive societies: SDG 16
 
 p_spaghetti_sdg13_16 <- df_agg |>
     filter(Topic %in% c("SDG13", "SDG16")) |>
@@ -168,14 +172,15 @@ p_spaghetti_sdg13_16 <- df_agg |>
                 df_agg$setting_hash == rlang::hash(jankin_settings),
         ],
         color = tmmv.colors$lightblue,
-        linewidth = 2
+        linewidth = 1
     ) +
     theme_minimal() +
-    theme(plot.background = element_rect("white")) +
+    theme_settings +
+    year_breaks +
     facet_wrap(~Topic)
 
 ggsave(
-    "plots/jankins_spaghetti_sdg13_16.png",
+    here("plots", "jankins_spaghetti_sdg13_16.png"),
     plot = p_spaghetti_sdg13_16,
     width = 3000,
     height = 1500,
@@ -183,6 +188,14 @@ ggsave(
 )
 
 # Create a mix of ribbon plot and a box plot
+# Caption:
+# Median yearly topic proportions across all settings (solid line), 
+# aggregated over documents within each year. 
+# Shaded ribbons show the interquartile range (first to third quartile) of proportions, 
+# while dots represent outlier settings beyond 1.5×IQR. 
+# This visualization provides a time-series analogue to a boxplot, 
+# illustrating how topic prevalence estimates vary across the multiverse of model configurations.
+# The coloured variations show the impact of changing the K-setting and of the model family
 
 df_box <- df_agg |>
     group_by(year, Topic) |>
@@ -193,6 +206,7 @@ df_box <- df_agg |>
     )
 
 df_box_outliers <- df_agg |>
+    group_by(year, Topic) |>
     mutate(
         outlier = if_else(
             Proportion >
@@ -208,7 +222,7 @@ df_box_outliers <- df_agg |>
     filter(outlier == TRUE) |>
     select(-outlier)
 
-p_ribbon_boxplot <- df_box |>
+p_ribbon <- df_box |>
     ggplot(aes(x = year, y = median)) +
     geom_ribbon(
         aes(ymin = first_quartile, ymax = third_quartile),
@@ -222,13 +236,14 @@ p_ribbon_boxplot <- df_box |>
     ) +
     geom_line() +
     theme_minimal() +
-    theme(plot.background = element_rect("white")) +
-    facet_wrap(~Topic, ncol = 3)
-
+    theme_settings +
+    year_breaks +
+    ylab("Proportion") +
+    facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 ggsave(
-    "plots/jankins_boxplots_full.png",
-    plot = p_ribbon_boxplot,
+    here("plots", "jankins_ribbon.png"),
+    plot = p_ribbon,
     width = 3500,
     height = 4000,
     units = "px"
@@ -263,18 +278,19 @@ p_ribbon_models <- df_median_models |>
     ) +
     geom_line(aes(color = model)) +
     theme_minimal() +
-    theme(plot.background = element_rect("white"), legend.position = "bottom") +
+    theme_settings +
+    year_breaks + 
     scale_color_manual(
         values = c(tmmv.colors$berrypurple, tmmv.colors$orange)
     ) +
     scale_fill_manual(
         values = c(tmmv.colors$berrypurple, tmmv.colors$orange)
     ) +
-    facet_wrap(~Topic, ncol = 3)
+    facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 
 ggsave(
-    "plots/jankins_ribbon_models.png",
+    here("plots", "jankins_ribbon_models.png"),
     plot = p_ribbon_models,
     width = 3000,
     height = 4500,
@@ -308,12 +324,13 @@ p_ribbon_k <- df_median_k |>
     ) +
     geom_line(aes(color = K)) +
     theme_minimal() +
-    theme(plot.background = element_rect("white"), legend.position = "bottom") +
-    facet_wrap(~Topic, ncol = 3)
+    theme_settings +
+    year_breaks +
+    facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 
 ggsave(
-    "plots/jankins_ribbon_k.png",
+    here("plots", "jankins_ribbon_k.png"),
     plot = p_ribbon_k,
     width = 3000,
     height = 4500,

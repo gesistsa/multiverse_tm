@@ -190,3 +190,10 @@ tmmv.find_anchor <- function(anchor_theta, theta) {
                         FUN.VALUE = numeric(1))
     return(which.max(cor_coefs))
 }
+
+
+tmmv.colors <- list(
+    lightblue = "#1E8CC8",
+    berrypurple = "#642878",
+    orange = "#F08741"
+)

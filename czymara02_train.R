@@ -46,7 +46,7 @@ train_model <- function(setting, args, .fix_seed = NULL, .return_output = FALSE)
     output$random_seed <- current$random_seed
     output$setting <- setting
 
-    ## STM drops rows slightly, we do it here explicitly
+    ## STM drops rows silently, we do it here explicitly
     rowsum_priv <- apply(current_dfm, 1, sum)
     trimmed_dfm <- current_dfm[rowsum_priv != 0, ]
 

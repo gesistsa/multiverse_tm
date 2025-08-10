@@ -22,8 +22,7 @@ library(quanteda)
 library(purrr)
 
 pilotdata <- read.csv(here("rawdata", "data_pilot_cleaned.csv"))
-pilotdata <- pilotdata |> 
-    dplyr::mutate (ID = rownames(.)) |> 
+pilotdata <- dplyr::mutate (pilotdata, ID = rownames(pilotdata)) |> 
     dplyr::select(ID, ins_1:age, -AWE.S_c) |> 
     dplyr::mutate_at (vars(starts_with("AWE")), as.numeric) |> 
     dplyr::mutate (time = (AWES_1+AWES_2+AWES_3+AWES_4+AWES_5)/5,
@@ -37,8 +36,7 @@ pilotdata <- pilotdata |>
                    age = as.numeric(age))
 
 data <- read.csv(here("rawdata", "data_cleaned.csv"))
-data <- data |> 
-    dplyr::mutate (ID = rownames(.)) |> 
+data <- dplyr::mutate (data, ID = rownames(data)) |> 
     dplyr::select(ID, DPES_1:age, -AWES_c) |> 
     dplyr::mutate_at (vars(starts_with("AWE")), as.numeric) |> 
     dplyr::mutate_at (vars(starts_with("DPES")), as.numeric) |> 

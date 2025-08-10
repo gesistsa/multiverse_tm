@@ -1,9 +1,10 @@
-all: chan jankin czymara curini
+all: chan jankin czymara curini takano
 
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
+takano: intermediate/takano/runs/1
 
 intermediate/takano/runs/1: takano_dfms
 	Rscript takano02_train.R 1

@@ -1,10 +1,27 @@
-all: chan jankin czymara curini
+all: chan jankin czymara curini tvinnereim
 
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
+tvinnereim: intermediate/tvinnereim/runs/1
 
+results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
+	mkdir -p results/aggregated/tvinnereim
+	Rscript tvinnereim03_combine.R 1
+intermediate/tvinnereim/runs/1: tvinnereim_dfms
+	Rscript tvinnereim02_train.R 1
+tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
+	mkdir -p intermediate/tvinnereim
+	Rscript tvinnereim01_read.R 1
+rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
+	mkdir -p rawdata
+	curl -L "https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe" -o rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe
+	echo "0ef59252b89073c1980177d72304929e  rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe" | md5sum -c
+rawdata/ncp-stm-data.csv:
+	mkdir -p rawdata
+	curl -L "https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28689/KO9T0Z" -o rawdata/ncp-stm-data.csv
+	echo "6072f1004cc368c476f7de3c28021d6d  rawdata/ncp-stm-data.csv" | md5sum -c
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
 	Rscript curini03_regression.R 1

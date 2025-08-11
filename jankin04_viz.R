@@ -17,7 +17,7 @@ dfms <- dfm_filenames |>
         \(x) {
             dfm_filename <- paste0(x, ".RDS")
             dfm <- readRDS(here("intermediate", "jankin", dfm_filename))
-            return(rownames(dfm))
+            return(quanteda::docvars(dfm, "Year"))
         }
     )
 
@@ -36,10 +36,10 @@ reformat_theta_matrix <- function(x, setting_hash) {
     colnames(x) <- gsub("Other_", "other", colnames(x))
 
     current_setting <- settings[[setting_hash]]
-    x$doc_id <- dfms[[rlang::hash(current_setting[1:3])]]
+    x$year <- dfms[[rlang::hash(current_setting[1:3])]]
     rownames(x) <- NULL
-    if (any(is.na(x$doc_id))) {
-        stop("NA in doc_id!")
+    if (any(is.na(x$year))) {
+        stop("NA in year!")
     }
     return(x)
 }
@@ -54,11 +54,6 @@ multiverse <- furrr::future_map2(
 )
 
 df <- bind_rows(multiverse, .id = "setting_hash")
-
-df$year <- as.integer(stringr::str_split_fixed(df$doc_id, "_", 2)[, 2])
-
-stopifnot(!any(is.na(df$year)))
-
 
 # this step is performed by Jankins as well
 # get the mean topic proportions across all documents
@@ -134,7 +129,7 @@ theme_settings <- theme(plot.background = element_rect("white"), legend.position
 
 p_spaghetti_full <- df_agg |>
     ggplot(aes(x = year, y = Proportion, group = setting_hash)) +
-    geom_line(alpha = 0.1) +
+    geom_line(alpha = 0.03) +
     geom_line(
         data = df_agg[df_agg$setting_hash == rlang::hash(jankin_settings), ],
         color = tmmv.colors$lightblue,
@@ -164,7 +159,7 @@ p_spaghetti_sdg13_16 <- df_agg |>
         y = Proportion,
         group = setting_hash,
     )) +
-    geom_line(alpha = 0.2) +
+    geom_line(alpha = 0.03) +
     geom_line(
         data = df_agg[
             df_agg$Topic %in%

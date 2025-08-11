@@ -208,3 +208,18 @@ tmmv.unify_theta <- function(mod, trimmed_dfm, current_dfm) {
     final_theta <- final_theta[match(rownames(current_dfm),rownames(final_theta)) ,]
     return(final_theta)
 }
+
+tmmv.colors <- list(
+    lightblue = "#1E8CC8",
+    berrypurple = "#642878",
+    orange = "#F08741"
+)
+
+tmmv.osf_download <- function(osf_handle, output_dir = "rawdata") {
+    outcome <- osfr::osf_retrieve_file(osf_handle) |>
+        osfr::osf_download(path = here::here(output_dir),
+                           conflicts = "skip",
+                           progress = TRUE)
+    stopifnot(file.exists(outcome$local_path[1]))
+    invisible(outcome)
+}

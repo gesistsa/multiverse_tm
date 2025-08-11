@@ -17,7 +17,7 @@ input <- iconv(readLines(here("rawdata", "ncp-stm-data.csv")),
 
 original_corpus <- corpus(input, text_field = "openanswer")
 
-norwegian_model <- udpipe_load_model(file = here::here("rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe"))
+norwegian_model <- udpipe_load_model(file = here::here("rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe"))
 
 parsed_content <- udpipe_annotate(norwegian_model, original_corpus)
 parsed_content_df <- as.data.frame(parsed_content)
@@ -69,8 +69,10 @@ rm(parsed_content_df_fixed, parsed_content_df, parsed_content)
 original_toks <- tokens(original_corpus, remove_punct = TRUE,
                         remove_numbers = TRUE, include_docvars = TRUE)
 
+## the lemmatizer left $ before puntuation. Need to remove it explicitly
 lemma_toks <- tokens(lemma_corpus, remove_punct = TRUE,
-                     remove_numbers = TRUE, include_docvars = TRUE)
+                     remove_numbers = TRUE, include_docvars = TRUE) |>
+    tokens_remove("$", valuetype = "fixed")
 
 ## Keep the original so-called "pre stemming" (very error prone, but we respect the original authors)
 

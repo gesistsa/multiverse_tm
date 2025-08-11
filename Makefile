@@ -14,10 +14,10 @@ intermediate/tvinnereim/runs/1: tvinnereim_dfms
 tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
 	mkdir -p intermediate/tvinnereim
 	Rscript tvinnereim01_read.R 1
-rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe:
+rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
 	mkdir -p rawdata
-	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe" -o rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe
-	echo "82b781c39ea701ff30b3ced7f3600da9  rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe" | md5sum -c
+	curl -L "https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe" -o rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe
+	echo "0ef59252b89073c1980177d72304929e  rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe" | md5sum -c
 rawdata/ncp-stm-data.csv:
 	mkdir -p rawdata
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28689/KO9T0Z" -o rawdata/ncp-stm-data.csv

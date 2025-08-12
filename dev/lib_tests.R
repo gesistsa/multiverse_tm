@@ -3,11 +3,11 @@ source(here::here("lib.R"))
 
 test_readtext_base <- function() {
     x <- quanteda::corpus(
-                       tmmv.read_text_base(here::here("tests/TXT"),
+                       tmmv.read_text_base(here::here("dev/TXT"),
                                            dvsep = "_", 
                                            docvarnames = c("Country", "Session", "Year")))
     
-    ungd_files <- readtext::readtext(here::here("tests/TXT"),
+    ungd_files <- readtext::readtext(here::here("dev/TXT"),
                                      docvarsfrom = "filenames",
                                      dvsep="_",
                                      docvarnames = c("Country", "Session", "Year"))
@@ -19,7 +19,7 @@ test_readtext_base <- function() {
 
 test_lemmatize_words <- function() {
     ungd_files <- readtext::readtext(
-                                here::here("tests/TXT"),
+                                here::here("dev/TXT"),
                                 dvsep = "_",
                                 docvarnames = c("Country", "Session", "Year")
                             )
@@ -171,7 +171,7 @@ testthat::test_that("tests", {
     test_get_settings()
     test_get_settings_filter()
     test_get_current()
-    if (dir.exists(here::here("tests/TXT"))) {
+    if (dir.exists(here::here("dev/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()
     }    

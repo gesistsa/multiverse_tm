@@ -156,6 +156,7 @@ Packages <- c(
     "furrr",
     "future",
     "ggplot2",
+    "grid",
     "haven",
     "here",
     "keyATM",
@@ -186,6 +187,14 @@ pak::pkg_install(packages)
 # Options
 
 There are options that one can customize; see `.Rprofile`.
+
+# License
+
+All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
+2025 `multiverse_tm` authors), except
+
+- [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
+- [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
 
 # References
 

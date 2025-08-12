@@ -122,4 +122,11 @@ There are options that one can customize; see `.Rprofile`.
 
 [^1]: There are also additional dependencies for developers: `withr` and `quarto`
 
+# License
+
+All code is under a [European Union Public Licence 1.2](LICENSE.md) (© `r format(Sys.Date(), "%Y")` `multiverse_tm` authors), except
+
+* [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
+* [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
+
 # References

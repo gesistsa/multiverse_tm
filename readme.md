@@ -118,6 +118,12 @@ list of the selected studies and their required datafiles:
     [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)
+- Tvinnereim and Fløttum (2015): Data and code availble via
+  [OSF](https://doi.org/10.7910/DVN/28689)
+  - Text data:
+    [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
+  - Lemmatization model:
+    [`rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe)
 
 # Docker
 
@@ -146,6 +152,7 @@ Packages <- c(
     "cowplot",
     "dplyr",
     "furrr",
+    "future",
     "ggplot2",
     "haven",
     "here",
@@ -155,6 +162,7 @@ Packages <- c(
     "osfr",
     "purrr",
     "quanteda",
+    "readr",
     "renv",
     "rlang",
     "rmarkdown",
@@ -225,6 +233,15 @@ Takano, Ryota, Akiko Matsuo, and Kazuaki Kawano. 2023. “Development of a
 Japanese Version of the Awe Experience Scale (AWE-s): A Structural Topic
 Modeling Approach.” *F1000Research* 12: 515.
 <https://doi.org/10.12688/f1000research.134275.2>.
+
+</div>
+
+<div id="ref-tvinnereim:2015:E" class="csl-entry">
+
+Tvinnereim, Endre, and Kjersti Fløttum. 2015. “Explaining Topic
+Prevalence in Answers to Open-Ended Survey Questions about Climate
+Change.” *Nature Climate Change* 5 (8): 744–47.
+<https://doi.org/10.1038/nclimate2663>.
 
 </div>
 

@@ -109,6 +109,7 @@ Major dependencies are listed below [^1]:
 
 ```{r, echo = FALSE, results = "asis"}
 rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
+rpkgs[rpkgs == "RMeCab"] <- "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092"
 cat(paste0("```r\nPackages <- c(\n",
            paste(paste0("    \"", rpkgs, "\""),
                  collapse = ",\n"), "\n)\n\npak::pkg_install(packages)\n```\n"))

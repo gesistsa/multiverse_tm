@@ -242,6 +242,30 @@
       "NeedsCompilation": "no",
       "Repository": "CRAN"
     },
+    "RMeCab": {
+      "Package": "RMeCab",
+      "Version": "1.15",
+      "Source": "GitHub",
+      "Type": "Package",
+      "Title": "interface to MeCab",
+      "Date": "2025-05-10 PM 15:00",
+      "Author": "Motohiro Ishida[aut, cre], Taku Kudo [aut]",
+      "Maintainer": "Motohiro Ishida <ishida.motohiro@gmail.com>",
+      "Description": "parsing Japanese texts with mecab-0.996 / R-4.5.0",
+      "License": "GPL | LGPL | BSD",
+      "Depends": [
+        "R (>= 4.5.0)"
+      ],
+      "SystemRequirements": "MeCab 0.996 64bit UTF-8 GNU make",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "RMeCab",
+      "RemoteUsername": "IshidaMotohiro",
+      "RemotePkgRef": "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
+      "RemoteRef": "2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
+      "RemoteSha": "2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
+      "NeedsCompilation": "yes"
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.1.0",

@@ -1,11 +1,28 @@
-all: chan jankin czymara curini tvinnereim
+all: chan jankin czymara curini tvinnereim takano
 
 chan: intermediate/chan/runs/1
 jankin: intermediate/jankin/runs/1
 czymara: intermediate/czymara/runs/1
 curini: intermediate/curini/runs/1
 tvinnereim: intermediate/tvinnereim/runs/1
+takano: intermediate/takano/runs/1
 
+results/aggregated/takano/1.csv: intermediate/takano/runs/1
+	mkdir -p results/aggregated/takano
+	Rscript takano03_combine.R 1
+intermediate/takano/runs/1: takano_dfms
+	Rscript takano02_train.R 1
+takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv
+	mkdir -p intermediate/takano
+	Rscript takano01_read.R $(DEBUG)	
+rawdata/data_cleaned.csv:
+	mkdir -p rawdata
+	Rscript -e "tmmv.osf_download('ecmt6')"
+	echo "a3caa1f91acb327b2d026601ff2a8a0c  rawdata/data_cleaned.csv" | md5sum -c
+rawdata/data_pilot_cleaned.csv:
+	mkdir -p rawdata
+	Rscript -e "tmmv.osf_download('k6h39')"
+	echo "4a0dfd051130d096f7fd07315a38bfc4  rawdata/data_pilot_cleaned.csv" | md5sum -c
 results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
 	mkdir -p results/aggregated/tvinnereim
 	Rscript tvinnereim03_combine.R 1

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## To cater for default air installation
+export PATH="$HOME/.local/bin:$PATH"
+
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=AM)
 QUARTO_AVAILBLE=$(command -v quarto)
 AIR_AVAILABLE=$(command -v air)

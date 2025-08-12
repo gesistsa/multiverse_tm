@@ -7,14 +7,15 @@ curini: intermediate/curini/runs/1
 tvinnereim: intermediate/tvinnereim/runs/1
 takano: intermediate/takano/runs/1
 
+## takano
 results/aggregated/takano/1.csv: intermediate/takano/runs/1
 	mkdir -p results/aggregated/takano
-	Rscript takano03_combine.R 1
+	Rscript takano/03_combine.R 1
 intermediate/takano/runs/1: takano_dfms
-	Rscript takano02_train.R 1
+	Rscript takano/02_train.R 1
 takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv
 	mkdir -p intermediate/takano
-	Rscript takano01_read.R $(DEBUG)	
+	Rscript takano/01_read.R $(DEBUG)	
 rawdata/data_cleaned.csv:
 	mkdir -p rawdata
 	Rscript -e "tmmv.osf_download('ecmt6')"
@@ -23,14 +24,16 @@ rawdata/data_pilot_cleaned.csv:
 	mkdir -p rawdata
 	Rscript -e "tmmv.osf_download('k6h39')"
 	echo "4a0dfd051130d096f7fd07315a38bfc4  rawdata/data_pilot_cleaned.csv" | md5sum -c
+
+# tvinnereim
 results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
 	mkdir -p results/aggregated/tvinnereim
-	Rscript tvinnereim03_combine.R 1
+	Rscript tvinnereim/03_combine.R 1
 intermediate/tvinnereim/runs/1: tvinnereim_dfms
-	Rscript tvinnereim02_train.R 1
+	Rscript tvinnereim/02_train.R 1
 tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
 	mkdir -p intermediate/tvinnereim
-	Rscript tvinnereim01_read.R 1
+	Rscript tvinnereim/01_read.R 1
 rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
 	mkdir -p rawdata
 	curl -L "https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe" -o rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe
@@ -39,14 +42,16 @@ rawdata/ncp-stm-data.csv:
 	mkdir -p rawdata
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28689/KO9T0Z" -o rawdata/ncp-stm-data.csv
 	echo "6072f1004cc368c476f7de3c28021d6d  rawdata/ncp-stm-data.csv" | md5sum -c
+
+# curini
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
-	Rscript curini03_regression.R 1
+	Rscript curini/03_regression.R 1
 intermediate/curini/runs/1: curini_dfms
-	Rscript curini02_train.R 1	
+	Rscript curini/02_train.R 1	
 curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab
 	mkdir -p intermediate/curini
-	Rscript curini01_read.R $(DEBUG)
+	Rscript curini/01_read.R $(DEBUG)
 rawdata/italian-isdt-ud-2.5-191206.udpipe:
 	mkdir -p rawdata
 	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe" -o rawdata/italian-isdt-ud-2.5-191206.udpipe
@@ -58,17 +63,16 @@ rawdata/meta_table.tab:
 rawdata/zip_texts.rar:
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/4291434" -o rawdata/zip_texts.rar
 	echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
+
+# czymara
 results/aggregated/czymara/1.csv: intermediate/czymara/1
 	mkdir -p results/aggregated/czymara
-	Rscript czymara03_combine.R 1
-results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
-	mkdir -p results/aggregated/chan
-	Rscript chan05_combine.R 1
+	Rscript czymara/03_combine.R 1
 intermediate/czymara/runs/1: czymara_dfms
-	Rscript czymara02_train.R 1
+	Rscript czymara/02_train.R 1
 czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe
 	mkdir -p intermediate/czymara
-	Rscript czymara01_read.R $(DEBUG)
+	Rscript czymara/01_read.R $(DEBUG)
 rawdata/stopwords-de.txt:
 	mkdir -p rawdata
 	curl -L "https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt" -o rawdata/stopwords-de.txt
@@ -77,27 +81,34 @@ rawdata/german-gsd-ud-2.5-191206.udpipe:
 	mkdir -p rawdata
 	curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe" -o rawdata/german-gsd-ud-2.5-191206.udpipe
 	echo "cf7058257ada6f24ecb0a241f10cc918  rawdata/german-gsd-ud-2.5-191206.udpipe" | md5sum -c
+
+# chan
+results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
+	mkdir -p results/aggregated/chan
+	Rscript chan/05_combine.R 1
 intermediate/chan/runs/1/brms: intermediate/chan/runs/1/theta/theta
-	Rscript chan04_brms.R 1
+	Rscript chan/04_brms.R 1
 intermediate/chan/runs/1/theta/theta: intermediate/chan/runs/1
-	Rscript chan03_theta.R 1
+	Rscript chan/03_theta.R 1
 intermediate/chan/runs/1: chan_dfms
-	Rscript chan02_train.R 1
+	Rscript chan/02_train.R 1
 chan_dfms: rawdata/final_data.RDS
 	mkdir -p intermediate/chan
-	Rscript chan01_read.R $(DEBUG)
+	Rscript chan/01_read.R $(DEBUG)
 rawdata/final_data.RDS:
 	mkdir -p rawdata
 	Rscript -e "tmmv.osf_download('3hazf')"
 	echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
+
+# jankin
 intermediata/jankin/runs/1/theta: intermediate/jankin/runs/1
 	mkdir -p intermediate/jankin/runs/1/theta
-	Rscript jankin03_combine.R 1
+	Rscript jankin/03_combine.R 1
 intermediate/jankin/runs/1: jankin_dfms
-	Rscript jankin02_train.R 1
+	Rscript jankin/02_train.R 1
 jankin_dfms: rawdata/jankin
 	mkdir -p intermediate/jankin
-	Rscript jankin01_read.R $(DEBUG)
+	Rscript jankin/01_read.R $(DEBUG)
 rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
 	mkdir -p rawdata/jankin
 	tar -xzf rawdata/UNGDC_1946-2024.tar.gz -C rawdata/jankin
@@ -107,12 +118,13 @@ rawdata/UNGDC_1946-2024.tar.gz:
 	curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
 	echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
 
+# DEBUG
 debug: DEBUG = --debug
 
 debug: chan_dfms jankin_dfms czymara_dfms
-	Rscript jankin02_train.R ${DEBUG}
-	Rscript chan02_train.R ${DEBUG}
-	Rscript czymara02_train.R ${DEBUG}
+	Rscript jankin/02_train.R ${DEBUG}
+	Rscript chan/02_train.R ${DEBUG}
+	Rscript czymara/02_train.R ${DEBUG}
 
 # Developers only
 test:

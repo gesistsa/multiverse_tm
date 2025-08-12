@@ -118,12 +118,14 @@ list of the selected studies and their required datafiles:
     [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)
-- Tvinnereim and Fløttum (2015): Data and code availble via
-  [OSF](https://doi.org/10.7910/DVN/28689)
+  - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
+  - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)
+- Tvinnereim and Fløttum (2015): Data and code availble via [Harvard
+  Dataverse](https://doi.org/10.7910/DVN/28689)
   - Text data:
     [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
   - Lemmatization model:
-    [`rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/norwegian-bokmaal-ud-2.5-191206.udpipe)
+    [`rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe`](https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe)
 
 # Docker
 
@@ -194,9 +196,8 @@ entry-spacing="0">
 
 Chan, Chung-hong, Jing Zeng, and Mike S. Schäfer. 2022. “Whose Research
 Benefits More from Twitter? On Twitter-Worthiness of Communication
-Research and Its Role in Reinforcing Disparities of the Field.” Edited
-by Pablo Dorta-González. *PLOS ONE* 17 (12): e0278840.
-<https://doi.org/10.1371/journal.pone.0278840>.
+Research and Its Role in Reinforcing Disparities of the Field.” *PLOS
+ONE* 17 (12): e0278840. <https://doi.org/10.1371/journal.pone.0278840>.
 
 </div>
 

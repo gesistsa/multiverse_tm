@@ -9,15 +9,20 @@ library(dplyr)
 
 ## the data is corrupted due to file encoding issues
 
-input <- iconv(readLines(here("rawdata", "ncp-stm-data.csv")),
-               from = "latin1", to = "UTF-8") |>
+input <- iconv(
+    readLines(here("rawdata", "ncp-stm-data.csv")),
+    from = "latin1",
+    to = "UTF-8"
+) |>
     paste(collapse = "\n") |>
     readr::read_delim(delim = ";", show_col_types = FALSE) |>
     na.omit()
 
 original_corpus <- corpus(input, text_field = "openanswer")
 
-norwegian_model <- udpipe_load_model(file = here::here("rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe"))
+norwegian_model <- udpipe_load_model(
+    file = here::here("rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe")
+)
 
 parsed_content <- udpipe_annotate(norwegian_model, original_corpus)
 parsed_content_df <- as.data.frame(parsed_content)
@@ -66,18 +71,26 @@ rm(parsed_content_df_fixed, parsed_content_df, parsed_content)
 
 ## quanteda::stopwords("norwegian") is the same as tm::stopwords("norwegian")
 
-original_toks <- tokens(original_corpus, remove_punct = TRUE,
-                        remove_numbers = TRUE, include_docvars = TRUE)
+original_toks <- tokens(
+    original_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+)
 
 ## the lemmatizer left $ before puntuation. Need to remove it explicitly
-lemma_toks <- tokens(lemma_corpus, remove_punct = TRUE,
-                     remove_numbers = TRUE, include_docvars = TRUE) |>
+lemma_toks <- tokens(
+    lemma_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+) |>
     tokens_remove("$", valuetype = "fixed")
 
 ## Keep the original so-called "pre stemming" (very error prone, but we respect the original authors)
 
 do_pre_stemming <- function(oa) {
-    for(i in 1:length(oa)) {
+    for (i in 1:length(oa)) {
         oa[[i]] <- gsub("frem", "fram", oa[[i]])
         oa[[i]] <- gsub("forurensing", "forurens", oa[[i]])
         oa[[i]] <- gsub("forurensning", "forurens", oa[[i]])
@@ -153,13 +166,12 @@ do_pre_stemming <- function(oa) {
 }
 
 prestemmed_toks <- do_pre_stemming(input$openanswer) |>
-    tokens(remove_punct = TRUE,
-           remove_numbers = TRUE)
+    tokens(remove_punct = TRUE, remove_numbers = TRUE)
 
 docvars(prestemmed_toks) <- docvars(original_toks)
 docnames(prestemmed_toks) <- docnames(original_toks)
 
-current_tokens_list<- list()
+current_tokens_list <- list()
 current_tokens_list[["normal"]] <- original_toks
 current_tokens_list[["lemmatized"]] <- lemma_toks
 current_tokens_list[["prestemmed"]] <- prestemmed_toks
@@ -172,21 +184,30 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     } else if (setting$token_normalization == "none") {
         current_tokens <- current_tokens_list[["normal"]]
     } else {
-        current_tokens <- current_tokens_list[["prestemmed"]]        
+        current_tokens <- current_tokens_list[["prestemmed"]]
     }
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
-            tokens_remove(stopwords("norwegian"),
-                          case_insensitive = TRUE, 
-                          padding = FALSE,
-                          verbose = verbose)
+            tokens_remove(
+                stopwords("norwegian"),
+                case_insensitive = TRUE,
+                padding = FALSE,
+                verbose = verbose
+            )
     }
     if (setting$token_normalization == "stemming") {
-        current_tokens <- tokens_wordstem(current_tokens, language = "norwegian")
+        current_tokens <- tokens_wordstem(
+            current_tokens,
+            language = "norwegian"
+        )
     }
     current_dfm <- dfm(current_tokens)
     if (setting$trimming) {
-        current_dfm <- dfm_trim(current_dfm, min_docfreq = 6, docfreq_type = "count") ## see note
+        current_dfm <- dfm_trim(
+            current_dfm,
+            min_docfreq = 6,
+            docfreq_type = "count"
+        ) ## see note
     }
     current_hash <- rlang::hash(setting)
     saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
@@ -194,11 +215,13 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     invisible(NULL)
 }
 
-purrr::walk(settings,
-            process_tokens,
-            current_tokens_list = current_tokens_list,
-            args = args,
-            .progress = !args$debug)
+purrr::walk(
+    settings,
+    process_tokens,
+    current_tokens_list = current_tokens_list,
+    args = args,
+    .progress = !args$debug
+)
 
 
 ## DEBUG_MODE: test
@@ -221,11 +244,21 @@ if (args$debug) {
             testthat::expect_true("konsekv" %in% features)
         }
         if (setting$stopword_removal) {
-            testthat::expect_false(all(purrr::map_lgl(stopwords("norwegian"), ~. %in% features)))
+            testthat::expect_false(all(purrr::map_lgl(
+                stopwords("norwegian"),
+                ~ . %in% features
+            )))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(stopwords("norwegian"), ~. %in% features)))
+            testthat::expect_true(any(purrr::map_lgl(
+                stopwords("norwegian"),
+                ~ . %in% features
+            )))
         }
-        docfreqs <- topfeatures(current_dfm, length(features), scheme = "docfreq")
+        docfreqs <- topfeatures(
+            current_dfm,
+            length(features),
+            scheme = "docfreq"
+        )
         if (setting$trimming) {
             testthat::expect_true(tail(docfreqs, 1) == 6)
         } else {

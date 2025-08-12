@@ -11,7 +11,7 @@ for (setting in settings) {
     mod_file <- file.path(args$output_dir, paste0(current_hash, ".RDS"))
     stopifnot(file.exists(mod_file))
     mod <- readRDS(mod_file)
-    theta[[current_hash]] <- mod$mod$theta[,1]
+    theta[[current_hash]] <- mod$mod$theta[, 1]
 }
 
 stopifnot(length(unique(purrr::map_int(theta, length))) == 1)

@@ -116,15 +116,18 @@ jankin_settings <- list(
 stopifnot(rlang::hash(jankin_settings) %in% names(settings))
 
 # Spaghetti Plots - OR: Jankin VS The Multiverse
-# Caption: 
+# Caption:
 
-# Mean topic proportions aggregated across all documents within each year, 
-# estimated from keyword-seeded topic models under 216 different settings (grey lines). 
-# Each panel shows one topic, with variation across settings. 
+# Mean topic proportions aggregated across all documents within each year,
+# estimated from keyword-seeded topic models under 216 different settings (grey lines).
+# Each panel shows one topic, with variation across settings.
 # The blue line highlights estimates from the original configuration by Jankin et al.
 
 year_breaks <- scale_x_continuous(breaks = c(1946, 1960, 1980, 2000, 2022))
-theme_settings <- theme(plot.background = element_rect("white"), legend.position = "bottom")
+theme_settings <- theme(
+    plot.background = element_rect("white"),
+    legend.position = "bottom"
+)
 
 
 p_spaghetti_full <- df_agg |>
@@ -184,11 +187,11 @@ ggsave(
 
 # Create a mix of ribbon plot and a box plot
 # Caption:
-# Median yearly topic proportions across all settings (solid line), 
-# aggregated over documents within each year. 
-# Shaded ribbons show the interquartile range (first to third quartile) of proportions, 
-# while dots represent outlier settings beyond 1.5×IQR. 
-# This visualization provides a time-series analogue to a boxplot, 
+# Median yearly topic proportions across all settings (solid line),
+# aggregated over documents within each year.
+# Shaded ribbons show the interquartile range (first to third quartile) of proportions,
+# while dots represent outlier settings beyond 1.5×IQR.
+# This visualization provides a time-series analogue to a boxplot,
 # illustrating how topic prevalence estimates vary across the multiverse of model configurations.
 # The coloured variations show the impact of changing the K-setting and of the model family
 
@@ -274,7 +277,7 @@ p_ribbon_models <- df_median_models |>
     geom_line(aes(color = model)) +
     theme_minimal() +
     theme_settings +
-    year_breaks + 
+    year_breaks +
     scale_color_manual(
         values = c(tmmv.colors$berrypurple, tmmv.colors$orange)
     ) +

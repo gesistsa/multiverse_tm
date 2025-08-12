@@ -5,33 +5,36 @@ library(here)
 library(quanteda)
 library(udpipe)
 
-myText <- tmmv.read_text_base(here("rawdata/zip_texts.rar"),
-                              dvsep = "_", docvarnames = c("Party", "Mission"))
+myText <- tmmv.read_text_base(
+    here("rawdata/zip_texts.rar"),
+    dvsep = "_",
+    docvarnames = c("Party", "Mission")
+)
 
 myText$doc_id <- gsub(".txt", "", myText$doc_id)
 
 
-myText$text <- gsub("[\u0092]","'",myText$text)
-myText$text <- gsub("[\u2019]","'",myText$text)
-myText$text <- gsub("[\u00b4]","'",myText$text)
-myText$text <- gsub("[\u00d5]","'",myText$text)
-myText$text <- gsub("[\u017e]","'",myText$text)
-myText$text <- gsub("[\u017d]","'",myText$text)
-myText$text <- gsub("[\u02c6]","'",myText$text)
-myText$text <- gsub("[\u00ca]","'",myText$text)
-myText$text <- gsub("[\u02dc]","'",myText$text)
-myText$text <- gsub("[\u00c7]","'",myText$text)
-myText$text <- gsub("'"," ",myText$text)
+myText$text <- gsub("[\u0092]", "'", myText$text)
+myText$text <- gsub("[\u2019]", "'", myText$text)
+myText$text <- gsub("[\u00b4]", "'", myText$text)
+myText$text <- gsub("[\u00d5]", "'", myText$text)
+myText$text <- gsub("[\u017e]", "'", myText$text)
+myText$text <- gsub("[\u017d]", "'", myText$text)
+myText$text <- gsub("[\u02c6]", "'", myText$text)
+myText$text <- gsub("[\u00ca]", "'", myText$text)
+myText$text <- gsub("[\u02dc]", "'", myText$text)
+myText$text <- gsub("[\u00c7]", "'", myText$text)
+myText$text <- gsub("'", " ", myText$text)
 
-myText$text <- gsub("�no�","no",myText$text)
-myText$text <-  gsub("�no�","no",myText$text)
-myText$text <-  gsub("�No�","no",myText$text)
+myText$text <- gsub("�no�", "no", myText$text)
+myText$text <- gsub("�no�", "no", myText$text)
+myText$text <- gsub("�No�", "no", myText$text)
 
 
 meta.pr <- read.table(here("rawdata", "meta_table.tab"), header = TRUE)
 
-meta.pr$Name <- as.character(meta.pr$Name )
-meta.pr <- meta.pr[,-2]
+meta.pr$Name <- as.character(meta.pr$Name)
+meta.pr <- meta.pr[, -2]
 names(meta.pr)[4] <- "Mission_name"
 
 fit <- merge(myText, meta.pr, by.x = "doc_id", by.y = "Name")
@@ -39,12 +42,14 @@ fit <- merge(myText, meta.pr, by.x = "doc_id", by.y = "Name")
 colnames(fit)[colnames(fit) == "Left_right_CHES"] <- "LR"
 
 fit$Party <- as.factor(fit$Party)
-fit$Mission <-as.factor(fit$Mission)
+fit$Mission <- as.factor(fit$Mission)
 
 
 original_corpus <- corpus(fit)
 
-italian_model <- udpipe_load_model(file = here::here("rawdata/italian-isdt-ud-2.5-191206.udpipe"))
+italian_model <- udpipe_load_model(
+    file = here::here("rawdata/italian-isdt-ud-2.5-191206.udpipe")
+)
 
 parsed_content <- udpipe_annotate(italian_model, original_corpus)
 parsed_content_df <- as.data.frame(parsed_content)
@@ -59,24 +64,39 @@ library(dplyr)
 
 parsed_content_df_fixed <- parsed_content_df
 
-parsed_content_df_fixed[,c("lemma"), drop = FALSE] |>
+parsed_content_df_fixed[, c("lemma"), drop = FALSE] |>
     count(lemma, sort = TRUE) |>
     filter(stringr::str_detect(lemma, "\\|"))
 
 ## contractions
-parsed_content_df_fixed[is.na(parsed_content_df_fixed$lemma), c("token", "lemma")]
+parsed_content_df_fixed[
+    is.na(parsed_content_df_fixed$lemma),
+    c("token", "lemma")
+]
 
-parsed_content_df_fixed <- parsed_content_df_fixed[!is.na(parsed_content_df_fixed$lemma),]
+parsed_content_df_fixed <- parsed_content_df_fixed[
+    !is.na(parsed_content_df_fixed$lemma),
+]
 
-parsed_content_df_fixed$lemma[stringr::str_detect(parsed_content_df_fixed$lemma, "\\|")] <-
+parsed_content_df_fixed$lemma[stringr::str_detect(
+    parsed_content_df_fixed$lemma,
+    "\\|"
+)] <-
     purrr::map_chr(
-               parsed_content_df_fixed$lemma[
-                                           stringr::str_detect(
-                                                        parsed_content_df_fixed$lemma, "\\|")],
-               \(x) { strsplit(x, "\\|")[[1]][1]}
-           )
+        parsed_content_df_fixed$lemma[
+            stringr::str_detect(
+                parsed_content_df_fixed$lemma,
+                "\\|"
+            )
+        ],
+        \(x) {
+            strsplit(x, "\\|")[[1]][1]
+        }
+    )
 
-parsed_content_df_fixed[,c("lemma"), drop = FALSE] |> count(lemma, sort = TRUE) |> filter(stringr::str_detect(lemma, "\\|"))
+parsed_content_df_fixed[, c("lemma"), drop = FALSE] |>
+    count(lemma, sort = TRUE) |>
+    filter(stringr::str_detect(lemma, "\\|"))
 
 parsed_content_df_fixed |>
     group_by(doc_id) |>
@@ -101,25 +121,44 @@ for (i in sample(1:ndoc(original_corpus), 30)) {
 rm(parsed_content_df_fixed, parsed_content_df, parsed_content)
 
 ## original process is in dfm (pre quanteda 2.0)
-## 
+##
 
 ## myDfm <- dfm(corpus, remove = c(stopwords("italian"), "l", "d", "dell", "dall", "afganistan", "libano", "kosovo", "iraq", "libia", "albania")
 ## , tolower = TRUE, stem = TRUE, remove_punct = TRUE, remove_numbers=TRUE)
 
+original_toks <- tokens(
+    original_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+)
 
-original_toks <- tokens(original_corpus, remove_punct = TRUE,
-                        remove_numbers = TRUE, include_docvars = TRUE)
+lemma_toks <- tokens(
+    lemma_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+)
 
-lemma_toks <- tokens(lemma_corpus, remove_punct = TRUE,
-                     remove_numbers = TRUE, include_docvars = TRUE)
-
-current_tokens_list<- list()
+current_tokens_list <- list()
 current_tokens_list[["normal"]] <- original_toks
 current_tokens_list[["lemmatized"]] <- lemma_toks
 
 ## from the original code
 
-all_stopwords <- c(stopwords("italian"), "l", "d", "dell", "dall", "afganistan", "libano", "kosovo", "iraq", "libia", "albania")
+all_stopwords <- c(
+    stopwords("italian"),
+    "l",
+    "d",
+    "dell",
+    "dall",
+    "afganistan",
+    "libano",
+    "kosovo",
+    "iraq",
+    "libia",
+    "albania"
+)
 
 process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     ## print(setting)
@@ -131,10 +170,12 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     }
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
-            tokens_remove(all_stopwords,
-                          case_insensitive = TRUE, 
-                          padding = FALSE,
-                          verbose = verbose)
+            tokens_remove(
+                all_stopwords,
+                case_insensitive = TRUE,
+                padding = FALSE,
+                verbose = verbose
+            )
     }
     if (setting$token_normalization == "stemming") {
         current_tokens <- tokens_wordstem(current_tokens, language = "italian")
@@ -142,7 +183,12 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     current_dfm <- dfm(current_tokens)
     if (setting$trimming) {
         ## default trimming
-        current_dfm <- dfm_trim(current_dfm, max_docfreq = 0.5,  min_docfreq = 0.005, docfreq_type = "prop")
+        current_dfm <- dfm_trim(
+            current_dfm,
+            max_docfreq = 0.5,
+            min_docfreq = 0.005,
+            docfreq_type = "prop"
+        )
     }
     current_hash <- rlang::hash(setting)
     saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
@@ -150,12 +196,14 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
     invisible(NULL)
 }
 
-purrr::walk(settings,
-            process_tokens,
-            current_tokens_list = current_tokens_list,
-            all_stopwords = all_stopwords,
-            args = args,
-            .progress = !args$debug)
+purrr::walk(
+    settings,
+    process_tokens,
+    current_tokens_list = current_tokens_list,
+    all_stopwords = all_stopwords,
+    args = args,
+    .progress = !args$debug
+)
 
 ## DEBUG_MODE: test
 if (args$debug) {
@@ -180,15 +228,26 @@ if (args$debug) {
             testthat::expect_true("afghan" %in% features)
         }
         if (setting$stopword_removal) {
-            testthat::expect_false(all(purrr::map_lgl(all_stopwords, ~. %in% features)))
+            testthat::expect_false(all(purrr::map_lgl(
+                all_stopwords,
+                ~ . %in% features
+            )))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(all_stopwords, ~. %in% features)))
+            testthat::expect_true(any(purrr::map_lgl(
+                all_stopwords,
+                ~ . %in% features
+            )))
         }
 
         if (setting$trimming) {
-            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_true(
+                topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150
+            )
         } else {
-            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) > ndoc(lemma_corpus) / 2)
+            testthat::expect_true(
+                topfeatures(current_dfm, scheme = "docfreq", n = 1) >
+                    ndoc(lemma_corpus) / 2
+            )
         }
     }
 }

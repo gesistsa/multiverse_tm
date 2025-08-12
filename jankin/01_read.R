@@ -11,11 +11,13 @@ library(purrr)
 
 ## Modified from the original RMD file
 
-ungd_files <- tmmv.read_text_base(here("rawdata/jankin/TXT/"),
-                                  dvsep = "_",
-                                  docvarnames = c("Country", "Session", "Year"))
+ungd_files <- tmmv.read_text_base(
+    here("rawdata/jankin/TXT/"),
+    dvsep = "_",
+    docvarnames = c("Country", "Session", "Year")
+)
 
-ungd_files$doc_id <- str_replace(ungd_files$doc_id , ".txt", "") |>
+ungd_files$doc_id <- str_replace(ungd_files$doc_id, ".txt", "") |>
     str_replace("_\\d{2}", "")
 
 ungd_corpus <- corpus(ungd_files, text_field = "text")
@@ -27,13 +29,16 @@ if (args$debug) {
 }
 
 ## Removed the stopword removal
-ungd_tokens <- tokens(ungd_corpus, what = "word",
-                 remove_punct = TRUE,
-                 remove_symbols = TRUE,
-                 remove_numbers = TRUE,
-                 remove_url = TRUE,
-                 split_hyphens = FALSE,
-                 verbose = args$debug) |>
+ungd_tokens <- tokens(
+    ungd_corpus,
+    what = "word",
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_numbers = TRUE,
+    remove_url = TRUE,
+    split_hyphens = FALSE,
+    verbose = args$debug
+) |>
     tokens_tolower()
 
 process_tokens <- function(setting, current_tokens, args) {
@@ -41,33 +46,55 @@ process_tokens <- function(setting, current_tokens, args) {
     verbose <- args$debug
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
-            tokens_select(stopwords("english"), selection = "remove",
-                          padding = FALSE, verbose = verbose)
+            tokens_select(
+                stopwords("english"),
+                selection = "remove",
+                padding = FALSE,
+                verbose = verbose
+            )
     }
     ## This tokens_select is kind of unreasonable, but let's keep it
     current_tokens <- current_tokens |>
-        tokens_select(c("[\\d-]", "[[:punct:]]", "^.{1}$", "us",
-                        "united_nations", "united", "nations"),
-                      selection = "remove",
-                      valuetype="regex",
-                      min_nchar = 2L,
-                      verbose = verbose)
+        tokens_select(
+            c(
+                "[\\d-]",
+                "[[:punct:]]",
+                "^.{1}$",
+                "us",
+                "united_nations",
+                "united",
+                "nations"
+            ),
+            selection = "remove",
+            valuetype = "regex",
+            min_nchar = 2L,
+            verbose = verbose
+        )
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
         lemma_types <- tmmv.lemmatize_words(ori_types)
-        current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
-                                      valuetype = "fixed")
+        current_tokens <- tokens_replace(
+            current_tokens,
+            ori_types,
+            lemma_types,
+            valuetype = "fixed"
+        )
     }
     if (setting$token_normalization == "stemming") {
         current_tokens <- tokens_wordstem(current_tokens)
     }
     temp_dfm <- current_tokens |>
         tokens_select(min_nchar = 2) |>
-        tokens_ngrams(n = 1:2) |> dfm()
+        tokens_ngrams(n = 1:2) |>
+        dfm()
     if (setting$trimming) {
         temp_dfm <- temp_dfm |>
-            dfm_trim(min_docfreq = 0.005, max_docfreq = 0.5,
-                     docfreq_type = "prop", verbose = verbose)
+            dfm_trim(
+                min_docfreq = 0.005,
+                max_docfreq = 0.5,
+                docfreq_type = "prop",
+                verbose = verbose
+            )
     }
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
@@ -78,11 +105,13 @@ process_tokens <- function(setting, current_tokens, args) {
 }
 
 ## Stupid but we only do it once
-purrr::walk(settings,
-            process_tokens,
-            current_tokens = ungd_tokens,
-            args = args,
-            .progress = !args$debug)
+purrr::walk(
+    settings,
+    process_tokens,
+    current_tokens = ungd_tokens,
+    args = args,
+    .progress = !args$debug
+)
 
 ## DEBUG_MODE: test
 if (args$debug) {
@@ -105,14 +134,24 @@ if (args$debug) {
             testthat::expect_true("debat" %in% features)
         }
         if (setting$stopword_removal) {
-            testthat::expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
+            testthat::expect_false(all(purrr::map_lgl(
+                stopwords("en"),
+                ~ . %in% features
+            )))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))
+            testthat::expect_true(any(purrr::map_lgl(
+                stopwords("en"),
+                ~ . %in% features
+            )))
         }
         if (setting$trimming) {
-            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_true(
+                topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150
+            )
         } else {
-            testthat::expect_false(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_false(
+                topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150
+            )
         }
     }
 }

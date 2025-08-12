@@ -12,11 +12,13 @@ library(purrr)
 
 final_data <- readRDS(here("rawdata/final_data.RDS"))
 
-current_tokens <- corpus(final_data$AB) |> 
-    tokens(remove_punct = TRUE,
-           remove_numbers = TRUE,
-           remove_symbols = TRUE,
-           split_hyphens = TRUE) |>
+current_tokens <- corpus(final_data$AB) |>
+    tokens(
+        remove_punct = TRUE,
+        remove_numbers = TRUE,
+        remove_symbols = TRUE,
+        split_hyphens = TRUE
+    ) |>
     tokens_tolower()
 
 if (args$debug) {
@@ -30,14 +32,22 @@ process_tokens <- function(setting, current_tokens, args) {
     verbose <- args$debug
     if (setting$stopword_removal) {
         current_tokens <- current_tokens |>
-            tokens_select(stopwords("english"), selection = "remove",
-                          padding = FALSE, verbose = verbose)
+            tokens_select(
+                stopwords("english"),
+                selection = "remove",
+                padding = FALSE,
+                verbose = verbose
+            )
     }
     if (setting$token_normalization == "lemmatization") {
         ori_types <- attr(current_tokens, "types")
         lemma_types <- tmmv.lemmatize_words(ori_types)
-        current_tokens <- tokens_replace(current_tokens, ori_types, lemma_types,
-                                         valuetype = "fixed")
+        current_tokens <- tokens_replace(
+            current_tokens,
+            ori_types,
+            lemma_types,
+            valuetype = "fixed"
+        )
     }
     if (setting$token_normalization == "stemming") {
         current_tokens <- tokens_wordstem(current_tokens)
@@ -49,7 +59,11 @@ process_tokens <- function(setting, current_tokens, args) {
         # i.e. the first one is a fixed number; the second is a proportion
         max_docfreq <- floor(ndoc(current_tokens) * 0.5)
         current_dfm <- current_dfm |>
-            dfm_trim(min_docfreq = 3, max_docfreq = max_docfreq, docfreq_type = "count")
+            dfm_trim(
+                min_docfreq = 3,
+                max_docfreq = max_docfreq,
+                docfreq_type = "count"
+            )
     }
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
@@ -59,11 +73,13 @@ process_tokens <- function(setting, current_tokens, args) {
     invisible(NULL)
 }
 
-purrr::walk(settings,
-            process_tokens,
-            current_tokens = current_tokens,
-            args = args,
-            .progress = !args$debug)
+purrr::walk(
+    settings,
+    process_tokens,
+    current_tokens = current_tokens,
+    args = args,
+    .progress = !args$debug
+)
 
 ## DEBUG_MODE: test
 if (args$debug) {
@@ -87,14 +103,24 @@ if (args$debug) {
             testthat::expect_true("influenc" %in% features)
         }
         if (setting$stopword_removal) {
-            testthat::expect_false(all(purrr::map_lgl(stopwords("en"), ~. %in% features)))
+            testthat::expect_false(all(purrr::map_lgl(
+                stopwords("en"),
+                ~ . %in% features
+            )))
         } else {
-            testthat::expect_true(any(purrr::map_lgl(stopwords("en"), ~. %in% features)))
+            testthat::expect_true(any(purrr::map_lgl(
+                stopwords("en"),
+                ~ . %in% features
+            )))
         }
         if (setting$trimming) {
-            testthat::expect_true(topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150)
+            testthat::expect_true(
+                topfeatures(current_dfm, scheme = "docfreq", n = 1) <= 150
+            )
         } else {
-            safe_feature <- current_dfm |> dfm_select("social") |> topfeatures(n = 1)
+            safe_feature <- current_dfm |>
+                dfm_select("social") |>
+                topfeatures(n = 1)
             testthat::expect_false(safe_feature <= 150)
         }
     }

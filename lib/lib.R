@@ -1,3 +1,6 @@
+# Sourcing code licensed differently
+source(here::here("lib/lemmatize_words.R"))
+
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
 tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
@@ -27,15 +30,6 @@ tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
     meta_df <- data.frame(meta_df, stringsAsFactors = FALSE)
     output <- cbind(output, meta_df)
     return(output)
-}
-
-#' A replacement of textstem::lemmatize_words
-tmmv.lemmatize_words <- function(tokens) {
-    token_matches <- match(tokens, lexicon::hash_lemmas[[1]])
-    tokens[!is.na(token_matches)] <- lexicon::hash_lemmas[
-        token_matches[!is.na(token_matches)],
-    ][[2]]
-    return(tokens)
 }
 
 tmmv.parse_args <- function(args = commandArgs()) {

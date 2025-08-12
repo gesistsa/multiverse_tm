@@ -1,5 +1,5 @@
 ## We need to source it here
-source(here::here("lib.R"))
+source(here::here("lib/lib.R"))
 
 test_readtext_base <- function() {
     x <- quanteda::corpus(

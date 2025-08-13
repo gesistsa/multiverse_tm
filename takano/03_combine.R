@@ -56,6 +56,7 @@ get_effect_size_mod <- function(setting, anchor_theta) {
         args$output_dir,
         paste0(rlang::hash(setting), ".RDS")
     ))
+    set.seed(current_mod$random_seed)
     k <- ncol(current_mod$theta)
     if (setting$alternative_model) {
         strata_topic <- keyATM::by_strata_DocTopic(

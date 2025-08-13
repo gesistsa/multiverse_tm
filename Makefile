@@ -130,6 +130,8 @@ debug: chan_dfms jankin_dfms czymara_dfms
 test:
 	Rscript --no-init-file -e "testthat::test_file('dev/lib_tests.R')"
 rmd:
+	Rscript --no-init-file dev/cache_requirements.R
+	Rscript --no-init-file dev/update_dockerfile.R
 	Rscript --no-init-file -e "quarto::quarto_render('readme.rmd', output_file = 'readme.md')"
 deploy-hook:
 	cp dev/precommit.sh .git/hooks/pre-commit

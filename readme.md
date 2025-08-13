@@ -145,7 +145,7 @@ analysis steps.
 
 # Project Dependencies
 
-Major dependencies are listed below [^1]:
+R dependencies are listed below [^1]:
 
 ``` r
 Packages <- c(
@@ -168,7 +168,6 @@ Packages <- c(
     "readr",
     "renv",
     "rlang",
-    "rmarkdown",
     "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
     "sandwich",
     "seededlda",
@@ -182,6 +181,25 @@ Packages <- c(
 )
 
 pak::pkg_install(packages)
+```
+
+System dependencies on Ubuntu Linux are listed below [^2]:
+
+``` r
+apt install -y \
+    curl \
+    make \
+    libarchive-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libxml2-dev \
+    libssl-dev \
+    pandoc \
+    libx11-dev \
+    zlib1g-dev \
+    mecab \
+    libmecab-dev \
+    mecab-ipadic-utf8
 ```
 
 # Options
@@ -257,5 +275,8 @@ Change.” *Nature Climate Change* 5 (8): 744–47.
 
 </div>
 
-[^1]: There are also additional dependencies for developers: `withr` and
-    `quarto`
+[^1]: There are also additional dependencies for developers: `jsonlite`,
+    `withr` and `quarto`
+
+[^2]: There are also additional dependencies for developers: quarto,
+    air, and git

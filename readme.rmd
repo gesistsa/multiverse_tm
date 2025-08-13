@@ -106,21 +106,30 @@ Note that `docker compose up` currently runs the debug mode of all analysis step
 
 # Project Dependencies
 
-Major dependencies are listed below [^1]:
+R dependencies are listed below [^1]:
 
 ```{r, echo = FALSE, results = "asis"}
-rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
-rpkgs[rpkgs == "RMeCab"] <- "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092"
+rpkgs <- jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$rpkgs
 cat(paste0("```r\nPackages <- c(\n",
            paste(paste0("    \"", rpkgs, "\""),
                  collapse = ",\n"), "\n)\n\npak::pkg_install(packages)\n```\n"))
+```
+
+System dependencies on Ubuntu Linux are listed below [^2]:
+```{r, echo = FALSE, results = "asis"}
+aptpkgs <- jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$aptpkgs
+cat(paste0("```r\napt install -y \\\n",
+           paste(paste0("    ", aptpkgs),
+                 collapse = " \\\n"), "\n```\n"))
 ```
 
 # Options
 
 There are options that one can customize; see `.Rprofile`.
 
-[^1]: There are also additional dependencies for developers: `withr` and `quarto`
+[^1]: There are also additional dependencies for developers: `jsonlite`, `withr` and `quarto`
+
+[^2]: There are also additional dependencies for developers: quarto, air, and git
 
 # License
 

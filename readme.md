@@ -118,6 +118,14 @@ list of the selected studies and their required datafiles:
     [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)
+  - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
+  - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)
+- Tvinnereim and Fløttum (2015): Data and code availble via [Harvard
+  Dataverse](https://doi.org/10.7910/DVN/28689)
+  - Text data:
+    [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
+  - Lemmatization model:
+    [`rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe`](https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe)
 
 # Docker
 
@@ -137,7 +145,7 @@ analysis steps.
 
 # Project Dependencies
 
-Major dependencies are listed below [^1]:
+R dependencies are listed below [^1]:
 
 ``` r
 Packages <- c(
@@ -146,7 +154,9 @@ Packages <- c(
     "cowplot",
     "dplyr",
     "furrr",
+    "future",
     "ggplot2",
+    "grid",
     "haven",
     "here",
     "keyATM",
@@ -155,9 +165,10 @@ Packages <- c(
     "osfr",
     "purrr",
     "quanteda",
+    "readr",
     "renv",
     "rlang",
-    "rmarkdown",
+    "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
     "sandwich",
     "seededlda",
     "SnowballC",
@@ -172,9 +183,36 @@ Packages <- c(
 pak::pkg_install(packages)
 ```
 
+System dependencies on Ubuntu Linux are listed below [^2]:
+
+``` r
+apt install -y \
+    curl \
+    make \
+    libarchive-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libxml2-dev \
+    libssl-dev \
+    pandoc \
+    libx11-dev \
+    zlib1g-dev \
+    mecab \
+    libmecab-dev \
+    mecab-ipadic-utf8
+```
+
 # Options
 
 There are options that one can customize; see `.Rprofile`.
+
+# License
+
+All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
+2025 `multiverse_tm` authors), except
+
+- [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
+- [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
 
 # References
 
@@ -185,9 +223,8 @@ entry-spacing="0">
 
 Chan, Chung-hong, Jing Zeng, and Mike S. Schäfer. 2022. “Whose Research
 Benefits More from Twitter? On Twitter-Worthiness of Communication
-Research and Its Role in Reinforcing Disparities of the Field.” Edited
-by Pablo Dorta-González. *PLOS ONE* 17 (12): e0278840.
-<https://doi.org/10.1371/journal.pone.0278840>.
+Research and Its Role in Reinforcing Disparities of the Field.” *PLOS
+ONE* 17 (12): e0278840. <https://doi.org/10.1371/journal.pone.0278840>.
 
 </div>
 
@@ -227,7 +264,19 @@ Modeling Approach.” *F1000Research* 12: 515.
 
 </div>
 
+<div id="ref-tvinnereim:2015:E" class="csl-entry">
+
+Tvinnereim, Endre, and Kjersti Fløttum. 2015. “Explaining Topic
+Prevalence in Answers to Open-Ended Survey Questions about Climate
+Change.” *Nature Climate Change* 5 (8): 744–47.
+<https://doi.org/10.1038/nclimate2663>.
+
 </div>
 
-[^1]: There are also additional dependencies for developers: `withr` and
-    `quarto`
+</div>
+
+[^1]: There are also additional dependencies for developers: `jsonlite`,
+    `withr` and `quarto`
+
+[^2]: There are also additional dependencies for developers: quarto,
+    air, and git

@@ -83,7 +83,11 @@ All selected studies make the data and source code publicly available. The requi
   - Text data: [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
   - Meta data: [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
 - @takano:2023:awe: Data and code available via [OSF](https://osf.io/6ktey/)
-
+  - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
+  - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)
+- @tvinnereim:2015:E: Data and code availble via [Harvard Dataverse](https://doi.org/10.7910/DVN/28689)
+  - Text data: [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
+  - Lemmatization model: [`rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe`](https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe)
 
 # Docker
 
@@ -102,19 +106,36 @@ Note that `docker compose up` currently runs the debug mode of all analysis step
 
 # Project Dependencies
 
-Major dependencies are listed below [^1]:
+R dependencies are listed below [^1]:
 
 ```{r, echo = FALSE, results = "asis"}
-rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
+rpkgs <- jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$rpkgs
 cat(paste0("```r\nPackages <- c(\n",
            paste(paste0("    \"", rpkgs, "\""),
                  collapse = ",\n"), "\n)\n\npak::pkg_install(packages)\n```\n"))
+```
+
+System dependencies on Ubuntu Linux are listed below [^2]:
+```{r, echo = FALSE, results = "asis"}
+aptpkgs <- jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$aptpkgs
+cat(paste0("```r\napt install -y \\\n",
+           paste(paste0("    ", aptpkgs),
+                 collapse = " \\\n"), "\n```\n"))
 ```
 
 # Options
 
 There are options that one can customize; see `.Rprofile`.
 
-[^1]: There are also additional dependencies for developers: `withr` and `quarto`
+[^1]: There are also additional dependencies for developers: `jsonlite`, `withr` and `quarto`
+
+[^2]: There are also additional dependencies for developers: quarto, air, and git
+
+# License
+
+All code is under a [European Union Public Licence 1.2](LICENSE.md) (© `r format(Sys.Date(), "%Y")` `multiverse_tm` authors), except
+
+* [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
+* [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
 
 # References

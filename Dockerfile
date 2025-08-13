@@ -1,6 +1,7 @@
 FROM rocker/r-ver:4.5.0
 
-RUN apt update; apt install curl make xz-utils libcurl4-gnutls-dev libssl-dev libpoppler-cpp-dev zlib1g-dev libicu-dev libxml2-dev -y
+## NOTE: Don't update this line by hand
+RUN apt update; apt install -y curl make libarchive-dev libcurl4-openssl-dev libicu-dev libxml2-dev libssl-dev pandoc libx11-dev zlib1g-dev mecab libmecab-dev mecab-ipadic-utf8
 
 RUN R -e 'install.packages(c("renv", "pak"), lib=.Library)'
 

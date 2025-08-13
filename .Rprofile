@@ -4,7 +4,7 @@ if (Sys.getenv("INSIDEDOCKER") == "" && renv_available) {
     source("renv/activate.R")
 }
 
-source(here::here("lib.R"))
+source(here::here("lib/lib.R"))
 
 ## Options for this project
 

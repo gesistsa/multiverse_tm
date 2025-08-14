@@ -110,7 +110,13 @@ get_effect_size_mod <- function(setting, anchor_theta) {
         rownames(output) <- NULL
     }
     output <- round(output, 6)
-    return(cbind(as.data.frame(setting), output))
+    hash <- rlang::hash(setting)
+    theta <- current_mod$theta[, anchor_index, drop = FALSE]
+    colnames(theta) <- hash
+    return(list(
+        multiverse = cbind(as.data.frame(setting), output),
+        theta = theta
+    ))
 }
 
 
@@ -133,6 +139,26 @@ res <- furrr::future_map(
     anchor_theta = anchor_theta,
     .progress = TRUE,
     .options = furrr_options(seed = NULL)
-) |>
+)
+
+res |>
+    purrr::map("multiverse") |>
     purrr::list_rbind() |>
     write.csv(output_path, row.names = FALSE)
+
+res |>
+    purrr::map("theta") |>
+    purrr::map(as.data.frame) |>
+    purrr::list_cbind() |>
+    round(6) -> thetas
+
+theta_path <- here::here(
+    "intermediate",
+    args$slug,
+    "runs",
+    args$current_run,
+    "theta",
+    "anchor_by_original_setting.csv"
+)
+
+write.csv(thetas, theta_path, row.names = FALSE)

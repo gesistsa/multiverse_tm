@@ -83,9 +83,40 @@ jankin_df <- purrr::map(multiverse, \(x) get_theta_by_topic_name("SDG16", x)) |>
     purrr::map(as.data.frame) |>
     purrr::list_cbind()
 
-get_pca <- function(df, slug) {
+czymara_df <- read.csv(here(
+    "intermediate",
+    "czymara",
+    "runs",
+    "1",
+    "theta",
+    "anchor_by_original_setting.csv"
+))
+
+tvinnereim_df <- read.csv(here(
+    "intermediate",
+    "tvinnereim",
+    "runs",
+    "1",
+    "theta",
+    "anchor_by_original_setting.csv"
+))
+
+takano_df <- read.csv(here(
+    "intermediate",
+    "takano",
+    "runs",
+    "1",
+    "theta",
+    "anchor_by_original_setting.csv"
+))
+
+
+## because takano doesn't have the same size
+## we weight it so that the max eigenvalue is comparable
+get_pca <- function(df, slug, multiverse_size = 216) {
     pca <- prcomp(df, scale = TRUE)
-    eigenvalues <- pca$sdev^2
+    weight <- multiverse_size / ncol(df)
+    eigenvalues <- (pca$sdev^2) * weight
     data.frame(
         slug = slug,
         i = seq_along(eigenvalues),
@@ -94,8 +125,8 @@ get_pca <- function(df, slug) {
 }
 
 pca_combined <- purrr::map2(
-    list(chan_df, curini_df, jankin_df),
-    c("chan", "curini", "jankin"),
+    list(chan_df, curini_df, jankin_df, czymara_df, tvinnereim_df, takano_df),
+    c("chan", "curini", "jankin", "czymara", "tvinnereim", "takano"),
     get_pca
 ) |>
     purrr::list_rbind()

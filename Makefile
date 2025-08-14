@@ -10,6 +10,7 @@ takano: intermediate/takano/runs/1
 ## takano
 results/aggregated/takano/1.csv: intermediate/takano/runs/1
 	mkdir -p results/aggregated/takano
+	mkdir -p intermediate/takano/runs/1/theta
 	Rscript takano/03_combine.R 1
 intermediate/takano/runs/1: takano_dfms
 	Rscript takano/02_train.R 1
@@ -28,6 +29,7 @@ rawdata/data_pilot_cleaned.csv:
 # tvinnereim
 results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
 	mkdir -p results/aggregated/tvinnereim
+	mkdir -p intermediate/tvinnereim/runs/1/theta
 	Rscript tvinnereim/03_combine.R 1
 intermediate/tvinnereim/runs/1: tvinnereim_dfms
 	Rscript tvinnereim/02_train.R 1
@@ -67,6 +69,7 @@ rawdata/zip_texts.rar:
 # czymara
 results/aggregated/czymara/1.csv: intermediate/czymara/1
 	mkdir -p results/aggregated/czymara
+	mkdir -p intermediate/czymara/runs/1/theta
 	Rscript czymara/03_combine.R 1
 intermediate/czymara/runs/1: czymara_dfms
 	Rscript czymara/02_train.R 1

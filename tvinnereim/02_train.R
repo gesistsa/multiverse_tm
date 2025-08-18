@@ -29,7 +29,7 @@ train_model <- function(
     current <- tmmv.get_current(
         setting = setting,
         args = args,
-        k = c(4, 3, 5),
+        k = tmmv.data[[args$slug]]$k,
         original_iter = c(100, round(100 * 0.8), round(100 * 1.2)), # original setting
         alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
         .fix_seed = .fix_seed
@@ -115,7 +115,7 @@ if (args$debug) {
         } else {
             testthat::expect_true("STM" %in% class(output$mod))
         }
-        expected_k <- c(4, 3, 5)[setting$k_setting]
+        expected_k <- tmmv.data[[args$slug]]$k[setting$k_setting]
         expect_equal(expected_k, ncol(output$theta))
         ## can't test iter
         ## output$theta

@@ -17,27 +17,6 @@ if (args$debug) {
     cat("Rerun if you want more checks.\n")
 }
 
-## REMOVE THIS WHEN #44 is merged
-tmmv.unify_theta <- function(mod, trimmed_dfm, current_dfm) {
-    theta <- mod$theta
-    rownames(theta) <- docnames(trimmed_dfm)
-
-    excluded_docs <- setdiff(docnames(current_dfm), docnames(trimmed_dfm))
-    k <- ncol(theta)
-    fake_theta <- matrix(
-        rep(1 / k, length(excluded_docs) * k),
-        nrow = length(excluded_docs),
-        ncol = k
-    )
-    rownames(fake_theta) <- excluded_docs
-    final_theta <- rbind(theta, fake_theta)
-
-    final_theta <- final_theta[
-        match(rownames(current_dfm), rownames(final_theta)),
-    ]
-    return(final_theta)
-}
-
 train_model <- function(
     setting,
     args,
@@ -50,7 +29,7 @@ train_model <- function(
     current <- tmmv.get_current(
         setting = setting,
         args = args,
-        k = c(7, 6, 8),
+        k = tmmv.data[[args$slug]]$k,
         original_iter = c(500, round(500 * 0.8), round(500 * 1.2)),
         alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
         .fix_seed = .fix_seed
@@ -131,7 +110,7 @@ if (args$debug) {
         } else {
             testthat::expect_true("STM" %in% class(output$mod))
         }
-        expected_k <- c(7, 6, 8)[setting$k_setting]
+        expected_k <- tmmv.data[[args$slug]]$k[setting$k_setting]
         expect_equal(expected_k, ncol(output$theta))
         ## can't test iter
         ## output$theta

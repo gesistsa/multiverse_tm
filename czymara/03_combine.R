@@ -27,14 +27,7 @@ library(furrr)
 ##                       docvars = data.frame(gender = data_priv$gender,
 ##                                            id = data_priv$CASE))
 
-## the original setting in Czymara
-anchor_setting <- list()
-anchor_setting$token_normalization <- "stemming"
-anchor_setting$stopword_removal <- TRUE
-anchor_setting$trimming <- TRUE
-anchor_setting$alternative_model <- FALSE
-anchor_setting$k_setting <- 1
-anchor_setting$iteration_setting <- 1
+anchor_setting <- tmmv.data[[args$slug]]$anchor
 
 anchor_mod <- readRDS(here(
     args$output_dir,

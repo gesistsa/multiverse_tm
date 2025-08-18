@@ -28,17 +28,8 @@ train_model <- function(
     current <- tmmv.get_current(
         setting = setting,
         args = args,
-        keywords = list(
-            socialmedia = c(
-                "facebook",
-                "twitter",
-                "blog*",
-                "sns*",
-                "tweet*",
-                "blog*"
-            )
-        ),
-        k = c(39, 35, 43),
+        keywords = tmmv.data[[args$slug]]$dict,
+        k = tmmv.data[[args$slug]]$k,
         original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
         alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
         .fix_seed = .fix_seed
@@ -98,7 +89,8 @@ if (args$debug) {
             testthat::expect_true("keyATM_output" %in% class(output$mod))
             n_theta <- ncol(output$mod$theta)
         }
-        expected_k <- c(39, 35, 43)[setting$k_setting] + 1
+        expected_k <- tmmv.data[[args$slug]]$k[setting$k_setting] +
+            length(tmmv.data[[args$slug]]$dict)
         expect_equal(expected_k, ncol(output$mod$theta))
         ## can't test iter
     }

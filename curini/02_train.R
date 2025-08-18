@@ -52,60 +52,11 @@ train_model <- function(
     dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
     current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
 
-    ## Note that the original does assume the text has been stemmed
-    ## I add * to communit, responsabilit, solidariet, libert (so that it will match e.g. comunità)
-    ## the original use all singular ("militare" has both singular and plural), except "alleati", "umani", "bombardamenti",
-    ## "bombe", "rischi", "vittime"
-    ## The singular terms have been added
-    ## for adjectives, only the feminine and plural: "umanitaria" and "unmanitari" (reduced to "umanitari*"; so that it can also capture
-    ## the musculine form "umanitario")
-
-    updated_dict <- list(
-        multilateralism = c(
-            "multilateralism",
-            "comunit*",
-            "responsabilit*",
-            "alleanza",
-            "alleati",
-            "impegno",
-            "sicurezza",
-            "coalizione"
-        ),
-        humanitarian_dimension = c(
-            "democrazia",
-            "umani",
-            "democrazia",
-            "democratica",
-            "diritto",
-            "pace",
-            "solidariet*",
-            "libert",
-            "pacific*",
-            "umanitari*",
-            "solidal*"
-        ),
-        war = c(
-            "guerra",
-            "militare",
-            "bombardamenti",
-            "militari",
-            "costituzione",
-            "disarmo",
-            "chiarezza",
-            "violenza",
-            "bombe",
-            "bomba",
-            "rischi",
-            "rischio",
-            "vittime",
-            "vittima"
-        )
-    )
     current <- tmmv.get_current(
         setting = setting,
         args = args,
-        keywords = updated_dict,
-        k = c(1, 2, 3),
+        keywords = tmmv.data[[args$slug]]$dict,
+        k = tmmv.data[[args$slug]]$k,
         original_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
         alternative_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
         .fix_seed = .fix_seed
@@ -194,7 +145,8 @@ if (args$debug) {
             testthat::expect_true("textmodel_lda" %in% class(output$mod))
             n_theta <- ncol(output$mod$theta)
         }
-        expected_k <- c(1, 2, 3)[setting$k_setting] + 3
+        expected_k <- tmmv.data[[args$slug]]$k[setting$k_setting] +
+            length(tmmv.data[[args$slug]]$dict)
         expect_equal(expected_k, ncol(output$mod$theta))
         ## can't test iter
     }

@@ -8,191 +8,7 @@ library(SnowballC)
 library(seededlda)
 library(furrr)
 
-sdg_keywords <- list(
-    SDG1 = c(
-        "poverty",
-        "extreme_poverty",
-        "poor",
-        "socioeconomic",
-        "income",
-        "living_standards",
-        "living_standard"
-    ),
-    SDG2 = c(
-        "hunger",
-        "food_security",
-        "nutrition",
-        "agriculture",
-        "farming",
-        "malnutrition",
-        "sustainable_agriculture",
-        "food_systems",
-        "food_system"
-    ),
-    SDG3 = c(
-        "health",
-        "wellbeing",
-        "disease",
-        "maternal_health",
-        "child_mortality",
-        "epidemic",
-        "vaccines",
-        "healthcare"
-    ),
-    SDG4 = c(
-        "education",
-        "literacy",
-        "school",
-        "primary_education",
-        "secondary_education",
-        "tertiary_education",
-        "lifelong_learning",
-        "skills_development"
-    ),
-    SDG5 = c(
-        "gender_equality",
-        "women",
-        "girls",
-        "empowerment",
-        "discrimination",
-        "female",
-        "gender_mainstreaming",
-        "gender_based",
-        "gender_violence"
-    ),
-    SDG6 = c(
-        "water",
-        "sanitation",
-        "clean_water",
-        "drinking_water",
-        "waste_water",
-        "wastewater",
-        "water_resources",
-        "water_management",
-        "hygiene"
-    ),
-    SDG7 = c(
-        "energy",
-        "renewable_energy",
-        "clean_energy",
-        "sustainable_energy",
-        "electricity",
-        "energy_access",
-        "energy_efficiency",
-        "energy_security"
-    ),
-    SDG8 = c(
-        "economic_growth",
-        "employment",
-        "decent_work",
-        "labour",
-        "inclusive_growth",
-        "sustainable_growth",
-        "labour_market",
-        "youth_employment"
-    ),
-    SDG9 = c(
-        "infrastructure",
-        "innovation",
-        "industrialization",
-        "technology",
-        "research",
-        "development",
-        "sustainable_industrialization",
-        "sustainable_industry",
-        "technological_progress"
-    ),
-    SDG10 = c(
-        "inequality",
-        "inequalities",
-        "income_inequality",
-        "wealth_distribution",
-        "social_inclusion",
-        "equal_opportunity",
-        "equal_opportunities",
-        "discrimination",
-        "economic_divide",
-        "equity"
-    ),
-    SDG11 = c(
-        "cities",
-        "urban",
-        "sustainable_cities",
-        "urban_planning",
-        "urban_development",
-        "urbanisation",
-        "urban_infrastructure",
-        "housing"
-    ),
-    SDG12 = c(
-        "sustainable_consumption",
-        "sustainable_production",
-        "resource_efficiency",
-        "waste_management",
-        "recycling",
-        "supply_chain",
-        "circular_economy",
-        "responsible_consumption"
-    ),
-    SDG13 = c(
-        "climate_change",
-        "global_warming",
-        "greenhouse_gas",
-        "emissions",
-        "carbon_dioxide",
-        "climate_action",
-        "climate_resilience",
-        "climate_mitigation"
-    ),
-    SDG14 = c(
-        "oceans",
-        "marine",
-        "coastal",
-        "sea",
-        "seas",
-        "marine_resources",
-        "fisheries",
-        "aquaculture",
-        "marine_pollution"
-    ),
-    SDG15 = c(
-        "biodiversity",
-        "ecosystems",
-        "ecosystem",
-        "land",
-        "forest",
-        "forests",
-        "wildlife",
-        "habitat",
-        "deforestation",
-        "desertification",
-        "species"
-    ),
-    SDG16 = c(
-        "peace",
-        "justice",
-        "institutions",
-        "rule_law",
-        "governance",
-        "accountability",
-        "transparency",
-        "corruption",
-        "human_rights",
-        "violence"
-    ),
-    SDG17 = c(
-        "partnership",
-        "international_cooperation",
-        "global_partnership",
-        "development_goals",
-        "development_cooperation",
-        "financing_development",
-        "development_finance",
-        "trade",
-        "technology_transfer",
-        "capacity_building"
-    )
-)
+sdg_keywords <- tmmv.data[[args$slug]]$dict
 
 ## This is not working because we stemmed first, before doing bigram in jankin01
 ## sdg_keywords_stemmed <- lapply(sdg_keywords, SnowballC::wordStem)
@@ -263,7 +79,7 @@ train_model <- function(
         args = args,
         keywords = sdg_keywords,
         stemmed_keywords = stemmed_sdg_keywords,
-        k = c(1, 3, 5),
+        k = tmmv.data[[args$slug]]$k,
         original_iter = c(1500, round(1500 * 0.8), round(1500 * 1.2)),
         alternative_iter = c(2000, round(2000 * 0.8), round(2000 * 1.2)),
         .fix_seed = .fix_seed
@@ -349,7 +165,8 @@ if (args$debug) {
             testthat::expect_true("keyATM_output" %in% class(output$mod))
             n_theta <- ncol(output$mod$theta)
         }
-        expected_k <- c(1, 3, 5)[setting$k_setting] + length(sdg_keywords)
+        expected_k <- tmmv.data[[args$slug]]$k[setting$k_setting] +
+            length(tmmv.data[[args$slug]]$dict)
         expect_equal(expected_k, ncol(output$mod$theta))
         ## can't test iter
     }

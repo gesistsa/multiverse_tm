@@ -1,6 +1,8 @@
 # Sourcing code licensed differently
 source(here::here("lib/lemmatize_words.R"))
 source(here::here("lib/plot_spec_curve.R"))
+# common data
+source(here::here("lib/data.R"))
 
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob

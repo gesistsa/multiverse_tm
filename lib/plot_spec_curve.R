@@ -19,12 +19,27 @@
 
 tmmv.plot_spec_curve <- function(
     results,
+    metadata = NULL,
     anchor = NULL,
     ylab = "Estimate [95% Conf. I.]",
-    k = NULL
+    k = NULL,
+    model_names = NULL
 ) {
+    if (!is.null(metadata)) {
+        if (metadata$keyword) {
+            keyworded_k <- length(metadata$dict)
+        } else {
+            keyworded_k <- 0
+        }
+        k <- metadata$k + keyworded_k
+        model_names <- c(metadata$alternative_model, metadata$original_model)
+        anchor <- metadata$anchor
+    }
     if (is.null(k)) {
         k <- c(1, 2, 3)
+    }
+    if (is.null(model_names)) {
+        model_names <- c("Alt.", "Orig.")
     }
     results_plotting <- results |>
         dplyr::arrange(Estimate) |>
@@ -96,7 +111,7 @@ tmmv.plot_spec_curve <- function(
         "Tok. Norm.",
         "Stopword Rem.",
         "Trim.",
-        "Alt. Model",
+        "Model",
         "k",
         "Iter."
     )
@@ -128,13 +143,13 @@ tmmv.plot_spec_curve <- function(
                 !trimming ~ "No"
             ),
             alternative_model = dplyr::case_when(
-                alternative_model ~ "Yes",
-                !alternative_model ~ "No"
+                alternative_model ~ model_names[1],
+                !alternative_model ~ model_names[2]
             ),
             iteration_setting = dplyr::case_when(
-                iteration_setting == 1 ~ "± 0%",
-                iteration_setting == 2 ~ "- 20%",
-                iteration_setting == 3 ~ "+ 20%"
+                iteration_setting == 1 ~ "±0%",
+                iteration_setting == 2 ~ "-20%",
+                iteration_setting == 3 ~ "+20%"
             ),
             k_setting = k[k_setting]
         ) |>
@@ -142,7 +157,7 @@ tmmv.plot_spec_curve <- function(
             "Tok. Norm." = token_normalization,
             "Stopword Rem." = stopword_removal,
             "Trim." = trimming,
-            "Alt. Model" = alternative_model,
+            "Model" = alternative_model,
             "k" = k_setting,
             "Iter." = iteration_setting
         ) |>

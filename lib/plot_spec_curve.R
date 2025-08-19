@@ -17,41 +17,70 @@
 #library(stringr)
 #library(tidyr)
 
-tmmv.plot_spec_curve <- function(results) {
-    plot_a <- results |>
+tmmv.plot_spec_curve <- function(results, anchor = NULL) {
+    results_plotting <- results |>
         dplyr::arrange(Estimate) |>
+        dplyr::mutate(specification = seq_len(nrow(results)))
+    if (!is.null(anchor)) {
+        results_plotting <- results_plotting |>
+            dplyr::mutate(
+                anchor = token_normalization == anchor$token_normalization &
+                    stopword_removal == anchor$stopword_removal &
+                    trimming == anchor$stopword_removal &
+                    alternative_model == anchor$alternative_model &
+                    k_setting == anchor$k_setting &
+                    iteration_setting == anchor$iteration_setting
+            )
+        axis_breaks <- which(results_plotting$anchor)
+        axis_labels <- c("Original")
+    } else {
+        results_plotting <- results_plotting |> dplyr::mutate(anchor = FALSE)
+        axis_breaks <- NULL
+        axis_labels <- NULL
+    }
+    plot_a <- results_plotting |>
         dplyr::mutate(
-            specifications = seq_len(nrow(results)),
             color = dplyr::case_when(
                 Q2.5 > 0 ~ tmmv.colors[["orange"]],
                 Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
                 is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
-                TRUE ~ "grey"
-            )
+                TRUE ~ "darkgrey"
+            ),
+            alpha = ifelse(anchor, 0.9, 0.2)
         ) |>
         ggplot2::ggplot(ggplot2::aes(
-            x = specifications,
+            x = specification,
             y = Estimate,
             ymin = Q2.5,
             ymax = Q97.5,
-            color = color
+            color = color,
+            alpha = alpha
         )) +
-        ggplot2::geom_point(ggplot2::aes(color = color), size = 1) +
-        ggplot2::theme_minimal() +
+        ggplot2::geom_point(ggplot2::aes(color = color), alpha = 1, size = 1) +
         ggplot2::scale_color_identity() +
+        ggplot2::labs(x = "", y = "Median [95% Cr. I.]") +
+        ggplot2::geom_pointrange(
+            ggplot2::aes(alpha = alpha),
+            size = 0.6,
+            fatten = 1
+        ) +
+        ggplot2::scale_alpha_identity() +
+        ggplot2::geom_hline(
+            yintercept = 0,
+            colour = "black",
+            linetype = "dotted"
+        ) +
+        ggplot2::scale_x_continuous(
+            breaks = axis_breaks,
+            labels = axis_labels
+        ) +
+        ggplot2::theme_minimal() +
         ggplot2::theme(
             strip.text = ggplot2::element_blank(),
             axis.line = ggplot2::element_line("black", linewidth = .5),
             legend.position = "none",
             panel.spacing = grid::unit(0.75, "lines"),
             axis.text = ggplot2::element_text(colour = "black")
-        ) +
-        ggplot2::labs(x = "", y = "Median [95% Cr. I.]") +
-        ggplot2::geom_pointrange(alpha = 0.5, size = 0.6, fatten = 1) +
-        ggplot2::geom_hline(
-            yintercept = 0,
-            colour = "black",
-            linetype = "dotted"
         )
 
     value <- key <- NULL
@@ -66,15 +95,13 @@ tmmv.plot_spec_curve <- function(results) {
 
     # Todo: Panel B of the entire plot still displays k and iteration settings as
     # 1, 2, 3. I suppose that this should actually display the actual values used.
-    plot_b <- results |>
-        dplyr::arrange(Estimate) |>
+    plot_b <- results_plotting |>
         dplyr::mutate(
-            specifications = seq_len(nrow(results)),
             color = dplyr::case_when(
                 Q2.5 > 0 ~ tmmv.colors[["orange"]],
                 Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
                 is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
-                TRUE ~ "grey"
+                TRUE ~ "darkgrey"
             )
         ) |>
         dplyr::mutate(
@@ -108,16 +135,20 @@ tmmv.plot_spec_curve <- function(results) {
         tidyr::gather(key, value, all_of(choices)) |>
         dplyr::mutate(key = factor(key, levels = choices)) |>
         ggplot2::ggplot(ggplot2::aes(
-            x = specifications,
+            x = specification,
             y = value,
             color = color
         )) +
         ggplot2::geom_point(
-            ggplot2::aes(x = specifications, y = value),
+            ggplot2::aes(x = specification, y = value),
             shape = 124,
             size = 3.35
         ) +
         ggplot2::scale_color_identity() +
+        ggplot2::scale_x_continuous(
+            breaks = axis_breaks,
+            labels = axis_labels
+        ) +
         ggplot2::theme_minimal() +
         ggplot2::facet_grid(key ~ 1, scales = "free_y", space = "free_y") +
         ggplot2::theme(

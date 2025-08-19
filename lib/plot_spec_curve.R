@@ -17,7 +17,11 @@
 #library(stringr)
 #library(tidyr)
 
-tmmv.plot_spec_curve <- function(results, anchor = NULL) {
+tmmv.plot_spec_curve <- function(
+    results,
+    anchor = NULL,
+    ylab = "Estimate [95% Conf. I.]"
+) {
     results_plotting <- results |>
         dplyr::arrange(Estimate) |>
         dplyr::mutate(specification = seq_len(nrow(results)))
@@ -58,7 +62,7 @@ tmmv.plot_spec_curve <- function(results, anchor = NULL) {
         )) +
         ggplot2::geom_point(ggplot2::aes(color = color), alpha = 1, size = 1) +
         ggplot2::scale_color_identity() +
-        ggplot2::labs(x = "", y = "Median [95% Cr. I.]") +
+        ggplot2::labs(x = "", y = ylab) +
         ggplot2::geom_pointrange(
             ggplot2::aes(alpha = alpha),
             size = 0.6,

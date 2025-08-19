@@ -39,7 +39,11 @@ overall |>
 ### Here is another visualisation.
 results <- read.csv(here("results", "aggregated", slug, "1.csv"))
 
-tmmv.plot_spec_curve(results, anchor = tmmv.data[[slug]]$anchor)
+tmmv.plot_spec_curve(
+    results,
+    anchor = tmmv.data[[slug]]$anchor,
+    ylab = "Median [95% Cr. I.]"
+)
 
 # ggsave(filename = here("plots/chan_brms_v2.pdf"),
 #        plot = plot,

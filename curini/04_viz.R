@@ -9,7 +9,7 @@ library(purrr)
 slug <- "curini"
 
 results <- read.csv(here("results", "aggregated", slug, "1.csv"))
-tmmv.plot_spec_curve(results, anchor = tmmv.data[[slug]]$anchor)
+tmmv.plot_spec_curve(results, tmmv.data[[slug]])
 
 ## conditional effect plot
 

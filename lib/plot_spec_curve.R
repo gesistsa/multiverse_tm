@@ -17,7 +17,30 @@
 #library(stringr)
 #library(tidyr)
 
-tmmv.plot_spec_curve <- function(results, anchor = NULL) {
+tmmv.plot_spec_curve <- function(
+    results,
+    metadata = NULL,
+    anchor = NULL,
+    ylab = "Estimate [95% Conf. I.]",
+    k = NULL,
+    model_names = NULL
+) {
+    if (!is.null(metadata)) {
+        if (metadata$keyword) {
+            keyworded_k <- length(metadata$dict)
+        } else {
+            keyworded_k <- 0
+        }
+        k <- metadata$k + keyworded_k
+        model_names <- c(metadata$alternative_model, metadata$original_model)
+        anchor <- metadata$anchor
+    }
+    if (is.null(k)) {
+        k <- c(1, 2, 3)
+    }
+    if (is.null(model_names)) {
+        model_names <- c("Alt.", "Orig.")
+    }
     results_plotting <- results |>
         dplyr::arrange(Estimate) |>
         dplyr::mutate(specification = seq_len(nrow(results)))
@@ -58,7 +81,7 @@ tmmv.plot_spec_curve <- function(results, anchor = NULL) {
         )) +
         ggplot2::geom_point(ggplot2::aes(color = color), alpha = 1, size = 1) +
         ggplot2::scale_color_identity() +
-        ggplot2::labs(x = "", y = "Median [95% Cr. I.]") +
+        ggplot2::labs(x = "", y = ylab) +
         ggplot2::geom_pointrange(
             ggplot2::aes(alpha = alpha),
             size = 0.6,
@@ -88,7 +111,7 @@ tmmv.plot_spec_curve <- function(results, anchor = NULL) {
         "Tok. Norm.",
         "Stopword Rem.",
         "Trim.",
-        "Alt. Model",
+        "Model",
         "k",
         "Iter."
     )
@@ -120,15 +143,21 @@ tmmv.plot_spec_curve <- function(results, anchor = NULL) {
                 !trimming ~ "No"
             ),
             alternative_model = dplyr::case_when(
-                alternative_model ~ "Yes",
-                !alternative_model ~ "No"
-            )
+                alternative_model ~ model_names[1],
+                !alternative_model ~ model_names[2]
+            ),
+            iteration_setting = dplyr::case_when(
+                iteration_setting == 1 ~ "±0%",
+                iteration_setting == 2 ~ "-20%",
+                iteration_setting == 3 ~ "+20%"
+            ),
+            k_setting = k[k_setting]
         ) |>
         dplyr::rename(
             "Tok. Norm." = token_normalization,
             "Stopword Rem." = stopword_removal,
             "Trim." = trimming,
-            "Alt. Model" = alternative_model,
+            "Model" = alternative_model,
             "k" = k_setting,
             "Iter." = iteration_setting
         ) |>

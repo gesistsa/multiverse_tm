@@ -20,8 +20,12 @@
 tmmv.plot_spec_curve <- function(
     results,
     anchor = NULL,
-    ylab = "Estimate [95% Conf. I.]"
+    ylab = "Estimate [95% Conf. I.]",
+    k = NULL
 ) {
+    if (is.null(k)) {
+        k <- c(1, 2, 3)
+    }
     results_plotting <- results |>
         dplyr::arrange(Estimate) |>
         dplyr::mutate(specification = seq_len(nrow(results)))
@@ -126,7 +130,13 @@ tmmv.plot_spec_curve <- function(
             alternative_model = dplyr::case_when(
                 alternative_model ~ "Yes",
                 !alternative_model ~ "No"
-            )
+            ),
+            iteration_setting = dplyr::case_when(
+                iteration_setting == 1 ~ "± 0%",
+                iteration_setting == 2 ~ "- 20%",
+                iteration_setting == 3 ~ "+ 20%"
+            ),
+            k_setting = k[k_setting]
         ) |>
         dplyr::rename(
             "Tok. Norm." = token_normalization,

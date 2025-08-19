@@ -1,4 +1,6 @@
 library(here)
 
-results <- read.csv(here("results", "aggregated", "tvinnereim", "1.csv"))
-tmmv.plot_spec_curve(results)
+slug <- "tvinnereim"
+
+results <- read.csv(here("results", "aggregated", slug, "1.csv"))
+tmmv.plot_spec_curve(results, tmmv.data[[slug]]$anchor)

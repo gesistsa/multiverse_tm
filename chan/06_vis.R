@@ -4,8 +4,10 @@ library(here)
 library(dplyr)
 library(ggplot2)
 
+slug <- "chan"
+
 ## TODO: aggregated multiple runs
-overall <- read.csv(here("results", "aggregated", "chan", "1.csv"))
+overall <- read.csv(here("results", "aggregated", slug, "1.csv"))
 
 ## note that we need to add one to K (the keyworded topic)
 overall |>
@@ -35,9 +37,9 @@ overall |>
 # ggsave(here("plots/chan_brms.png"), width = 2500, height = 1080, units = "px")
 
 ### Here is another visualisation.
-results <- read.csv(here("results", "aggregated", "chan", "1.csv"))
+results <- read.csv(here("results", "aggregated", slug, "1.csv"))
 
-tmmv.plot_spec_curve(results)
+tmmv.plot_spec_curve(results, anchor = tmmv.data[[slug]]$anchor)
 
 # ggsave(filename = here("plots/chan_brms_v2.pdf"),
 #        plot = plot,

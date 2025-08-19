@@ -6,15 +6,17 @@ library(stringr)
 library(tidyr)
 library(purrr)
 
-results <- read.csv(here("results", "aggregated", "curini", "1.csv"))
-tmmv.plot_spec_curve(results)
+slug <- "curini"
+
+results <- read.csv(here("results", "aggregated", slug, "1.csv"))
+tmmv.plot_spec_curve(results, anchor = tmmv.data[[slug]]$anchor)
 
 ## conditional effect plot
 
 condit_effect <- read.csv(here::here(
     "results",
     "aggregated",
-    "curini",
+    slug,
     "condit_1.csv"
 ))
 

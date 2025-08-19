@@ -33,7 +33,7 @@ intermediate/tvinnereim/runs/1: tvinnereim_dfms
 	Rscript tvinnereim/02_train.R 1
 tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv
 	mkdir -p intermediate/tvinnereim
-	Rscript tvinnereim/01_read.R 1
+	Rscript tvinnereim/01_read.R $(DEBUG)
 rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
 	mkdir -p rawdata
 	curl -L "https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe" -o rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe

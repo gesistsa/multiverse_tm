@@ -23,10 +23,10 @@ tmmv.plot_spec_curve <- function(results) {
         dplyr::mutate(
             specifications = seq_len(nrow(results)),
             color = dplyr::case_when(
-                Q2.5 > 0 ~ "green",
-                Q97.5 < 0 ~ "#377eb8",
-                is.na(Estimate) ~ "#e41a1c",
-                TRUE ~ "darkgrey"
+                Q2.5 > 0 ~ tmmv.colors[["orange"]],
+                Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
+                is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
+                TRUE ~ "grey"
             )
         ) |>
         ggplot2::ggplot(ggplot2::aes(
@@ -71,10 +71,10 @@ tmmv.plot_spec_curve <- function(results) {
         dplyr::mutate(
             specifications = seq_len(nrow(results)),
             color = dplyr::case_when(
-                Q2.5 > 0 ~ "green",
-                Q97.5 < 0 ~ "#377eb8",
-                is.na(Estimate) ~ "#e41a1c",
-                TRUE ~ "darkgrey"
+                Q2.5 > 0 ~ tmmv.colors[["orange"]],
+                Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
+                is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
+                TRUE ~ "grey"
             )
         ) |>
         dplyr::mutate(

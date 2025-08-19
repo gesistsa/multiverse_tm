@@ -8,6 +8,16 @@ tvinnereim: intermediate/tvinnereim/runs/1
 takano: intermediate/takano/runs/1
 
 ## takano
+results/aggregated/takano/3.csv: intermediate/takano/runs/3
+	mkdir -p results/aggregated/takano
+	Rscript takano/03_combine.R 3
+intermediate/takano/runs/3: takano_dfms
+	Rscript takano/02_train.R 3
+results/aggregated/takano/2.csv: intermediate/takano/runs/2
+	mkdir -p results/aggregated/takano
+	Rscript takano/03_combine.R 2
+intermediate/takano/runs/2: takano_dfms
+	Rscript takano/02_train.R 2
 results/aggregated/takano/1.csv: intermediate/takano/runs/1
 	mkdir -p results/aggregated/takano
 	Rscript takano/03_combine.R 1
@@ -26,6 +36,16 @@ rawdata/data_pilot_cleaned.csv:
 	echo "4a0dfd051130d096f7fd07315a38bfc4  rawdata/data_pilot_cleaned.csv" | md5sum -c
 
 # tvinnereim
+results/aggregated/tvinnereim/3.csv: intermediate/tvinnereim/runs/3
+	mkdir -p results/aggregated/tvinnereim
+	Rscript tvinnereim/03_combine.R 3
+intermediate/tvinnereim/runs/3: tvinnereim_dfms
+	Rscript tvinnereim/02_train.R 3
+results/aggregated/tvinnereim/2.csv: intermediate/tvinnereim/runs/2
+	mkdir -p results/aggregated/tvinnereim
+	Rscript tvinnereim/03_combine.R 2
+intermediate/tvinnereim/runs/2: tvinnereim_dfms
+	Rscript tvinnereim/02_train.R 2
 results/aggregated/tvinnereim/1.csv: intermediate/tvinnereim/runs/1
 	mkdir -p results/aggregated/tvinnereim
 	Rscript tvinnereim/03_combine.R 1
@@ -44,6 +64,16 @@ rawdata/ncp-stm-data.csv:
 	echo "6072f1004cc368c476f7de3c28021d6d  rawdata/ncp-stm-data.csv" | md5sum -c
 
 # curini
+results/aggregated/curini/3.csv: intermediate/curini/runs/3
+	mkdir -p results/aggregated/curini
+	Rscript curini/03_regression.R 3
+intermediate/curini/runs/3: curini_dfms
+	Rscript curini/02_train.R 3
+results/aggregated/curini/2.csv: intermediate/curini/runs/2
+	mkdir -p results/aggregated/curini
+	Rscript curini/03_regression.R 2
+intermediate/curini/runs/2: curini_dfms
+	Rscript curini/02_train.R 2
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
 	Rscript curini/03_regression.R 1
@@ -65,6 +95,16 @@ rawdata/zip_texts.rar:
 	echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
 
 # czymara
+results/aggregated/czymara/3.csv: intermediate/czymara/3
+	mkdir -p results/aggregated/czymara
+	Rscript czymara/03_combine.R 3
+intermediate/czymara/runs/3: czymara_dfms
+	Rscript czymara/02_train.R 3
+results/aggregated/czymara/2.csv: intermediate/czymara/2
+	mkdir -p results/aggregated/czymara
+	Rscript czymara/03_combine.R 2
+intermediate/czymara/runs/2: czymara_dfms
+	Rscript czymara/02_train.R 2
 results/aggregated/czymara/1.csv: intermediate/czymara/1
 	mkdir -p results/aggregated/czymara
 	Rscript czymara/03_combine.R 1
@@ -83,6 +123,24 @@ rawdata/german-gsd-ud-2.5-191206.udpipe:
 	echo "cf7058257ada6f24ecb0a241f10cc918  rawdata/german-gsd-ud-2.5-191206.udpipe" | md5sum -c
 
 # chan
+results/aggregated/chan/3.csv: intermediate/chan/runs/3/brms
+	mkdir -p results/aggregated/chan
+	Rscript chan/05_combine.R 3
+intermediate/chan/runs/3/brms: intermediate/chan/runs/3/theta/theta
+	Rscript chan/04_brms.R 3
+intermediate/chan/runs/3/theta/theta: intermediate/chan/runs/3
+	Rscript chan/03_theta.R 3
+intermediate/chan/runs/3: chan_dfms
+	Rscript chan/02_train.R 3
+results/aggregated/chan/2.csv: intermediate/chan/runs/2/brms
+	mkdir -p results/aggregated/chan
+	Rscript chan/05_combine.R 2
+intermediate/chan/runs/2/brms: intermediate/chan/runs/2/theta/theta
+	Rscript chan/04_brms.R 2
+intermediate/chan/runs/2/theta/theta: intermediate/chan/runs/2
+	Rscript chan/03_theta.R 2
+intermediate/chan/runs/2: chan_dfms
+	Rscript chan/02_train.R 2
 results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
 	mkdir -p results/aggregated/chan
 	Rscript chan/05_combine.R 1
@@ -101,6 +159,16 @@ rawdata/final_data.RDS:
 	echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
 
 # jankin
+intermediata/jankin/runs/3/theta: intermediate/jankin/runs/3
+	mkdir -p intermediate/jankin/runs/3/theta
+	Rscript jankin/03_combine.R 3
+intermediate/jankin/runs/3: jankin_dfms
+	Rscript jankin/02_train.R 3
+intermediata/jankin/runs/2/theta: intermediate/jankin/runs/2
+	mkdir -p intermediate/jankin/runs/2/theta
+	Rscript jankin/03_combine.R 2
+intermediate/jankin/runs/2: jankin_dfms
+	Rscript jankin/02_train.R 2
 intermediata/jankin/runs/1/theta: intermediate/jankin/runs/1
 	mkdir -p intermediate/jankin/runs/1/theta
 	Rscript jankin/03_combine.R 1

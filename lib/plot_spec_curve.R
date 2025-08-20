@@ -17,6 +17,74 @@
 #library(stringr)
 #library(tidyr)
 
+.process_data_plot_spec_curve <- function(results, anchor) {
+    output <- list() # should have results_plotting, results, axis_breaks, axis_labels
+    if (is.data.frame(results)) {
+        output$results_plotting <- results |>
+            dplyr::arrange(Estimate) |>
+            dplyr::mutate(specification = seq_len(nrow(results)))
+        if (!is.null(anchor)) {
+            output$results_plotting <- output$results_plotting |>
+                dplyr::mutate(
+                    anchor = token_normalization == anchor$token_normalization &
+                        stopword_removal == anchor$stopword_removal &
+                        trimming == anchor$stopword_removal &
+                        alternative_model == anchor$alternative_model &
+                        k_setting == anchor$k_setting &
+                        iteration_setting == anchor$iteration_setting
+                )
+            output$axis_breaks <- which(output$results_plotting$anchor)
+            output$axis_labels <- c("Original")
+        } else {
+            output$results_plotting <- output$results_plotting |>
+                dplyr::mutate(anchor = FALSE)
+            output$axis_breaks <- NULL
+            output$axis_labels <- NULL
+        }
+        output$results <- results
+        return(output)
+    }
+
+    ## assumed to be list of dfs (replications) from now on
+
+    specification_order <- purrr::map(results, \(x) x$Estimate) |>
+        purrr::list_c() |>
+        matrix(ncol = length(results), byrow = FALSE) |>
+        apply(1, mean) |>
+        rank()
+
+    for (i in seq_along(results)) {
+        results[[i]]$specification <- specification_order
+    }
+
+    if (!is.null(anchor)) {
+        for (i in seq_along(results)) {
+            results[[i]] <- results[[i]] |>
+                dplyr::mutate(
+                    anchor = token_normalization == anchor$token_normalization &
+                        stopword_removal == anchor$stopword_removal &
+                        trimming == anchor$stopword_removal &
+                        alternative_model == anchor$alternative_model &
+                        k_setting == anchor$k_setting &
+                        iteration_setting == anchor$iteration_setting
+                )
+        }
+        output$axis_breaks <- results[[1]]$specification[which(
+            results[[1]]$anchor
+        )]
+        output$axis_labels <- c("Original")
+    } else {
+        for (i in seq_along(results)) {
+            results[[i]]$anchor <- FALSE
+        }
+        output$axis_breaks <- NULL
+        output$axis_labels <- NULL
+    }
+    output$results_plotting <- purrr::list_rbind(results)
+    output$results <- results
+    return(output)
+}
+
 tmmv.plot_spec_curve <- function(
     results,
     metadata = NULL,
@@ -41,27 +109,8 @@ tmmv.plot_spec_curve <- function(
     if (is.null(model_names)) {
         model_names <- c("Alt.", "Orig.")
     }
-    results_plotting <- results |>
-        dplyr::arrange(Estimate) |>
-        dplyr::mutate(specification = seq_len(nrow(results)))
-    if (!is.null(anchor)) {
-        results_plotting <- results_plotting |>
-            dplyr::mutate(
-                anchor = token_normalization == anchor$token_normalization &
-                    stopword_removal == anchor$stopword_removal &
-                    trimming == anchor$stopword_removal &
-                    alternative_model == anchor$alternative_model &
-                    k_setting == anchor$k_setting &
-                    iteration_setting == anchor$iteration_setting
-            )
-        axis_breaks <- which(results_plotting$anchor)
-        axis_labels <- c("Original")
-    } else {
-        results_plotting <- results_plotting |> dplyr::mutate(anchor = FALSE)
-        axis_breaks <- NULL
-        axis_labels <- NULL
-    }
-    plot_a <- results_plotting |>
+    processed_data <- .process_data_plot_spec_curve(results, anchor)
+    plot_a <- processed_data$results_plotting |>
         dplyr::mutate(
             color = dplyr::case_when(
                 Q2.5 > 0 ~ tmmv.colors[["orange"]],
@@ -79,7 +128,10 @@ tmmv.plot_spec_curve <- function(
             color = color,
             alpha = alpha
         )) +
-        ggplot2::geom_point(ggplot2::aes(color = color), alpha = 1, size = 1) +
+        ggplot2::geom_point(
+            ggplot2::aes(color = color, alpha = alpha),
+            size = 1
+        ) +
         ggplot2::scale_color_identity() +
         ggplot2::labs(x = "", y = ylab) +
         ggplot2::geom_pointrange(
@@ -94,8 +146,8 @@ tmmv.plot_spec_curve <- function(
             linetype = "dotted"
         ) +
         ggplot2::scale_x_continuous(
-            breaks = axis_breaks,
-            labels = axis_labels
+            breaks = processed_data$axis_breaks,
+            labels = processed_data$axis_labels
         ) +
         ggplot2::theme_minimal() +
         ggplot2::theme(
@@ -118,7 +170,13 @@ tmmv.plot_spec_curve <- function(
 
     # Todo: Panel B of the entire plot still displays k and iteration settings as
     # 1, 2, 3. I suppose that this should actually display the actual values used.
-    plot_b <- results_plotting |>
+    if (is.data.frame(results)) {
+        results_plotting_b <- processed_data$results_plotting
+    } else {
+        results_plotting_b <- processed_data$results[[1]] |>
+            dplyr::select(-anchor)
+    }
+    plot_b <- results_plotting_b |>
         dplyr::mutate(
             color = dplyr::case_when(
                 Q2.5 > 0 ~ tmmv.colors[["orange"]],
@@ -175,8 +233,8 @@ tmmv.plot_spec_curve <- function(
         ) +
         ggplot2::scale_color_identity() +
         ggplot2::scale_x_continuous(
-            breaks = axis_breaks,
-            labels = axis_labels
+            breaks = processed_data$axis_breaks,
+            labels = processed_data$axis_labels
         ) +
         ggplot2::theme_minimal() +
         ggplot2::facet_grid(key ~ 1, scales = "free_y", space = "free_y") +

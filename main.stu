@@ -1,0 +1,228 @@
+% version 2.7
+
+@all: [deps.results];
+
+SLUGS = {chan jankin czymara curini tvinnereim takano}
+RUNS = {1 2 3}
+
+DEBUG = { }
+
+>deps.results: SLUGS RUNS
+{
+    for SLUG in $(cat SLUGS); do
+        for RUN in $(cat RUNS); do
+            echo "results/aggregated/${SLUG}/${RUN}.csv"
+        done
+    done
+}
+
+results/aggregated/${SLUG}/${RUN}.csv: intermediate/${SLUG}/runs/${RUN} ${SLUG}/03_combine.R
+    -p results/aggregated/${SLUG}
+{
+    Rscript ${SLUG}/03_combine.R $RUN
+}
+
+intermediate/${SLUG}/runs/${RUN}: ${SLUG}_dfms -p intermediate/${SLUG}/runs/ $SLUG/02_train.R
+{
+    Rscript $SLUG/02_train.R $RUN
+}
+
+# chan
+chan_dfms: rawdata/final_data.RDS chan/01_read.R $[DEBUG]
+    -p intermediate/chan
+{
+    Rscript chan/01_read.R $DEBUG
+    touch chan_dfms
+}
+
+rawdata/final_data.RDS:
+    -p rawdata
+{
+    Rscript -e "tmmv.osf_download('3hazf')"
+    echo "4a3fea6f80a02e0ddf8afaf29abd1e71  rawdata/final_data.RDS" | md5sum -c -
+}
+
+# chan special
+results/aggregated/chan/$RUN.csv: intermediate/chan/runs/$RUN/brms chan/05_combine.R
+    -p results/aggregated/chan
+{
+    Rscript chan/05_combine.R $RUN
+}
+
+intermediate/chan/runs/$RUN/brms: intermediate/chan/runs/$RUN/theta/theta chan/04_brms.R
+{
+    Rscript chan/04_brms.R $RUN
+}
+
+intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/03_theta.R
+{
+    Rscript chan/03_theta.R $RUN
+}
+
+# jankin
+jankin_dfms: rawdata/jankin jankin/01_read.R $[DEBUG]
+    -p intermediate/jankin
+{
+    Rscript jankin/01_read.R $DEBUG
+    touch jankin_dfms
+}
+
+rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
+    -p rawdata/jankin
+{
+    tar -xzf rawdata/UNGDC_1946-2024.tar.gz -C rawdata/jankin
+    find rawdata/jankin -name "._*" -delete
+}
+
+rawdata/UNGDC_1946-2024.tar.gz:
+{
+    curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
+    echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
+}
+
+# czymara
+czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe czymara/01_read.R $[DEBUG]
+    -p intermediate/czymara
+{
+    Rscript czymara/01_read.R $DEBUG
+    touch czymara_dfms
+}
+
+rawdata/stopwords-de.txt:
+    -p rawdata
+{
+    curl -L "https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt" -o rawdata/stopwords-de.txt
+    echo "fa7875d925fb7eccbb082a6cd6e2c37d  rawdata/stopwords-de.txt" | md5sum -c
+}
+
+rawdata/german-gsd-ud-2.5-191206.udpipe:
+    -p rawdata
+{
+    curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe" -o rawdata/german-gsd-ud-2.5-191206.udpipe
+    echo "cf7058257ada6f24ecb0a241f10cc918  rawdata/german-gsd-ud-2.5-191206.udpipe" | md5sum -c
+}
+
+# curini
+curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab curini/01_read.R $[DEBUG]
+    -p intermediate/curini
+{
+    Rscript curini/01_read.R $DEBUG
+    touch curini_dfms
+}
+
+rawdata/italian-isdt-ud-2.5-191206.udpipe:
+    -p rawdata
+{
+    curl -L "https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe" -o rawdata/italian-isdt-ud-2.5-191206.udpipe
+    echo "0ca1865e00ec3f20c3dcc22c022955a0  rawdata/italian-isdt-ud-2.5-191206.udpipe" | md5sum -c
+}
+
+rawdata/meta_table.tab:
+    -p rawdata
+{
+    curl -L "https://dataverse.harvard.edu/api/access/datafile/4291441" -o rawdata/meta_table.tab
+    echo "84603176197dbde65c103e454379ae1f  rawdata/meta_table.tab" | md5sum -c
+}
+
+rawdata/zip_texts.rar:
+    -p rawdata
+{
+    curl -L "https://dataverse.harvard.edu/api/access/datafile/4291434" -o rawdata/zip_texts.rar
+    echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
+}
+
+# curini special
+results/aggregated/curini/$RUN.csv: intermediate/curini/runs/$RUN curini/03_regression.R
+    -p results/aggregated/curini
+{
+    Rscript curini/03_regression.R $RUN
+}
+
+# tvinnereim
+tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv tvinnereim/01_read.R $[DEBUG]
+    -p intermediate/tvinnereim
+{
+    Rscript tvinnereim/01_read.R $DEBUG
+    touch tvinnereim_dfms
+}
+
+rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
+    -p rawdata
+{
+    curl -L "https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe" -o rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe
+    echo "0ef59252b89073c1980177d72304929e  rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe" | md5sum -c
+}
+
+rawdata/ncp-stm-data.csv:
+    -p rawdata
+{
+    curl -L "https://dataverse.harvard.edu/api/access/datafile/:persistentId?persistentId=doi:10.7910/DVN/28689/KO9T0Z" -o rawdata/ncp-stm-data.csv
+    echo "6072f1004cc368c476f7de3c28021d6d  rawdata/ncp-stm-data.csv" | md5sum -c
+}
+
+# takano
+takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv takano/01_read.R $[DEBUG]
+     -p intermediate/takano
+{
+    Rscript takano/01_read.R $DEBUG
+    touch takano_dfms
+}
+
+rawdata/data_cleaned.csv:
+    -p rawdata/
+{
+    Rscript -e "tmmv.osf_download('ecmt6')"
+    echo "a3caa1f91acb327b2d026601ff2a8a0c  rawdata/data_cleaned.csv" | md5sum -c
+}
+
+rawdata/data_pilot_cleaned.csv:
+    -p rawdata
+{
+    Rscript -e "tmmv.osf_download('k6h39')"
+    echo "4a0dfd051130d096f7fd07315a38bfc4  rawdata/data_pilot_cleaned.csv" | md5sum -c
+}
+
+# dirs
+rawdata/:
+{
+    mkdir -p rawdata/
+}
+
+intermediate/${SLUG}/
+{
+    mkdir -p intermediate/${SLUG}
+}
+
+intermediate/${SLUG}/runs/
+{
+    mkdir -p intermediate/${SLUG}/runs/
+}
+
+results/aggregated/${SLUG}/
+{
+    mkdir results/aggregated/${SLUG}/
+}
+
+@test:
+{
+    Rscript --no-init-file -e "testthat::test_file('dev/lib_tests.R')"
+}
+
+@rmd:
+{
+    Rscript --no-init-file dev/cache_requirements.R
+    Rscript --no-init-file dev/update_dockerfile.R
+    Rscript --no-init-file -e "quarto::quarto_render('readme.rmd', output_file = 'readme.md')"
+}
+
+@deploy-hook:
+{
+    cp dev/precommit.sh .git/hooks/pre-commit
+    chmod +x .git/hooks/pre-commit
+}
+
+@clean:
+{
+    rm -rf rawdata/ results/ intermediate/
+    rm -f *_dfms DEBUG RUNS SLUGS deps.results
+}

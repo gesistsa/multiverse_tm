@@ -127,7 +127,7 @@ cat(paste0("```r\napt install -y \\\n",
 
 There are options that one can customize; see `.Rprofile`.
 
-[^1]: There are also additional dependencies for developers: `jsonlite`, `withr` and `quarto`
+[^1]: There are also additional dependencies for developers: `jsonlite`, `withr`, `clauswilke/colorblindr`, and `quarto`
 
 [^2]: There are also additional dependencies for developers: quarto, air, and git
 

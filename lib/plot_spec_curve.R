@@ -16,7 +16,8 @@ tmmv.plot_spec_curve <- function(
     anchor = NULL,
     ylab = "Estimate [95% Conf. I.]",
     k = NULL,
-    model_names = NULL
+    model_names = NULL,
+    color_partb = is.data.frame(results)
 ) {
     .process_data_plot_spec_curve <- function(results, anchor) {
         output <- list() # should have results_plotting, results, axis_breaks, axis_labels
@@ -171,6 +172,20 @@ tmmv.plot_spec_curve <- function(
         results_plotting_b <- processed_data$results[[1]] |>
             dplyr::select(-anchor)
     }
+    if (color_partb) {
+        results_plotting_b <- results_plotting_b |>
+            dplyr::mutate(
+                color = dplyr::case_when(
+                    Q2.5 > 0 ~ tmmv.colors[["orange"]],
+                    Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
+                    is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
+                    TRUE ~ "darkgrey"
+                )
+            )
+    } else {
+        results_plotting_b$color <- "darkgrey"
+    }
+
     plot_b <- results_plotting_b |>
         dplyr::mutate(
             color = dplyr::case_when(

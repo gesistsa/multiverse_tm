@@ -276,7 +276,7 @@ Change.” *Nature Climate Change* 5 (8): 744–47.
 </div>
 
 [^1]: There are also additional dependencies for developers: `jsonlite`,
-    `withr` and `quarto`
+    `withr`, `clauswilke/colorblindr`, and `quarto`
 
 [^2]: There are also additional dependencies for developers: quarto,
     air, and git

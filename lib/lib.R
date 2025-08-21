@@ -278,7 +278,7 @@ tmmv.unify_theta <- function(mod, trimmed_dfm, current_dfm) {
     return(final_theta)
 }
 
-# Best to use for plots with 2 colors 
+# Best to use for plots with 2 colors
 # (orange and purple)
 # Do NOT use if there are more than 4 overlapping items
 tmmv.colors <- list(
@@ -286,26 +286,19 @@ tmmv.colors <- list(
     berrypurple = "#642878",
     lightblue = "#1E8CC8",
     yellow = "#FAD205",
-    pink = "#D20064",
+    pink = "#D20064"
 )
 
 # Color palette proposed by Okabe & Ito
 # See: https://web.archive.org/web/20210209175206im_/http://jfly.iam.u-tokyo.ac.jp/color/image/pallete.jpg
-tmmv.palette_safe <- c(
-    # Orange
-    rgb(230, 159, 0, maxColorValue = 255),
-    # Sky Blue
-    rgb(86, 180, 233, maxColorValue = 255),
-    # bluish Green
-    rgb(0, 158, 155, maxColorValue = 255),
-    # Yellow
-    rgb(240, 228, 66, maxColorValue = 255),
-    # Blue
-    rgb(0, 114, 178, maxColorValue = 255),
-    # Vermilion
-    rgb(213, 94, 0, maxColorValue = 255),
-    # reddish Purple
-    rgb(204, 121, 167, maxColorValue = 255)
+tmmv.palette_safe <- list(
+    orange = grDevices::rgb(230, 159, 0, maxColorValue = 255),
+    blue = grDevices::rgb(86, 180, 233, maxColorValue = 255),
+    green = grDevices::rgb(0, 158, 155, maxColorValue = 255),
+    yellow = grDevices::rgb(240, 228, 66, maxColorValue = 255),
+    darkblue = grDevices::rgb(0, 114, 178, maxColorValue = 255),
+    vermilion = grDevices::rgb(213, 94, 0, maxColorValue = 255),
+    purple = grDevices::rgb(204, 121, 167, maxColorValue = 255)
 )
 
 tmmv.osf_download <- function(osf_handle, output_dir = "rawdata") {

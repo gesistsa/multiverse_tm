@@ -10,81 +10,6 @@
 #   Specification Curve Analyses.
 #   Available from https://CRAN.R-project.org/package=specr
 
-#library(cowplot)
-#library(dplyr)
-#library(ggplot2)
-# library("here")
-#library(stringr)
-#library(tidyr)
-
-.process_data_plot_spec_curve <- function(results, anchor) {
-    output <- list() # should have results_plotting, results, axis_breaks, axis_labels
-    if (is.data.frame(results)) {
-        output$results_plotting <- results |>
-            dplyr::arrange(Estimate) |>
-            dplyr::mutate(specification = seq_len(nrow(results)))
-        if (!is.null(anchor)) {
-            output$results_plotting <- output$results_plotting |>
-                dplyr::mutate(
-                    anchor = token_normalization == anchor$token_normalization &
-                        stopword_removal == anchor$stopword_removal &
-                        trimming == anchor$stopword_removal &
-                        alternative_model == anchor$alternative_model &
-                        k_setting == anchor$k_setting &
-                        iteration_setting == anchor$iteration_setting
-                )
-            output$axis_breaks <- which(output$results_plotting$anchor)
-            output$axis_labels <- c("Original")
-        } else {
-            output$results_plotting <- output$results_plotting |>
-                dplyr::mutate(anchor = FALSE)
-            output$axis_breaks <- NULL
-            output$axis_labels <- NULL
-        }
-        output$results <- results
-        return(output)
-    }
-
-    ## assumed to be list of dfs (replications) from now on
-
-    specification_order <- purrr::map(results, \(x) x$Estimate) |>
-        purrr::list_c() |>
-        matrix(ncol = length(results), byrow = FALSE) |>
-        apply(1, mean) |>
-        rank()
-
-    for (i in seq_along(results)) {
-        results[[i]]$specification <- specification_order
-    }
-
-    if (!is.null(anchor)) {
-        for (i in seq_along(results)) {
-            results[[i]] <- results[[i]] |>
-                dplyr::mutate(
-                    anchor = token_normalization == anchor$token_normalization &
-                        stopword_removal == anchor$stopword_removal &
-                        trimming == anchor$stopword_removal &
-                        alternative_model == anchor$alternative_model &
-                        k_setting == anchor$k_setting &
-                        iteration_setting == anchor$iteration_setting
-                )
-        }
-        output$axis_breaks <- results[[1]]$specification[which(
-            results[[1]]$anchor
-        )]
-        output$axis_labels <- c("Original")
-    } else {
-        for (i in seq_along(results)) {
-            results[[i]]$anchor <- FALSE
-        }
-        output$axis_breaks <- NULL
-        output$axis_labels <- NULL
-    }
-    output$results_plotting <- purrr::list_rbind(results)
-    output$results <- results
-    return(output)
-}
-
 tmmv.plot_spec_curve <- function(
     results,
     metadata = NULL,
@@ -93,6 +18,76 @@ tmmv.plot_spec_curve <- function(
     k = NULL,
     model_names = NULL
 ) {
+    .process_data_plot_spec_curve <- function(results, anchor) {
+        output <- list() # should have results_plotting, results, axis_breaks, axis_labels
+        if (is.data.frame(results)) {
+            output$results_plotting <- results |>
+                dplyr::arrange(Estimate) |>
+                dplyr::mutate(specification = seq_len(nrow(results)))
+            if (!is.null(anchor)) {
+                output$results_plotting <- output$results_plotting |>
+                    dplyr::mutate(
+                        anchor = token_normalization ==
+                            anchor$token_normalization &
+                            stopword_removal == anchor$stopword_removal &
+                            trimming == anchor$stopword_removal &
+                            alternative_model == anchor$alternative_model &
+                            k_setting == anchor$k_setting &
+                            iteration_setting == anchor$iteration_setting
+                    )
+                output$axis_breaks <- which(output$results_plotting$anchor)
+                output$axis_labels <- c("Original")
+            } else {
+                output$results_plotting <- output$results_plotting |>
+                    dplyr::mutate(anchor = FALSE)
+                output$axis_breaks <- NULL
+                output$axis_labels <- NULL
+            }
+            output$results <- results
+            return(output)
+        }
+
+        ## assumed to be list of dfs (replications) from now on
+
+        specification_order <- purrr::map(results, \(x) x$Estimate) |>
+            purrr::list_c() |>
+            matrix(ncol = length(results), byrow = FALSE) |>
+            apply(1, mean) |>
+            rank()
+
+        for (i in seq_along(results)) {
+            results[[i]]$specification <- specification_order
+        }
+
+        if (!is.null(anchor)) {
+            for (i in seq_along(results)) {
+                results[[i]] <- results[[i]] |>
+                    dplyr::mutate(
+                        anchor = token_normalization ==
+                            anchor$token_normalization &
+                            stopword_removal == anchor$stopword_removal &
+                            trimming == anchor$stopword_removal &
+                            alternative_model == anchor$alternative_model &
+                            k_setting == anchor$k_setting &
+                            iteration_setting == anchor$iteration_setting
+                    )
+            }
+            output$axis_breaks <- results[[1]]$specification[which(
+                results[[1]]$anchor
+            )]
+            output$axis_labels <- c("Original")
+        } else {
+            for (i in seq_along(results)) {
+                results[[i]]$anchor <- FALSE
+            }
+            output$axis_breaks <- NULL
+            output$axis_labels <- NULL
+        }
+        output$results_plotting <- purrr::list_rbind(results)
+        output$results <- results
+        return(output)
+    }
+
     if (!is.null(metadata)) {
         if (metadata$keyword) {
             keyworded_k <- length(metadata$dict)

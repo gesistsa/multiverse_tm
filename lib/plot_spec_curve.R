@@ -188,14 +188,6 @@ tmmv.plot_spec_curve <- function(
 
     plot_b <- results_plotting_b |>
         dplyr::mutate(
-            color = dplyr::case_when(
-                Q2.5 > 0 ~ tmmv.colors[["orange"]],
-                Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
-                is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
-                TRUE ~ "darkgrey"
-            )
-        ) |>
-        dplyr::mutate(
             token_normalization = dplyr::case_when(
                 stringr::str_equal(token_normalization, "none") ~ "None",
                 stringr::str_equal(token_normalization, "lemmatization") ~

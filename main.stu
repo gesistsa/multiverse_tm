@@ -16,7 +16,7 @@ DEBUG = { }
     done
 }
 
-results/aggregated/${SLUG}/${RUN}.csv: intermediate/${SLUG}/runs/${RUN} ${SLUG}/03_combine.R
+results/aggregated/${SLUG}/${RUN}.csv: -p intermediate/${SLUG}/runs/${RUN} ${SLUG}/03_combine.R
     -p results/aggregated/${SLUG}
 {
     Rscript ${SLUG}/03_combine.R $RUN

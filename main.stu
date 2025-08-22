@@ -22,17 +22,16 @@ results/aggregated/${SLUG}/${RUN}.csv: -p intermediate/${SLUG}/runs/${RUN} ${SLU
     Rscript ${SLUG}/03_combine.R $RUN
 }
 
-intermediate/${SLUG}/runs/${RUN}: ${SLUG}_dfms -p intermediate/${SLUG}/runs/ $SLUG/02_train.R
+intermediate/${SLUG}/runs/${RUN}: @${SLUG}_dfms -p intermediate/${SLUG}/runs/ $SLUG/02_train.R
 {
     Rscript $SLUG/02_train.R $RUN
 }
 
 # chan
-chan_dfms: rawdata/final_data.RDS chan/01_read.R $[DEBUG]
+@chan_dfms: rawdata/final_data.RDS chan/01_read.R $[DEBUG]
     -p intermediate/chan
 {
     Rscript chan/01_read.R $DEBUG
-    touch chan_dfms
 }
 
 rawdata/final_data.RDS:
@@ -60,11 +59,10 @@ intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/03_
 }
 
 # jankin
-jankin_dfms: rawdata/jankin jankin/01_read.R $[DEBUG]
+@jankin_dfms: rawdata/jankin jankin/01_read.R $[DEBUG]
     -p intermediate/jankin
 {
     Rscript jankin/01_read.R $DEBUG
-    touch jankin_dfms
 }
 
 rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
@@ -81,11 +79,10 @@ rawdata/UNGDC_1946-2024.tar.gz:
 }
 
 # czymara
-czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe czymara/01_read.R $[DEBUG]
+@czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe czymara/01_read.R $[DEBUG]
     -p intermediate/czymara
 {
     Rscript czymara/01_read.R $DEBUG
-    touch czymara_dfms
 }
 
 rawdata/stopwords-de.txt:
@@ -103,11 +100,10 @@ rawdata/german-gsd-ud-2.5-191206.udpipe:
 }
 
 # curini
-curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab curini/01_read.R $[DEBUG]
+@curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab curini/01_read.R $[DEBUG]
     -p intermediate/curini
 {
     Rscript curini/01_read.R $DEBUG
-    touch curini_dfms
 }
 
 rawdata/italian-isdt-ud-2.5-191206.udpipe:
@@ -139,11 +135,10 @@ results/aggregated/curini/$RUN.csv: intermediate/curini/runs/$RUN curini/03_regr
 }
 
 # tvinnereim
-tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv tvinnereim/01_read.R $[DEBUG]
+@tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.5-191206.udpipe rawdata/ncp-stm-data.csv tvinnereim/01_read.R $[DEBUG]
     -p intermediate/tvinnereim
 {
     Rscript tvinnereim/01_read.R $DEBUG
-    touch tvinnereim_dfms
 }
 
 rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe:
@@ -161,11 +156,10 @@ rawdata/ncp-stm-data.csv:
 }
 
 # takano
-takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv takano/01_read.R $[DEBUG]
+@takano_dfms: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv takano/01_read.R $[DEBUG]
      -p intermediate/takano
 {
     Rscript takano/01_read.R $DEBUG
-    touch takano_dfms
 }
 
 rawdata/data_cleaned.csv:
@@ -224,5 +218,5 @@ results/aggregated/${SLUG}/
 @clean:
 {
     rm -rf rawdata/ results/ intermediate/
-    rm -f *_dfms DEBUG RUNS SLUGS deps.results
+    rm -f DEBUG RUNS SLUGS deps.results
 }

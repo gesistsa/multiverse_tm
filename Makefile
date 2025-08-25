@@ -66,17 +66,17 @@ rawdata/ncp-stm-data.csv:
 # curini
 results/aggregated/curini/3.csv: intermediate/curini/runs/3
 	mkdir -p results/aggregated/curini
-	Rscript curini/03_regression.R 3
+	Rscript curini/03_combine.R 3
 intermediate/curini/runs/3: curini_dfms
 	Rscript curini/02_train.R 3
 results/aggregated/curini/2.csv: intermediate/curini/runs/2
 	mkdir -p results/aggregated/curini
-	Rscript curini/03_regression.R 2
+	Rscript curini/03_combine.R 2
 intermediate/curini/runs/2: curini_dfms
 	Rscript curini/02_train.R 2
 results/aggregated/curini/1.csv: intermediate/curini/runs/1
 	mkdir -p results/aggregated/curini
-	Rscript curini/03_regression.R 1
+	Rscript curini/03_combine.R 1
 intermediate/curini/runs/1: curini_dfms
 	Rscript curini/02_train.R 1	
 curini_dfms: rawdata/italian-isdt-ud-2.5-191206.udpipe rawdata/zip_texts.rar rawdata/meta_table.tab

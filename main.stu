@@ -127,13 +127,6 @@ rawdata/zip_texts.rar:
     echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
 }
 
-# curini special
-results/aggregated/curini/$RUN.csv: intermediate/curini/runs/$RUN curini/03_regression.R
-    -p results/aggregated/curini
-{
-    Rscript curini/03_regression.R $RUN
-}
-
 # tvinnereim
 @tvinnereim_dfms: rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe rawdata/ncp-stm-data.csv tvinnereim/01_read.R $[DEBUG]
     -p intermediate/tvinnereim

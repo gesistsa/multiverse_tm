@@ -27,8 +27,8 @@ done
 
 if $NEED_RERENDERING; then
     if [ -n $QUARTO_AVAILABLE ]; then
-	if ! make rmd; then
-	    echo "Error: 'make rmd' failed. Aborting commit."
+	if ! stu @rmd; then
+	    echo "Error: 'stu @rmd' failed. Aborting commit."
 	    exit 1
 	fi
 	git add readme.md

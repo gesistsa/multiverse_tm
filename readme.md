@@ -3,7 +3,8 @@
 # Setup
 
 **Requires R 4.1.0 or newer** We tested our code on R 4.5.1 on Ubuntu
-Linux 22.04.
+Linux 22.04. [`stu`](https://github.com/kunegis/stu) was used to build
+the project.
 
 There are two ways to manage your R environment so that the correct
 packages are installed:
@@ -79,10 +80,11 @@ Dependencies” at the bottom of this readme.
 
 All selected studies make the data and source code publicly available.
 The required data files from each study should be in the `rawdata`
-directory. Most files can be downloaded automatically by using
-`make rawdata/<filename>`. For example, to download the text data for
-Curini and Vignoli (2021) use `make rawdata/zip_texts.rar`. Below is a
-list of the selected studies and their required datafiles:
+directory. All files, except `rawdata/Corona-survey_fill.dta`, can be
+downloaded automatically by using `stu rawdata/<filename>`. For example,
+to download the text data for Curini and Vignoli (2021) use
+`stu rawdata/zip_texts.rar`. Below is a list of the selected studies and
+their required datafiles:
 
 - Chan, Zeng, and Schäfer (2022): Data and code is available on
   [OSF](https://osf.io/ycx6j/)
@@ -102,7 +104,7 @@ list of the selected studies and their required datafiles:
   [Github](https://github.com/czymara/perceiving-COVID19-in-Germany) and
   [OSF](https://osf.io/6s7rp/)
   - Text / survey data:
-    [`Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
+    [`rawdata/Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
     (You must request it via GESIS BASIS)
   - Stop word list:
     [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
@@ -140,8 +142,8 @@ docker compose build
 docker compose up
 ```
 
-Note that `docker compose up` currently runs the debug mode of all
-analysis steps.
+Note that `docker compose up` currently runs the debug mode of the
+`takano` analysis.
 
 # Project Dependencies
 
@@ -156,6 +158,7 @@ Packages <- c(
     "furrr",
     "future",
     "ggplot2",
+    "grDevices",
     "grid",
     "haven",
     "here",

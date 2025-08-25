@@ -213,3 +213,9 @@ results/aggregated/${SLUG}/
     rm -rf rawdata/ results/ intermediate/
     rm -f DEBUG RUNS SLUGS deps.results
 }
+
+@dockertest: rawdata/data_cleaned.csv rawdata/data_pilot_cleaned.csv takano/01_read.R $[DEBUG]
+{
+    Rscript takano/01_read.R --debug
+    Rscript takano/02_train.R --debug
+}

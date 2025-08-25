@@ -42,20 +42,20 @@ rawdata/final_data.RDS:
 }
 
 # chan special
-results/aggregated/chan/$RUN.csv: intermediate/chan/runs/$RUN/brms chan/05_combine.R
+results/aggregated/chan/$RUN.csv: intermediate/chan/runs/$RUN/brms chan/03_combine.R
     -p results/aggregated/chan
 {
-    Rscript chan/05_combine.R $RUN
+    Rscript chan/03_combine.R $RUN
 }
 
-intermediate/chan/runs/$RUN/brms: intermediate/chan/runs/$RUN/theta/theta chan/04_brms.R
+intermediate/chan/runs/$RUN/brms: intermediate/chan/runs/$RUN/theta/theta chan/02b_brms.R
 {
-    Rscript chan/04_brms.R $RUN
+    Rscript chan/02b_brms.R $RUN
 }
 
-intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/03_theta.R
+intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/02a_theta.R
 {
-    Rscript chan/03_theta.R $RUN
+    Rscript chan/02a_theta.R $RUN
 }
 
 # jankin
@@ -125,13 +125,6 @@ rawdata/zip_texts.rar:
 {
     curl -L "https://dataverse.harvard.edu/api/access/datafile/4291434" -o rawdata/zip_texts.rar
     echo "5470b2e0193a514cad931171ff5185e8  rawdata/zip_texts.rar" | md5sum -c
-}
-
-# curini special
-results/aggregated/curini/$RUN.csv: intermediate/curini/runs/$RUN curini/03_regression.R
-    -p results/aggregated/curini
-{
-    Rscript curini/03_regression.R $RUN
 }
 
 # tvinnereim

@@ -142,8 +142,8 @@ docker compose build
 docker compose up
 ```
 
-Note that `docker compose up` currently runs the debug mode of all
-analysis steps.
+Note that `docker compose up` currently runs the debug mode of the
+`takano` analysis.
 
 # Project Dependencies
 

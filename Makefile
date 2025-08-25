@@ -125,29 +125,29 @@ rawdata/german-gsd-ud-2.5-191206.udpipe:
 # chan
 results/aggregated/chan/3.csv: intermediate/chan/runs/3/brms
 	mkdir -p results/aggregated/chan
-	Rscript chan/05_combine.R 3
+	Rscript chan/03_combine.R 3
 intermediate/chan/runs/3/brms: intermediate/chan/runs/3/theta/theta
-	Rscript chan/04_brms.R 3
+	Rscript chan/02b_brms.R 3
 intermediate/chan/runs/3/theta/theta: intermediate/chan/runs/3
-	Rscript chan/03_theta.R 3
+	Rscript chan/02a_theta.R 3
 intermediate/chan/runs/3: chan_dfms
 	Rscript chan/02_train.R 3
 results/aggregated/chan/2.csv: intermediate/chan/runs/2/brms
 	mkdir -p results/aggregated/chan
-	Rscript chan/05_combine.R 2
+	Rscript chan/03_combine.R 2
 intermediate/chan/runs/2/brms: intermediate/chan/runs/2/theta/theta
-	Rscript chan/04_brms.R 2
+	Rscript chan/02b_brms.R 2
 intermediate/chan/runs/2/theta/theta: intermediate/chan/runs/2
-	Rscript chan/03_theta.R 2
+	Rscript chan/02a_theta.R 2
 intermediate/chan/runs/2: chan_dfms
 	Rscript chan/02_train.R 2
 results/aggregated/chan/1.csv: intermediate/chan/runs/1/brms
 	mkdir -p results/aggregated/chan
-	Rscript chan/05_combine.R 1
+	Rscript chan/03_combine.R 1
 intermediate/chan/runs/1/brms: intermediate/chan/runs/1/theta/theta
-	Rscript chan/04_brms.R 1
+	Rscript chan/02b_brms.R 1
 intermediate/chan/runs/1/theta/theta: intermediate/chan/runs/1
-	Rscript chan/03_theta.R 1
+	Rscript chan/02a_theta.R 1
 intermediate/chan/runs/1: chan_dfms
 	Rscript chan/02_train.R 1
 chan_dfms: rawdata/final_data.RDS

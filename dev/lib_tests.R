@@ -69,7 +69,7 @@ test_get_settings_filter <- function() {
         args$debug <- FALSE
         x <- tmmv.get_settings(full = TRUE, args = args)
         for (i in sample(seq_along(x), 10)) {
-            saveRDS(iris, file.path(wd, paste0(rlang::hash(x[[i]]), ".RDS")))
+            saveRDS(iris, tmmv.get_rds_filename(x[[i]], wd))
         }
         y1 <- tmmv.get_settings(full = TRUE, args = args)
         testthat::expect_true(length(x) - length(y1) == 10)
@@ -85,7 +85,7 @@ test_get_settings_filter <- function() {
         args$debug <- FALSE
         x <- tmmv.get_settings(full = FALSE, args = args)
         for (i in sample(seq_along(x), 10)) {
-            saveRDS(iris, file.path(wd, paste0(rlang::hash(x[[i]]), ".RDS")))
+            saveRDS(iris, tmmv.get_rds_filename(x[[i]], wd))
         }
         y1 <- tmmv.get_settings(full = FALSE, args = args)
         testthat::expect_true(length(x) - length(y1) == 10)
@@ -192,21 +192,21 @@ test_create_dir <- function() {
     withr::with_tempdir({
         wd <- getwd()
         args <- list()
-        args$output_dir <- file.path(wd, "intermediate", "1")
+        args$output_dir <- fs::path(wd, "intermediate", "1")
         testthat::expect_error(tmmv.create_dir(args), NA)
-        testthat::expect_true(dir.exists(args$output_dir)) ## #13
+        testthat::expect_true(fs::dir_exists(args$output_dir))
         ## ontop
         testthat::expect_error(tmmv.create_dir(args, ontop = "brms"), NA)
-        testthat::expect_true(dir.exists(file.path(args$output_dir, "brms")))
+        testthat::expect_true(fs::dir_exists(fs::path(args$output_dir, "brms")))
         ## clean
-        write.csv(iris, file.path(args$output_dir, "brms", "iris.csv"))
-        testthat::expect_true(file.exists(file.path(
+        write.csv(iris, fs::path(args$output_dir, "brms", "iris.csv"))
+        testthat::expect_true(fs::file_exists(fs::path(
             args$output_dir,
             "brms",
             "iris.csv"
         )))
         testthat::expect_error(tmmv.create_dir(args, ontop = "brms"), NA)
-        testthat::expect_true(file.exists(file.path(
+        testthat::expect_true(fs::file_exists(fs::path(
             args$output_dir,
             "brms",
             "iris.csv"
@@ -215,11 +215,19 @@ test_create_dir <- function() {
             tmmv.create_dir(args, ontop = "brms", clean = TRUE),
             NA
         )
-        testthat::expect_false(file.exists(file.path(
+        testthat::expect_false(fs::file_exists(fs::path(
             args$output_dir,
             "brms",
             "iris.csv"
         )))
+    })
+    ## clean = TRUE still works when the dir does not exist
+    withr::with_tempdir({
+        wd <- getwd()
+        args <- list()
+        args$output_dir <- file.path(wd, "intermediate", "1")
+        testthat::expect_error(tmmv.create_dir(args, clean = TRUE), NA)
+        testthat::expect_true(fs::dir_exists(args$output_dir))
     })
 }
 
@@ -228,7 +236,7 @@ testthat::test_that("tests", {
     test_get_settings_filter()
     test_get_current()
     test_create_dir()
-    if (dir.exists(here::here("dev/TXT"))) {
+    if (fs::dir_exists(here::here("dev/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()
     }

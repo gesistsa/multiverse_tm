@@ -210,7 +210,7 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
         ) ## see note
     }
     current_hash <- rlang::hash(setting)
-    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, tmmv.get_rds_filename(setting, args$output_dir))
     gc()
     invisible(NULL)
 }
@@ -223,15 +223,14 @@ purrr::walk(
     .progress = !args$debug
 )
 
-
 ## DEBUG_MODE: test
 if (args$debug) {
     library(testthat)
     output_dir <- args$output_dir
     for (setting in settings) {
         ## print(setting)
-        filename <- paste0(rlang::hash(setting), ".RDS")
-        testthat::expect_true(file.exists(here(output_dir, filename)))
+        filename <- tmmv.get_rds_filename(setting, output_dir)
+        testthat::expect_true(fs::file_exists(here(output_dir, filename)))
         current_dfm <- readRDS(here(output_dir, filename))
         features <- featnames(current_dfm)
         if (setting$token_normalization == "none") {

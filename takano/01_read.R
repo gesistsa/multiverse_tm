@@ -189,7 +189,7 @@ process_tokens <- function(setting, current_tokens_list, args) {
     colnames(current_dfm) <- current_tokens$meta$TERM[!mask]
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
-    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, tmmv.get_rds_filename(setting, args$output_dir))
     gc()
     invisible(NULL)
 }

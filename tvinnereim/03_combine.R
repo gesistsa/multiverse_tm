@@ -12,9 +12,9 @@ library(furrr)
 
 anchor_setting <- tmmv.data[[args$slug]]$anchor
 
-anchor_mod <- readRDS(here(
-    args$output_dir,
-    paste0(rlang::hash(anchor_setting), ".RDS")
+anchor_mod <- readRDS(tmmv.get_rds_filename(
+    anchor_setting,
+    here(args$output_dir)
 ))
 
 set.seed(anchor_mod$random_seed)
@@ -46,9 +46,9 @@ max_topic_index <- which.max(
 anchor_theta <- anchor_mod$theta[, max_topic_index]
 
 get_effect_size_mod <- function(setting, anchor_theta) {
-    current_mod <- readRDS(here(
-        args$output_dir,
-        paste0(rlang::hash(setting), ".RDS")
+    current_mod <- readRDS(tmmv.get_rds_filename(
+        setting,
+        here(args$output_dir)
     ))
     set.seed(current_mod$random_seed)
     k <- ncol(current_mod$theta)
@@ -102,7 +102,6 @@ get_effect_size_mod <- function(setting, anchor_theta) {
     output <- round(output, 6)
     return(cbind(as.data.frame(setting), output))
 }
-
 
 if (args$debug) {
     plan(sequential)

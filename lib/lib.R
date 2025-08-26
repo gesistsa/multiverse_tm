@@ -7,13 +7,13 @@ source(here::here("lib/data.R"))
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
 tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
-    if (dir.exists(input_path)) {
-        txt_files <- list.files(input_path, recursive = TRUE)
+    if (fs::dir_exists(input_path)) {
+        txt_files <- fs::dir_ls(input_path, recurse = TRUE, type = "file")
         txt_content <- vapply(
             txt_files,
             function(x) {
                 paste(
-                    suppressWarnings(readLines(file.path(input_path, x))),
+                    suppressWarnings(readLines(x)),
                     collapse = "\n"
                 )
             },
@@ -81,13 +81,12 @@ tmmv.parse_args <- function(args = commandArgs()) {
 tmmv.create_dir <- function(args, ontop = NULL, clean = FALSE) {
     output_dir <- args$output_dir
     if (!is.null(ontop)) {
-        output_dir <- file.path(output_dir, ontop)
+        output_dir <- fs::path(output_dir, ontop)
     }
-    if (clean) {
-        unlink(output_dir, recursive = TRUE, force = TRUE)
+    if (clean && fs::dir_exists(output_dir)) {
+        fs::dir_delete(output_dir)
     }
-    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-    stopifnot(dir.exists(output_dir))
+    fs::dir_create(output_dir, recurse = TRUE)
     return(invisible(output_dir))
 }
 
@@ -95,10 +94,10 @@ tmmv.parse_args_read <- function(slug = "chan") {
     args <- tmmv.parse_args()
     args$slug <- slug
     if (!args$debug) {
-        args$output_dir <- paste0("intermediate/", slug)
+        args$output_dir <- fs::path("intermediate/", slug)
         return(args)
     }
-    args$output_dir <- paste0("debug/", slug)
+    args$output_dir <- fs::path("debug/", slug)
     tmmv.create_dir(args, clean = TRUE)
     message(
         "DEBUG MODE ENABLED. Please check the artefacts in",
@@ -162,6 +161,15 @@ tmmv.parse_args_train <- function(
     return(args)
 }
 
+## only because it happens frequently
+tmmv.get_rds_filename <- function(setting, output_dir = NULL) {
+    rds_filename <- paste0(rlang::hash(setting), ".RDS")
+    if (is.null(output_dir)) {
+        return(rds_filename)
+    }
+    return(fs::path(output_dir, rds_filename))
+}
+
 ## for #14
 tmmv.get_settings <- function(full = TRUE, args = NULL, .nothing_quit = TRUE) {
     settings <- list(
@@ -182,7 +190,7 @@ tmmv.get_settings <- function(full = TRUE, args = NULL, .nothing_quit = TRUE) {
     ## filtering
     all_artefacts <- list.files(args$output_dir, pattern = "\\.RDS$")
     output <- purrr::discard(output, function(x) {
-        paste0(rlang::hash(x), ".RDS") %in% all_artefacts
+        tmmv.get_rds_filename(x) %in% all_artefacts
     })
     if (length(output) == 0 && .nothing_quit) {
         quit("no", status = 0)

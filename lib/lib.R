@@ -55,6 +55,7 @@ tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
     return(output)
 }
 
+
 tmmv.parse_args <- function(args = commandArgs()) {
     output <- list()
     output$debug <- "--debug" %in% args
@@ -75,6 +76,21 @@ tmmv.parse_args <- function(args = commandArgs()) {
     return(output)
 }
 
+## a reusable function to create `args$output_dir`
+## to be rewritten with fs #13
+tmmv.create_dir <- function(args, ontop = NULL, clean = FALSE) {
+    output_dir <- args$output_dir
+    if (!is.null(ontop)) {
+        output_dir <- file.path(output_dir, ontop)
+    }
+    if (clean) {
+        unlink(output_dir, recursive = TRUE, force = TRUE)
+    }
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    stopifnot(dir.exists(output_dir))
+    return(invisible(output_dir))
+}
+
 tmmv.parse_args_read <- function(slug = "chan") {
     args <- tmmv.parse_args()
     args$slug <- slug
@@ -83,8 +99,7 @@ tmmv.parse_args_read <- function(slug = "chan") {
         return(args)
     }
     args$output_dir <- paste0("debug/", slug)
-    unlink(args$output_dir, recursive = TRUE, force = TRUE)
-    dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
+    tmmv.create_dir(args, clean = TRUE)
     message(
         "DEBUG MODE ENABLED. Please check the artefacts in",
         args$output_dir,
@@ -141,15 +156,9 @@ tmmv.parse_args_train <- function(
             output_display,
             "\n"
         )
-        unlink(
-            here::here(args$prefix, slug, args$current_run),
-            recursive = TRUE,
-            force = TRUE
-        )
         args$output_dir <- here::here(args$prefix, slug, args$current_run)
     }
-    dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
-    stopifnot(dir.exists(args$output_dir))
+    tmmv.create_dir(args, clean = args$debug)
     return(args)
 }
 

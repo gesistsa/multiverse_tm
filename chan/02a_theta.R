@@ -1,8 +1,7 @@
 args <- tmmv.parse_args_train(slug = "chan")
 settings <- tmmv.get_settings(full = TRUE, args = NULL)
 
-dir.create(file.path(args$output_dir, "theta"), showWarnings = FALSE)
-stopifnot(dir.exists(file.path(args$output_dir, "theta")))
+tmmv.create_dir(args, ontop = "theta")
 
 theta <- list()
 

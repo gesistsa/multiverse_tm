@@ -21,7 +21,7 @@ stopifnot(file.exists(theta_path))
 
 theta <- readRDS(theta_path)
 
-dir.create(args$output_dir, showWarnings = FALSE)
+tmmv.create_dir(args)
 
 library(here)
 library(purrr)

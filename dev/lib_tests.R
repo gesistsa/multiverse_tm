@@ -188,10 +188,46 @@ test_get_current <- function() {
     testthat::expect_equal(names(current$keywords), "videogame")
 }
 
+test_create_dir <- function() {
+    withr::with_tempdir({
+        wd <- getwd()
+        args <- list()
+        args$output_dir <- file.path(wd, "intermediate", "1")
+        testthat::expect_error(tmmv.create_dir(args), NA)
+        testthat::expect_true(dir.exists(args$output_dir)) ## #13
+        ## ontop
+        testthat::expect_error(tmmv.create_dir(args, ontop = "brms"), NA)
+        testthat::expect_true(dir.exists(file.path(args$output_dir, "brms")))
+        ## clean
+        write.csv(iris, file.path(args$output_dir, "brms", "iris.csv"))
+        testthat::expect_true(file.exists(file.path(
+            args$output_dir,
+            "brms",
+            "iris.csv"
+        )))
+        testthat::expect_error(tmmv.create_dir(args, ontop = "brms"), NA)
+        testthat::expect_true(file.exists(file.path(
+            args$output_dir,
+            "brms",
+            "iris.csv"
+        )))
+        testthat::expect_error(
+            tmmv.create_dir(args, ontop = "brms", clean = TRUE),
+            NA
+        )
+        testthat::expect_false(file.exists(file.path(
+            args$output_dir,
+            "brms",
+            "iris.csv"
+        )))
+    })
+}
+
 testthat::test_that("tests", {
     test_get_settings()
     test_get_settings_filter()
     test_get_current()
+    test_create_dir()
     if (dir.exists(here::here("dev/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()

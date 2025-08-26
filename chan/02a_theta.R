@@ -7,7 +7,7 @@ theta <- list()
 
 for (setting in settings) {
     current_hash <- rlang::hash(setting)
-    mod_file <- file.path(args$output_dir, paste0(current_hash, ".RDS"))
+    mod_file <- tmmv.get_rds_filename(setting, args$output_dir)
     stopifnot(file.exists(mod_file))
     mod <- readRDS(mod_file)
     theta[[current_hash]] <- mod$mod$theta[, 1]

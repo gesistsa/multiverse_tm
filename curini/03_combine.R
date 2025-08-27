@@ -118,11 +118,8 @@ cbind(
 ) |>
     write.csv(output_path, row.names = FALSE)
 
-
-hashes <- purrr::map_chr(settings, \(x) rlang::hash(x))
-
 theta <- purrr::map(res, \(x) x$data$multi100)
-names(theta) <- hashes
+names(theta) <- purrr::map_chr(settings, \(x) rlang::hash(x))
 saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
 
 generate_conditional_effect <- function(res, hash) {

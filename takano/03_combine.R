@@ -45,46 +45,27 @@ max_topic_index <- which.max(
 anchor_theta <- anchor_mod$theta[, max_topic_index]
 ## summary(anchor_mod$mod) ##look like scenary
 
-get_effect_size_mod <- function(setting, anchor_theta) {
-    current_mod <- readRDS(tmmv.get_rds_filename(
-        setting,
-        here(args$output_dir)
-    ))
-    set.seed(current_mod$random_seed)
-    k <- ncol(current_mod$theta)
-    if (setting$alternative_model) {
-        strata_topic <- keyATM::by_strata_DocTopic(
-            current_mod$mod,
-            by_var = "time",
-            by_values = c(4, 5),
-            labels = c(4, 5)
-        )
-        theta1 <- strata_topic$theta[[1]]
-        theta2 <- strata_topic$theta[[2]]
-        theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
-        theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
-        theta_diff_mean <- apply(theta_diff, 2, mean)
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        output <- data.frame(
-            Estimate = theta_diff_mean[anchor_index],
-            Q2.5 = theta_diff_quantile[1, anchor_index],
-            Q97.5 = theta_diff_quantile[2, anchor_index]
-        )
-        rownames(output) <- NULL
-    } else {
-        est <- stm::estimateEffect(
-            ~ time +
-                selfLoss +
-                connectedness +
-                vastness +
-                physiological +
-                accommodation,
-            stmobj = current_mod$mod,
-            metadata = current_mod$docvars
-        )
+.get_keyatm_strata_topic_func <- function(current_mod) {
+    keyATM::by_strata_DocTopic(
+        current_mod$mod,
+        by_var = "time",
+        by_values = c(4, 5),
+        labels = c(4, 5)
+    )
+}
 
-        res <- plot(
-            est,
+.get_stm_estimate_func <- function(current_mod) {
+    stm::estimateEffect(
+        ~ time +
+            selfLoss +
+            connectedness +
+            vastness +
+            physiological +
+            accommodation,
+        stmobj = current_mod$mod,
+        metadata = current_mod$docvars
+    ) |>
+        plot(
             covariate = "time",
             model = current_mod$mod,
             method = "difference",
@@ -92,18 +73,6 @@ get_effect_size_mod <- function(setting, anchor_theta) {
             cov.value2 = 4,
             omit.plot = TRUE
         )
-
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        output <- data.frame(
-            Estimate = as.vector(res$means)[anchor_index],
-            Q2.5 = res$cis[[anchor_index]][1],
-            Q97.5 = res$cis[[anchor_index]][2]
-        )
-        colnames(output) <- c("Estimate", "Q2.5", "Q97.5")
-        rownames(output) <- NULL
-    }
-    output <- round(output, 6)
-    return(cbind(as.data.frame(setting), output))
 }
 
 if (args$debug) {
@@ -112,19 +81,14 @@ if (args$debug) {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
 
-output_path <- here::here(
-    "results",
-    "aggregated",
-    args$slug,
-    paste0(args$current_run, ".csv")
-)
-
-res <- furrr::future_map(
+furrr::future_map(
     settings,
-    get_effect_size_mod,
+    tmmv.get_effect_size_mod,
     anchor_theta = anchor_theta,
+    args = args,
+    .get_keyatm_strata_topic_func = .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func = .get_stm_estimate_func,
     .progress = TRUE,
     .options = furrr_options(seed = NULL)
 ) |>
-    purrr::list_rbind() |>
-    write.csv(output_path, row.names = FALSE)
+    tmmv.postprocess_effect_size_mod(args = args)

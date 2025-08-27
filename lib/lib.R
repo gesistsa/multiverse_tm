@@ -318,7 +318,7 @@ tmmv.palette_safe <- list(
     purple = grDevices::rgb(204, 121, 167, maxColorValue = 255)
 )
 
-tmmv.osf_download <- function(osf_handle, output_dir = "rawdata") {
+tmmv.download_from_osf <- function(osf_handle, output_dir = "rawdata") {
     outcome <- osfr::osf_retrieve_file(osf_handle) |>
         osfr::osf_download(
             path = here::here(output_dir),

@@ -23,8 +23,10 @@ train_model <- function(
     .fix_seed = NULL,
     .return_output = FALSE
 ) {
-    dfm_filename <- paste0(rlang::hash(setting[1:3]), ".RDS")
-    current_dfm <- readRDS(here(args$prefix, args$slug, dfm_filename))
+    current_dfm <- readRDS(tmmv.get_rds_filename(
+        setting[1:3],
+        here(args$prefix, args$slug)
+    ))
 
     current <- tmmv.get_current(
         setting = setting,
@@ -87,8 +89,7 @@ train_model <- function(
     if (.return_output) {
         return(output)
     }
-    current_hash <- rlang::hash(setting)
-    saveRDS(output, file.path(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(output, tmmv.get_rds_filename(setting, args$output_dir))
 }
 
 purrr::walk(settings, train_model, args = args, .progress = !args$debug)

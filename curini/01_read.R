@@ -4,6 +4,7 @@ settings <- tmmv.get_settings(full = FALSE, args = args)
 library(here)
 library(quanteda)
 library(udpipe)
+library(dplyr)
 
 myText <- tmmv.read_text_base(
     here("rawdata/zip_texts.rar"),
@@ -11,8 +12,8 @@ myText <- tmmv.read_text_base(
     docvarnames = c("Party", "Mission")
 )
 
+## from the original R file
 myText$doc_id <- gsub(".txt", "", myText$doc_id)
-
 
 myText$text <- gsub("[\u0092]", "'", myText$text)
 myText$text <- gsub("[\u2019]", "'", myText$text)
@@ -53,7 +54,6 @@ italian_model <- udpipe_load_model(
 
 parsed_content <- udpipe_annotate(italian_model, original_corpus)
 parsed_content_df <- as.data.frame(parsed_content)
-library(dplyr)
 
 ## Unlike czymara, we can safely select the first lemma
 
@@ -191,7 +191,7 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
         )
     }
     current_hash <- rlang::hash(setting)
-    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, tmmv.get_rds_filename(setting, here(args$output_dir)))
     gc()
     invisible(NULL)
 }

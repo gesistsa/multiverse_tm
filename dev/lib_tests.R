@@ -231,11 +231,31 @@ test_create_dir <- function() {
     })
 }
 
+test_parse_args_train <- function() {
+    testthat::skip_if(rlang::is_interactive())
+    testthat::expect_error(tmmv.parse_args_train(
+        slug = "chan",
+        debug = FALSE,
+        .current_run = NULL
+    ))
+    rlang::with_interactive(value = TRUE, expr = {
+        testthat::expect_error(
+            tmmv.parse_args_train(
+                slug = "chan",
+                debug = FALSE,
+                .current_run = NULL
+            ),
+            NA
+        )
+    })
+}
+
 testthat::test_that("tests", {
     test_get_settings()
     test_get_settings_filter()
     test_get_current()
     test_create_dir()
+    test_parse_args_train()
     if (fs::dir_exists(here::here("dev/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()

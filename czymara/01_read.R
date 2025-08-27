@@ -3,9 +3,9 @@ settings <- tmmv.get_settings(full = FALSE, args = args)
 
 library(here)
 
-stopifnot(file.exists(here("rawdata/Corona-Survey_full.dta")))
-stopifnot(file.exists(here("rawdata/stopwords-de.txt")))
-stopifnot(file.exists(here("rawdata/german-gsd-ud-2.5-191206.udpipe")))
+stopifnot(fs::file_exists(here("rawdata/Corona-Survey_full.dta")))
+stopifnot(fs::file_exists(here("rawdata/stopwords-de.txt")))
+stopifnot(fs::file_exists(here("rawdata/german-gsd-ud-2.5-191206.udpipe")))
 
 library(quanteda)
 library(haven)
@@ -207,9 +207,7 @@ process_tokens <- function(setting, current_tokens_list, all_stopwords, args) {
             docfreq_type = "prop"
         )
     }
-    current_hash <- rlang::hash(setting)
-    ##print(current_hash)
-    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, tmmv.get_rds_filename(setting, here(args$output_dir)))
     gc()
     invisible(NULL)
 }

@@ -12,6 +12,8 @@ library(here)
 
 settings <- tmmv.get_settings(full = TRUE)
 
+tmmv.create_dir(args, ontop = "theta")
+
 get_theta_by_topic_name <- function(topic_name, mod) {
     topic_index <- which(stringr::str_detect(
         colnames(mod$mod$theta),
@@ -118,6 +120,10 @@ cbind(
 
 
 hashes <- purrr::map_chr(settings, \(x) rlang::hash(x))
+
+theta <- purrr::map(res, \(x) x$data$multi100)
+names(theta) <- hashes
+saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
 
 generate_conditional_effect <- function(res, hash) {
     .f = function(x, mod, data) {

@@ -331,3 +331,46 @@ tmmv.download_from_osf <- function(osf_handle, output_dir = "rawdata") {
     stopifnot(file.exists(outcome$local_path[1]))
     invisible(outcome)
 }
+
+# for use with 03_combine for czymara, takano, and tvinnereim
+tmmv.get_effect_size_mod <- function(
+    setting,
+    anchor_theta,
+    args,
+    .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func
+) {
+    current_mod <- readRDS(tmmv.get_rds_filename(
+        setting,
+        here(args$output_dir)
+    ))
+    set.seed(current_mod$random_seed)
+    k <- ncol(current_mod$theta)
+    if (setting$alternative_model) {
+        strata_topic <- .get_keyatm_strata_topic_func(current_mod)
+        theta1 <- strata_topic$theta[[1]]
+        theta2 <- strata_topic$theta[[2]]
+        theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
+        theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
+        theta_diff_mean <- apply(theta_diff, 2, mean)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        output <- data.frame(
+            Estimate = theta_diff_mean[anchor_index],
+            Q2.5 = theta_diff_quantile[1, anchor_index],
+            Q97.5 = theta_diff_quantile[2, anchor_index]
+        )
+        rownames(output) <- NULL
+    } else {
+        res <- .get_stm_estimate_func(current_mod)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        output <- data.frame(
+            Estimate = as.vector(res$means)[anchor_index],
+            Q2.5 = res$cis[[anchor_index]][1],
+            Q97.5 = res$cis[[anchor_index]][2]
+        )
+        colnames(output) <- c("Estimate", "Q2.5", "Q97.5")
+        rownames(output) <- NULL
+    }
+    output <- round(output, 6)
+    return(cbind(as.data.frame(setting), output))
+}

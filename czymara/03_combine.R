@@ -60,43 +60,21 @@ anchor_theta <- anchor_mod$theta[, max_topic_index]
 
 ## as.character(corpus_priv[which.max(anchor_theta)])
 ## docvars(corpus_priv, "gender")[which.max(anchor_theta)]
+.get_keyatm_strata_topic_func <- function(current_mod) {
+    keyATM::by_strata_DocTopic(
+        current_mod$mod,
+        by_var = "genderfemale",
+        labels = c("male", "female")
+    )
+}
 
-get_effect_size_mod <- function(setting, anchor_theta) {
-    current_mod <- readRDS(tmmv.get_rds_filename(
-        setting,
-        here(args$output_dir)
-    ))
-    set.seed(current_mod$random_seed)
-    k <- ncol(current_mod$theta)
-    if (setting$alternative_model) {
-        strata_topic <- keyATM::by_strata_DocTopic(
-            current_mod$mod,
-            by_var = "genderfemale",
-            labels = c("male", "female")
-        )
-        theta1 <- strata_topic$theta[[1]]
-        theta2 <- strata_topic$theta[[2]]
-
-        theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
-
-        theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
-        theta_diff_mean <- apply(theta_diff, 2, mean)
-
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        output <- data.frame(
-            Estimate = theta_diff_mean[anchor_index],
-            Q2.5 = theta_diff_quantile[1, anchor_index],
-            Q97.5 = theta_diff_quantile[2, anchor_index]
-        )
-        rownames(output) <- NULL
-    } else {
-        est <- stm::estimateEffect(
-            ~gender,
-            stmobj = current_mod$mod,
-            metadata = current_mod$docvars
-        )
-        res <- plot(
-            est,
+.get_stm_estimate_func <- function(current_mod) {
+    stm::estimateEffect(
+        ~gender,
+        stmobj = current_mod$mod,
+        metadata = current_mod$docvars
+    ) |>
+        plot(
             covariate = "gender",
             model = current_mod$mod,
             method = "difference",
@@ -104,17 +82,6 @@ get_effect_size_mod <- function(setting, anchor_theta) {
             cov.value2 = "male",
             omit.plot = TRUE
         )
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        output <- data.frame(
-            Estimate = as.vector(res$means)[anchor_index],
-            Q2.5 = res$cis[[anchor_index]][1],
-            Q97.5 = res$cis[[anchor_index]][2]
-        )
-        colnames(output) <- c("Estimate", "Q2.5", "Q97.5")
-        rownames(output) <- NULL
-    }
-    output <- round(output, 6)
-    return(cbind(as.data.frame(setting), output))
 }
 
 if (args$debug) {
@@ -132,8 +99,11 @@ output_path <- here::here(
 
 res <- furrr::future_map(
     settings,
-    get_effect_size_mod,
+    tmmv.get_effect_size_mod,
     anchor_theta = anchor_theta,
+    args = args,
+    .get_keyatm_strata_topic_func = .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func = .get_stm_estimate_func,
     .progress = TRUE,
     .options = furrr_options(seed = NULL)
 ) |>

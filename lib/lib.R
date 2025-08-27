@@ -125,6 +125,9 @@ tmmv.parse_args_train <- function(
         args <- tmmv.parse_args()
     }
     args$slug <- slug
+    if (rlang::is_interactive() && is.null(.current_run)) {
+        .current_run <- 1
+    }
     if (!args$debug && is.null(args$arg) && is.null(.current_run)) {
         msg <- paste(
             "You must provide the current run number, e.g. Rscript",

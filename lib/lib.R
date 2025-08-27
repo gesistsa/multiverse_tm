@@ -372,5 +372,28 @@ tmmv.get_effect_size_mod <- function(
         rownames(output) <- NULL
     }
     output <- round(output, 6)
-    return(cbind(as.data.frame(setting), output))
+    estimate <- cbind(as.data.frame(setting), output)
+    theta <- current_mod$theta[, anchor_index]
+    return(list(estimate = estimate, theta = theta))
+}
+
+tmmv.postprocess_effect_size_mod <- function(res, args) {
+    ## only for the side effect
+    output_path <- here::here(
+        "results",
+        "aggregated",
+        args$slug,
+        paste0(args$current_run, ".csv")
+    )
+    res |>
+        purrr::map("estimate") |>
+        purrr::list_rbind() |>
+        write.csv(output_path, row.names = FALSE)
+
+    tmmv.create_dir(args, ontop = "theta")
+
+    theta <- res |> purrr::map("theta")
+    names(theta) <- purrr::map_chr(settings, \(x) rlang::hash(x))
+    saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
+    invisible(NULL)
 }

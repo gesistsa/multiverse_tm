@@ -81,14 +81,7 @@ if (args$debug) {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
 
-output_path <- here::here(
-    "results",
-    "aggregated",
-    args$slug,
-    paste0(args$current_run, ".csv")
-)
-
-res <- furrr::future_map(
+furrr::future_map(
     settings,
     tmmv.get_effect_size_mod,
     anchor_theta = anchor_theta,
@@ -98,5 +91,4 @@ res <- furrr::future_map(
     .progress = TRUE,
     .options = furrr_options(seed = NULL)
 ) |>
-    purrr::list_rbind() |>
-    write.csv(output_path, row.names = FALSE)
+    tmmv.postprocess_effect_size_mod(args = args)

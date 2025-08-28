@@ -1,14 +1,13 @@
 args <- tmmv.parse_args_train(slug = "chan")
 settings <- tmmv.get_settings(full = TRUE, args = NULL)
 
-dir.create(file.path(args$output_dir, "theta"), showWarnings = FALSE)
-stopifnot(dir.exists(file.path(args$output_dir, "theta")))
+tmmv.create_dir(args, ontop = "theta")
 
 theta <- list()
 
 for (setting in settings) {
     current_hash <- rlang::hash(setting)
-    mod_file <- file.path(args$output_dir, paste0(current_hash, ".RDS"))
+    mod_file <- tmmv.get_rds_filename(setting, args$output_dir)
     stopifnot(file.exists(mod_file))
     mod <- readRDS(mod_file)
     theta[[current_hash]] <- mod$mod$theta[, 1]

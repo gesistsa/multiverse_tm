@@ -7,13 +7,13 @@ source(here::here("lib/data.R"))
 #' our base-only replacement of readtext::read_text
 #' note that input_path is not a glob
 tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
-    if (dir.exists(input_path)) {
-        txt_files <- list.files(input_path, recursive = TRUE)
+    if (fs::dir_exists(input_path)) {
+        txt_files <- fs::dir_ls(input_path, recurse = TRUE, type = "file")
         txt_content <- vapply(
             txt_files,
             function(x) {
                 paste(
-                    suppressWarnings(readLines(file.path(input_path, x))),
+                    suppressWarnings(readLines(x)),
                     collapse = "\n"
                 )
             },
@@ -55,6 +55,7 @@ tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
     return(output)
 }
 
+
 tmmv.parse_args <- function(args = commandArgs()) {
     output <- list()
     output$debug <- "--debug" %in% args
@@ -75,16 +76,29 @@ tmmv.parse_args <- function(args = commandArgs()) {
     return(output)
 }
 
+## a reusable function to create `args$output_dir`
+## to be rewritten with fs #13
+tmmv.create_dir <- function(args, ontop = NULL, clean = FALSE) {
+    output_dir <- args$output_dir
+    if (!is.null(ontop)) {
+        output_dir <- fs::path(output_dir, ontop)
+    }
+    if (clean && fs::dir_exists(output_dir)) {
+        fs::dir_delete(output_dir)
+    }
+    fs::dir_create(output_dir, recurse = TRUE)
+    return(invisible(output_dir))
+}
+
 tmmv.parse_args_read <- function(slug = "chan") {
     args <- tmmv.parse_args()
     args$slug <- slug
     if (!args$debug) {
-        args$output_dir <- paste0("intermediate/", slug)
+        args$output_dir <- fs::path("intermediate/", slug)
         return(args)
     }
-    args$output_dir <- paste0("debug/", slug)
-    unlink(args$output_dir, recursive = TRUE, force = TRUE)
-    dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
+    args$output_dir <- fs::path("debug/", slug)
+    tmmv.create_dir(args, clean = TRUE)
     message(
         "DEBUG MODE ENABLED. Please check the artefacts in",
         args$output_dir,
@@ -111,6 +125,9 @@ tmmv.parse_args_train <- function(
         args <- tmmv.parse_args()
     }
     args$slug <- slug
+    if (rlang::is_interactive() && is.null(.current_run)) {
+        .current_run <- 1
+    }
     if (!args$debug && is.null(args$arg) && is.null(.current_run)) {
         msg <- paste(
             "You must provide the current run number, e.g. Rscript",
@@ -141,16 +158,19 @@ tmmv.parse_args_train <- function(
             output_display,
             "\n"
         )
-        unlink(
-            here::here(args$prefix, slug, args$current_run),
-            recursive = TRUE,
-            force = TRUE
-        )
         args$output_dir <- here::here(args$prefix, slug, args$current_run)
     }
-    dir.create(args$output_dir, recursive = TRUE, showWarnings = FALSE)
-    stopifnot(dir.exists(args$output_dir))
+    tmmv.create_dir(args, clean = args$debug)
     return(args)
+}
+
+## only because it happens frequently
+tmmv.get_rds_filename <- function(setting, output_dir = NULL) {
+    rds_filename <- paste0(rlang::hash(setting), ".RDS")
+    if (is.null(output_dir)) {
+        return(rds_filename)
+    }
+    return(fs::path(output_dir, rds_filename))
 }
 
 ## for #14
@@ -173,7 +193,7 @@ tmmv.get_settings <- function(full = TRUE, args = NULL, .nothing_quit = TRUE) {
     ## filtering
     all_artefacts <- list.files(args$output_dir, pattern = "\\.RDS$")
     output <- purrr::discard(output, function(x) {
-        paste0(rlang::hash(x), ".RDS") %in% all_artefacts
+        tmmv.get_rds_filename(x) %in% all_artefacts
     })
     if (length(output) == 0 && .nothing_quit) {
         quit("no", status = 0)
@@ -301,7 +321,7 @@ tmmv.palette_safe <- list(
     purple = grDevices::rgb(204, 121, 167, maxColorValue = 255)
 )
 
-tmmv.osf_download <- function(osf_handle, output_dir = "rawdata") {
+tmmv.download_from_osf <- function(osf_handle, output_dir = "rawdata") {
     outcome <- osfr::osf_retrieve_file(osf_handle) |>
         osfr::osf_download(
             path = here::here(output_dir),
@@ -310,4 +330,70 @@ tmmv.osf_download <- function(osf_handle, output_dir = "rawdata") {
         )
     stopifnot(file.exists(outcome$local_path[1]))
     invisible(outcome)
+}
+
+# for use with 03_combine for czymara, takano, and tvinnereim
+tmmv.get_effect_size_mod <- function(
+    setting,
+    anchor_theta,
+    args,
+    .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func
+) {
+    current_mod <- readRDS(tmmv.get_rds_filename(
+        setting,
+        here(args$output_dir)
+    ))
+    set.seed(current_mod$random_seed)
+    k <- ncol(current_mod$theta)
+    if (setting$alternative_model) {
+        strata_topic <- .get_keyatm_strata_topic_func(current_mod)
+        theta1 <- strata_topic$theta[[1]]
+        theta2 <- strata_topic$theta[[2]]
+        theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
+        theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
+        theta_diff_mean <- apply(theta_diff, 2, mean)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        output <- data.frame(
+            Estimate = theta_diff_mean[anchor_index],
+            Q2.5 = theta_diff_quantile[1, anchor_index],
+            Q97.5 = theta_diff_quantile[2, anchor_index]
+        )
+        rownames(output) <- NULL
+    } else {
+        res <- .get_stm_estimate_func(current_mod)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        output <- data.frame(
+            Estimate = as.vector(res$means)[anchor_index],
+            Q2.5 = res$cis[[anchor_index]][1],
+            Q97.5 = res$cis[[anchor_index]][2]
+        )
+        colnames(output) <- c("Estimate", "Q2.5", "Q97.5")
+        rownames(output) <- NULL
+    }
+    output <- round(output, 6)
+    estimate <- cbind(as.data.frame(setting), output)
+    theta <- current_mod$theta[, anchor_index]
+    return(list(estimate = estimate, theta = theta))
+}
+
+tmmv.postprocess_effect_size_mod <- function(res, args) {
+    ## only for the side effect
+    output_path <- here::here(
+        "results",
+        "aggregated",
+        args$slug,
+        paste0(args$current_run, ".csv")
+    )
+    res |>
+        purrr::map("estimate") |>
+        purrr::list_rbind() |>
+        write.csv(output_path, row.names = FALSE)
+
+    tmmv.create_dir(args, ontop = "theta")
+
+    theta <- res |> purrr::map("theta")
+    names(theta) <- purrr::map_chr(settings, \(x) rlang::hash(x))
+    saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
+    invisible(NULL)
 }

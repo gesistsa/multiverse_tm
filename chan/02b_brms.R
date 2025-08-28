@@ -4,7 +4,7 @@ if (args$debug) {
     stop("No debug mode!")
 }
 
-args$output_dir <- file.path(args$output_dir, "brms")
+args$output_dir <- fs::path(args$output_dir, "brms")
 
 settings <- tmmv.get_settings(full = TRUE, args = args)
 
@@ -17,11 +17,11 @@ theta_path <- here::here(
     "theta.RDS"
 )
 
-stopifnot(file.exists(theta_path))
+stopifnot(fs::file_exists(theta_path))
 
 theta <- readRDS(theta_path)
 
-dir.create(args$output_dir, showWarnings = FALSE)
+tmmv.create_dir(args)
 
 library(here)
 library(purrr)
@@ -73,7 +73,7 @@ train_brms <- function(setting, theta, iter = 4000, .fix_seed = NULL) {
     output$setting <- setting
     saveRDS(
         output,
-        file.path(args$output_dir, paste0(rlang::hash(setting), ".RDS"))
+        tmmv.get_rds_filename(setting, args$output_dir)
     )
 }
 

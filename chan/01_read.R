@@ -3,7 +3,7 @@ settings <- tmmv.get_settings(full = FALSE, args = args)
 
 library(here)
 
-stopifnot(file.exists(here("rawdata/final_data.RDS")))
+stopifnot(fs::file_exists(here("rawdata/final_data.RDS")))
 
 library(quanteda)
 library(purrr)
@@ -67,7 +67,7 @@ process_tokens <- function(setting, current_tokens, args) {
     }
     current_hash <- rlang::hash(setting)
     ##print(current_hash)
-    saveRDS(current_dfm, here(args$output_dir, paste0(current_hash, ".RDS")))
+    saveRDS(current_dfm, tmmv.get_rds_filename(setting, here(args$output_dir)))
     ## thank you for your 16G of ram
     gc()
     invisible(NULL)

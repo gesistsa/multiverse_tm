@@ -12,6 +12,8 @@ library(here)
 
 settings <- tmmv.get_settings(full = TRUE)
 
+tmmv.create_dir(args, ontop = "theta")
+
 get_theta_by_topic_name <- function(topic_name, mod) {
     topic_index <- which(stringr::str_detect(
         colnames(mod$mod$theta),
@@ -24,10 +26,7 @@ get_theta_by_topic_name <- function(topic_name, mod) {
 }
 
 conduct_regression <- function(setting, args) {
-    mod <- readRDS(file.path(
-        args$output_dir,
-        paste0(rlang::hash(setting), ".RDS")
-    ))
+    mod <- readRDS(tmmv.get_rds_filename(setting, args$output_dir))
 
     theta <- rep(0, nrow(mod$mod$theta) * 3) |>
         matrix(ncol = 3) |>
@@ -41,10 +40,9 @@ conduct_regression <- function(setting, args) {
 
     ## Should save also the docvars in mod; but well...
 
-    current_dfm <- readRDS(here(
-        "intermediate",
-        args$slug,
-        paste0(rlang::hash(setting[1:3]), ".RDS")
+    current_dfm <- readRDS(tmmv.get_rds_filename(
+        setting[1:3],
+        here("intermediate", args$slug)
     ))
 
     reg_data <- cbind(theta, current_dfm@docvars)
@@ -120,8 +118,9 @@ cbind(
 ) |>
     write.csv(output_path, row.names = FALSE)
 
-
-hashes <- purrr::map_chr(settings, \(x) rlang::hash(x))
+theta <- purrr::map(res, \(x) x$data$multi100)
+names(theta) <- purrr::map_chr(settings, \(x) rlang::hash(x))
+saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
 
 generate_conditional_effect <- function(res, hash) {
     .f = function(x, mod, data) {

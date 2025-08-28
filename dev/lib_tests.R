@@ -250,6 +250,24 @@ test_parse_args_train <- function() {
     })
 }
 
+test_parse_args_train <- function() {
+    samedata <- list(a = c(1, 1, 1), b = c(1, 1, 1), c = c(1, 1, 1))
+    testthat::expect_error(res <- tmmv.calculate_icc(samedata), NA)
+    testthat::expect_equal(res, 1)
+    fake1 <- rnorm(100)
+    fake2 <- fake1
+    fake2[1] <- 0
+    fake3 <- fake1
+    fake3[8] <- 0
+    fakedata <- list(fake1, fake2, fake3)
+    ## res <- tmmv.calculate_icc(fakedata)
+    fakedata_df <- purrr::map(fakedata, as.data.frame) |>
+        purrr::quietly(purrr::list_cbind)() |>
+        purrr::chuck("result")
+    res2 <- psych::ICC(fakedata_df, lmer = FALSE)
+    ## testthat::expect_equal(res, res2$results[res2$results$type == "ICC2",]$ICC)
+}
+
 testthat::test_that("tests", {
     test_get_settings()
     test_get_settings_filter()

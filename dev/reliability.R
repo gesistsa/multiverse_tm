@@ -2,11 +2,6 @@ library(here)
 library(ggplot2)
 library(ggridges)
 
-read_theta <- function(slug) {}
-
-slug <- "takano"
-run <- 1
-
 read_thetas <- function(slug) {
     .f <- function(run, slug) {
         path <- here("intermediate", slug, "runs", run, "theta/theta.RDS")
@@ -17,16 +12,6 @@ read_thetas <- function(slug) {
     }
     purrr::map(c(1, 2, 3), .f = .f, slug = slug)
 }
-
-thetas <- read_thetas("tvinnereim")
-
-hashes <- names(thetas[[1]])
-
-all_iccs <- hashes |>
-    purrr::map_dbl(
-        \(x) thetas |> purrr::map(x) |> tmmv.calculate_icc(),
-        .progress = TRUE
-    )
 
 generate_density <- function(slug) {
     thetas <- read_thetas(slug)
@@ -45,5 +30,6 @@ all_density <- purrr::map(
 ) |>
     purrr::list_rbind()
 
+## the figure is sort of misleading; but we can work on it later
 ggplot(all_density, aes(x = icc, y = slug)) +
-    geom_density_ridges(stat = "binline", alpha = 0.5, scale = 1, bins = 50)
+    geom_density_ridges(alpha = 0.5)

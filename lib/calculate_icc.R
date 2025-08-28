@@ -11,12 +11,12 @@ tmmv.calculate_icc <- function(x) {
     x.s <- stack(x)
     x.df <- data.frame(x.s, subs = rep(paste("S", 1:n.obs, sep = ""), nj))
     colnames(x.df) <- c("values", "items", "id") #this makes it simpler to understand
-    ## quiet_lmer <- purrr::quietly(lme4::lmer)
-    mod.lmer <- lme4::lmer(
+    quiet_lmer <- purrr::quietly(lme4::lmer)
+    mod.lmer <- quiet_lmer(
         values ~ 1 + (1 | id) + (1 | items),
         data = x.df,
         na.action = na.omit
-    )
+    )$result
     vc <- lme4::VarCorr(mod.lmer)
     MS_id <- vc$id[1, 1]
     MS_items <- vc$items[1, 1]

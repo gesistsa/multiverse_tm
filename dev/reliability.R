@@ -1,8 +1,8 @@
-library(psych)
 library(here)
-read_theta <- function(slug) {
-    
-}
+library(ggplot2)
+library(ggridges)
+
+read_theta <- function(slug) {}
 
 slug <- "takano"
 run <- 1
@@ -15,28 +15,35 @@ read_thetas <- function(slug) {
         }
         NULL
     }
-    purrr::map(c(1,2,3), .f = .f, slug = slug)
+    purrr::map(c(1, 2, 3), .f = .f, slug = slug)
 }
 
-thetas <- read_thetas("czymara")
+thetas <- read_thetas("tvinnereim")
 
 hashes <- names(thetas[[1]])
 
-thetas |> purrr::map(hashes[13]) |> tmmv.calculate_icc()
+all_iccs <- hashes |>
+    purrr::map_dbl(
+        \(x) thetas |> purrr::map(x) |> tmmv.calculate_icc(),
+        .progress = TRUE
+    )
 
-    purrr::map(as.data.frame) |> purrr::quietly(purrr::list_cbind)() |> purrr::chuck("result") |> psych::ICC(lmer = FALSE)
+generate_density <- function(slug) {
+    thetas <- read_thetas(slug)
+    hashes <- names(thetas[[1]])
+    all_iccs <- hashes |>
+        purrr::map_dbl(
+            \(x) thetas |> purrr::map(x) |> tmmv.calculate_icc(),
+            .progress = TRUE
+        )
+    return(data.frame(slug = slug, icc = all_iccs))
+}
 
-thetas |> purrr::map(hashes[13]) |> unique() |> length()
+all_density <- purrr::map(
+    c("curini", "czymara", "takano", "tvinnereim"),
+    generate_density
+) |>
+    purrr::list_rbind()
 
-|> purrr::map(as.data.frame) |> purrr::quietly(purrr::list_cbind)() |> purrr::chuck("result") |> 
-
-|> tmmv.calculate_icc()
-
-
-all_iccs <- hashes |> purrr::map(\(x) thetas |> purrr::map(x) |> tmmv.calculate_icc(), .progress = TRUE)
-
-hashes[38] |> purrr::map(\(x) thetas |> purrr::map(x) |> tmmv.calculate_icc(), .progress = TRUE)
-
-x2 <- purrr::map(thetas, hashes[38]) |> purrr::map(as.data.frame) |> purrr::quietly(purrr::list_cbind)() |> purrr::chuck("result")
-
-psych::ICC(x2, lmer = FALSE)
+ggplot(all_density, aes(x = icc, y = slug)) +
+    geom_density_ridges(stat = "binline", alpha = 0.5, scale = 1, bins = 50)

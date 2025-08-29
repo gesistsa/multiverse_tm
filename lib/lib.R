@@ -381,3 +381,14 @@ tmmv.cache_requirements <- function() {
     )
     invisible(NULL)
 }
+
+tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
+    .f <- function(run, slug) {
+        path <- here::here("intermediate", slug, "runs", run, "theta/theta.RDS")
+        if (fs::file_exists(path)) {
+            return(readRDS(path))
+        }
+        NULL
+    }
+    purrr::map(runs, .f = .f, slug = slug)
+}

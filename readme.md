@@ -221,7 +221,9 @@ All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
 - [`lib/read_text_base.R`](lib/read_text_base.R) - GPL3
 - [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
 - [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
-- [`lib/calculate_icc.R`](lib/calculate_icc.R) - GPL\>=2 x \# References
+- [`lib/calculate_icc.R`](lib/calculate_icc.R) - GPL\>=2
+
+# References
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">

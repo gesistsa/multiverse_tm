@@ -260,12 +260,16 @@ test_parse_args_train <- function() {
     fake3 <- fake1
     fake3[8] <- 0
     fakedata <- list(fake1, fake2, fake3)
-    ## res <- tmmv.calculate_icc(fakedata)
+    res <- tmmv.calculate_icc(fakedata)
     fakedata_df <- purrr::map(fakedata, as.data.frame) |>
         purrr::quietly(purrr::list_cbind)() |>
         purrr::chuck("result")
     res2 <- psych::ICC(fakedata_df, lmer = FALSE)
-    ## testthat::expect_equal(res, res2$results[res2$results$type == "ICC2",]$ICC)
+    testthat::expect_equal(
+        res,
+        res2$results[res2$results$type == "ICC2", ]$ICC,
+        tolerance = 0.001
+    )
 }
 
 testthat::test_that("tests", {

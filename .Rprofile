@@ -8,6 +8,9 @@ source(here::here("lib/lib.R"))
 
 ## Options for this project
 
+## see ?renv::config
+options(renv.config.pak.enabled = TRUE)
+
 ## # of cores for brms and co.
 options(tmmv.cores = 6)
 

@@ -192,14 +192,14 @@ results/aggregated/${SLUG}/
 
 @test:
 {
-    Rscript --no-init-file -e "testthat::test_file('dev/lib_tests.R')"
+    env RENV_PROFILE=dev Rscript -e "testthat::test_file('dev/lib_tests.R')"
 }
 
 @rmd:
 {
-    Rscript --no-init-file dev/cache_requirements.R
-    Rscript --no-init-file dev/update_dockerfile.R
-    Rscript --no-init-file -e "quarto::quarto_render('readme.rmd', output_file = 'readme.md')"
+    Rscript -e "tmmv.cache_requirements()"
+    env RENV_PROFILE=dev Rscript dev/update_dockerfile.R
+    env RENV_PROFILE=dev Rscript dev/render_rmd.R
 }
 
 @deploy-hook:

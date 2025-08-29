@@ -348,3 +348,36 @@ tmmv.postprocess_effect_size_mod <- function(res, args) {
     saveRDS(theta, fs::path(args$output_dir, "theta", "theta.RDS"))
     invisible(NULL)
 }
+
+tmmv.cache_requirements <- function() {
+    rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
+    system_requirements <- pak::pkg_sysreqs(setdiff(
+        rpkgs,
+        c("RMeCab", "colorblindr")
+    ))
+    rpkgs[
+        rpkgs == "RMeCab"
+    ] <- "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092"
+
+    rpkgs[
+        rpkgs == "colorblindr"
+    ] <- "clauswilke/colorblindr"
+
+    aptpkgs <- unique(c(
+        "curl",
+        "make",
+        setdiff(
+            as.character(system_requirements$packages$system_packages),
+            c("pandoc-citeproc")
+        ),
+        "mecab",
+        "libmecab-dev",
+        "mecab-ipadic-utf8"
+    ))
+
+    jsonlite::write_json(
+        list(rpkgs = rpkgs, aptpkgs = aptpkgs),
+        here::here("dev", "requirements.json")
+    )
+    invisible(NULL)
+}

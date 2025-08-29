@@ -28,7 +28,6 @@ tmmv.parse_args <- function(args = commandArgs()) {
 }
 
 ## a reusable function to create `args$output_dir`
-## to be rewritten with fs #13
 tmmv.create_dir <- function(args, ontop = NULL, clean = FALSE) {
     output_dir <- args$output_dir
     if (!is.null(ontop)) {
@@ -382,6 +381,7 @@ tmmv.cache_requirements <- function() {
     invisible(NULL)
 }
 
+## reading theta generated via 03_combine.R scripts (or 02a_theta.R for chan)
 tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
     .f <- function(run, slug) {
         path <- here::here("intermediate", slug, "runs", run, "theta/theta.RDS")

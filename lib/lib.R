@@ -1,6 +1,7 @@
 # Sourcing code licensed differently
 source(here::here("lib/lemmatize_words.R"))
 source(here::here("lib/plot_spec_curve.R"))
+source(here::here("lib/calculate_icc.R"))
 # common data
 source(here::here("lib/data.R"))
 

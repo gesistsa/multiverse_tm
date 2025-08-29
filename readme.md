@@ -155,6 +155,7 @@ Packages <- c(
     "brms",
     "cowplot",
     "dplyr",
+    "fs",
     "furrr",
     "future",
     "ggplot2",
@@ -164,6 +165,7 @@ Packages <- c(
     "here",
     "keyATM",
     "lexicon",
+    "lme4",
     "lmtest",
     "osfr",
     "purrr",
@@ -192,6 +194,7 @@ System dependencies on Ubuntu Linux are listed below [^2]:
 apt install -y \
     curl \
     make \
+    cmake \
     libarchive-dev \
     libcurl4-openssl-dev \
     libicu-dev \
@@ -216,6 +219,7 @@ All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
 
 - [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
 - [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
+- [`lib/calculate_icc.R`](lib/calculate_icc.R) - GPL\>=2
 
 # References
 

@@ -1,7 +1,7 @@
 FROM rocker/r-ver:4.5.0
 
 ## NOTE: Don't update this line by hand
-RUN apt update; apt install -y curl make libarchive-dev libcurl4-openssl-dev libicu-dev libxml2-dev libssl-dev pandoc libx11-dev zlib1g-dev mecab libmecab-dev mecab-ipadic-utf8
+RUN apt update; apt install -y curl make cmake libarchive-dev libcurl4-openssl-dev libicu-dev libxml2-dev libssl-dev pandoc libx11-dev zlib1g-dev mecab libmecab-dev mecab-ipadic-utf8
 
 ARG STU_VERSION="2.7.85"
 

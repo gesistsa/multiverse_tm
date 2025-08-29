@@ -31,7 +31,7 @@ if $NEED_RERENDERING; then
 	    echo "Error: 'stu @rmd' failed. Aborting commit."
 	    exit 1
 	fi
-	git add readme.md
+	git add readme.md Dockerfile dev/requirements.json
     else
 	echo "Quarto not available."
     fi

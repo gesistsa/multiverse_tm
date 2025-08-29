@@ -1,61 +1,10 @@
 # Sourcing code licensed differently
+source(here::here("lib/read_text_base.R"))
 source(here::here("lib/lemmatize_words.R"))
 source(here::here("lib/plot_spec_curve.R"))
 source(here::here("lib/calculate_icc.R"))
 # common data
 source(here::here("lib/data.R"))
-
-#' our base-only replacement of readtext::read_text
-#' note that input_path is not a glob
-tmmv.read_text_base <- function(input_path, dvsep, docvarnames) {
-    if (fs::dir_exists(input_path)) {
-        txt_files <- fs::dir_ls(input_path, recurse = TRUE, type = "file")
-        txt_content <- vapply(
-            txt_files,
-            function(x) {
-                paste(
-                    suppressWarnings(readLines(x)),
-                    collapse = "\n"
-                )
-            },
-            character(1)
-        )
-    } else {
-        ## assume to be an archive
-        txt_files <- archive::archive(input_path)$path
-        txt_content <- vapply(
-            txt_files,
-            function(x) {
-                paste(
-                    suppressWarnings(readLines(
-                        archive::archive_read(archive = input_path, file = x)
-                    )),
-                    collapse = "\n"
-                )
-            },
-            character(1)
-        )
-    }
-
-    output <- data.frame(text = txt_content, stringsAsFactors = FALSE)
-    output$doc_id <- basename(txt_files)
-
-    meta <- strsplit(
-        tools::file_path_sans_ext(output$doc_id),
-        dvsep,
-        fixed = TRUE
-    )
-
-    meta_df <- as.data.frame(do.call(rbind, meta))
-    colnames(meta_df) <- docvarnames
-    meta_df <- lapply(meta_df, function(x) {
-        type.convert(as.character(x), as.is = TRUE)
-    })
-    meta_df <- data.frame(meta_df, stringsAsFactors = FALSE)
-    output <- cbind(output, meta_df)
-    return(output)
-}
-
 
 tmmv.parse_args <- function(args = commandArgs()) {
     output <- list()

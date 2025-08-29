@@ -383,12 +383,24 @@ tmmv.cache_requirements <- function() {
 
 ## reading theta generated via 03_combine.R scripts (or 02a_theta.R for chan)
 tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
+    .f2 <- function(x) {
+        output <- x[, which(stringr::str_detect(colnames(x), "SDG10"))]
+        names(output) <- NULL
+        return(output)
+    }
     .f <- function(run, slug) {
         path <- here::here("intermediate", slug, "runs", run, "theta/theta.RDS")
         if (fs::file_exists(path)) {
-            return(readRDS(path))
+            if (slug != "jankin") {
+                return(readRDS(path))
+            } else {
+                content <- readRDS(path)
+                output <- purrr::map(content, .f2)
+                names(output) <- names(content)
+                return(output)
+            }
         }
         NULL
     }
-    purrr::map(runs, .f = .f, slug = slug)
+    purrr::map(runs, .f = .f, slug = slug) |> purrr::discard(is.null)
 }

@@ -3,6 +3,7 @@ source(here::here("lib/read_text_base.R"))
 source(here::here("lib/lemmatize_words.R"))
 source(here::here("lib/plot_spec_curve.R"))
 source(here::here("lib/calculate_icc.R"))
+source(here::here("lib/check_keywords.R"))
 # common data
 source(here::here("lib/data.R"))
 

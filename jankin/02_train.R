@@ -34,35 +34,6 @@ if (args$debug) {
     cat("Rerun if you want more checks.\n")
 }
 
-## stole from keyATM:::check_keywords, modified to return missing keywords topics
-check_keywords <- function(docs, keywords) {
-    info <- list()
-
-    if (is.null(docs$wd_names)) {
-        info$wd_names <- unique(unlist(
-            docs$W_raw,
-            use.names = FALSE,
-            recursive = FALSE
-        ))
-        keyATM:::check_vocabulary(info$wd_names)
-    } else {
-        info$wd_names <- docs$wd_names
-    }
-
-    unique_words <- info$wd_names
-
-    # Prune keywords that do not appear in the corpus
-    keywords_flat <- unlist(keywords, use.names = FALSE, recursive = FALSE)
-    non_existent <- keywords_flat[!keywords_flat %in% unique_words]
-    keywords <- lapply(keywords, function(x) {
-        x[!x %in% non_existent]
-    })
-    # Check there is at least one keywords in each topic
-    num_keywords <- unlist(lapply(keywords, length))
-    check_zero <- which(as.vector(num_keywords) != 0)
-    return(check_zero)
-}
-
 train_model <- function(
     setting,
     args,
@@ -88,7 +59,7 @@ train_model <- function(
     )
     # find fully pruned topics
     ATM_docs <- keyATM_read(current_dfm)
-    available_topics <- check_keywords(ATM_docs, current$keywords)
+    available_topics <- tmmv.check_keywords(ATM_docs, current$keywords)
     if (args$debug) {
         cat("Available topics: ", length(available_topics), "\n")
     }

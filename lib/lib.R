@@ -404,3 +404,35 @@ tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
     }
     purrr::map(runs, .f = .f, slug = slug) |> purrr::discard(is.null)
 }
+
+tmmv.calculate_optimal_transpost_cost <- function(
+    theta1,
+    theta2,
+    cor_method = "spearman",
+    return_avg_cost = TRUE
+) {
+    cost_matrix <- matrix(data = 0, nrow = ncol(theta1), ncol = ncol(theta2))
+    for (i in seq_len(ncol(theta1))) {
+        for (j in seq_len(ncol(theta2))) {
+            cost_matrix[i, j] <- (1 -
+                cor(theta1[, i], theta2[, j], method = cor_method)) /
+                2
+        }
+    }
+
+    cost <- purrr::map_dbl(seq_len(nrow(theta1)), \(x) {
+        sum(
+            transport::transport(
+                theta1[x, ],
+                theta2[x, ],
+                costm = cost_matrix,
+                fullreturn = TRUE
+            )$primal *
+                cost_matrix
+        )
+    })
+    if (return_avg_cost) {
+        return(sum(cost) / nrow(theta1))
+    }
+    sum(cost)
+}

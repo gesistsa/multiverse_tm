@@ -185,6 +185,7 @@ Packages <- c(
     "testthat",
     "tidyr",
     "tools",
+    "transport",
     "udpipe"
 )
 

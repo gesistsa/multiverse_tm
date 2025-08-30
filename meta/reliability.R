@@ -2,19 +2,8 @@ library(here)
 library(ggplot2)
 library(ggridges)
 
-read_thetas <- function(slug) {
-    .f <- function(run, slug) {
-        path <- here("intermediate", slug, "runs", run, "theta/theta.RDS")
-        if (fs::file_exists(path)) {
-            return(readRDS(path))
-        }
-        NULL
-    }
-    purrr::map(c(1, 2, 3), .f = .f, slug = slug)
-}
-
 generate_density <- function(slug) {
-    thetas <- read_thetas(slug)
+    thetas <- tmmv.read_thetas(slug)
     hashes <- names(thetas[[1]])
     all_iccs <- hashes |>
         purrr::map_dbl(

@@ -28,7 +28,6 @@ tmmv.parse_args <- function(args = commandArgs()) {
 }
 
 ## a reusable function to create `args$output_dir`
-## to be rewritten with fs #13
 tmmv.create_dir <- function(args, ontop = NULL, clean = FALSE) {
     output_dir <- args$output_dir
     if (!is.null(ontop)) {
@@ -380,4 +379,28 @@ tmmv.cache_requirements <- function() {
         here::here("dev", "requirements.json")
     )
     invisible(NULL)
+}
+
+## reading theta generated via 03_combine.R scripts (or 02a_theta.R for chan)
+tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
+    .extract_sdg <- function(x, topic_label = "SDG10") {
+        output <- x[, which(stringr::str_detect(colnames(x), topic_label))]
+        names(output) <- NULL
+        return(output)
+    }
+    .f <- function(run, slug) {
+        path <- here::here("intermediate", slug, "runs", run, "theta/theta.RDS")
+        if (fs::file_exists(path)) {
+            if (slug == "jankin") {
+                content <- readRDS(path)
+                output <- purrr::map(content, .extract_sdg)
+                names(output) <- names(content)
+                return(output)
+            } else {
+                return(readRDS(path))
+            }
+        }
+        NULL
+    }
+    purrr::map(runs, .f = .f, slug = slug) |> purrr::discard(is.null)
 }

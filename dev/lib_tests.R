@@ -272,12 +272,30 @@ test_parse_args_train <- function() {
     )
 }
 
+test_calculate_optimal_transport_cost <- function() {
+    df_theta1 <- readRDS(here::here("dev", "theta1.RDS"))
+    df_theta2 <- readRDS(here::here("dev", "theta2.RDS"))
+    testthat::expect_equal(
+        tmmv.calculate_optimal_transport_cost(df_theta1, df_theta2),
+        0.3332487
+    )
+    testthat::expect_equal(
+        tmmv.calculate_optimal_transport_cost(
+            df_theta1,
+            df_theta2,
+            return_avg_cost = FALSE
+        ),
+        704.82100777
+    )
+}
+
 testthat::test_that("tests", {
     test_get_settings()
     test_get_settings_filter()
     test_get_current()
     test_create_dir()
     test_parse_args_train()
+    test_calculate_optimal_transport_cost()
     if (fs::dir_exists(here::here("dev/TXT"))) {
         test_readtext_base()
         test_lemmatize_words()

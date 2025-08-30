@@ -29,4 +29,5 @@ dplyr::filter(combined_pca, i <= 10) |>
     ggplot(aes(x = i, y = eigenvalue, color = slug)) +
     geom_line(linewidth = 1) +
     scale_color_manual(values = as.character(tmmv.palette_safe)) +
-    facet_grid(cols = vars(run))
+    facet_grid(cols = vars(run)) +
+    ggplot2::theme_minimal()

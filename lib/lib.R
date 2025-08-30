@@ -405,7 +405,7 @@ tmmv.read_thetas <- function(slug, runs = c(1, 2, 3)) {
     purrr::map(runs, .f = .f, slug = slug) |> purrr::discard(is.null)
 }
 
-tmmv.calculate_optimal_transpost_cost <- function(
+tmmv.calculate_optimal_transport_cost <- function(
     theta1,
     theta2,
     cor_method = "spearman",

@@ -290,7 +290,7 @@ Change.” *Nature Climate Change* 5 (8): 744–47.
 
 [^1]: There are also additional dependencies for developers: `jsonlite`,
     `withr`, `clauswilke/colorblindr`, and `quarto`. Please read
-    [dev/readme.md](dev/readme.md)
+    `dev/readme.md`
 
 [^2]: There are also additional dependencies for developers: quarto,
-    air, and git. Please read [dev/readme.md](dev/readme.md)
+    air, and git. Please read `dev/readme.md`

@@ -7,16 +7,15 @@ The following assumes you are using a Ubuntu 22.04 environment.
 Please install `quarto` (for rendering of the README), `air` (for formatting R code automatically), and `stu` (for automation)
 
 ```sh
+## quarto
 QUARTO_VERION=1.6.40
 curl -q -o /tmp/quarto_amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
 sudo dpkg -i /tmp/quarto_amd64.deb 
-```
 
-```sh
+## Air
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/posit-dev/air/releases/download/0.7.1/air-installer.sh | sh
-```
 
-```sh
+## stu
 STU_VERSION="2.7.85"
 curl -q -o /tmp/stu_amd64.deb -L https://github.com/kunegis/stu/releases/download/${STU_VERSION}/stu_amd64.deb \
   && sudo dpkg -i /tmp/stu_amd64.deb \

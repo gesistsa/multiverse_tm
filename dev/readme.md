@@ -12,7 +12,7 @@ curl -q -o /tmp/quarto_amd64.deb -L https://github.com/quarto-dev/quarto-cli/rel
 sudo dpkg -i /tmp/quarto_amd64.deb 
 ```
 
-``sh
+```sh
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/posit-dev/air/releases/download/0.7.1/air-installer.sh | sh
 ```
 

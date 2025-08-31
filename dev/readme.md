@@ -8,16 +8,18 @@ Please install `quarto` (for rendering of the README), `air` (for formatting R c
 
 ```sh
 ## quarto
-QUARTO_VERION=1.6.40
-curl -q -o /tmp/quarto_amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
-sudo dpkg -i /tmp/quarto_amd64.deb 
+QUARTO_VERSION="1.6.40"
+curl -q -L https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-amd64.deb -o /tmp/quarto_amd64.deb \
+	&& sudo dpkg -i /tmp/quarto_amd64.deb \
+	&& rm /tmp/quarto_amd64.deb
 
 ## Air
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/posit-dev/air/releases/download/0.7.1/air-installer.sh | sh
+AIR_VERSION="0.7.1"
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/posit-dev/air/releases/download/$AIR_VERSION/air-installer.sh | sh
 
 ## stu
 STU_VERSION="2.7.85"
-curl -q -o /tmp/stu_amd64.deb -L https://github.com/kunegis/stu/releases/download/${STU_VERSION}/stu_amd64.deb \
+curl -q -o /tmp/stu_amd64.deb -L https://github.com/kunegis/stu/releases/download/$STU_VERSION/stu_amd64.deb \
   && sudo dpkg -i /tmp/stu_amd64.deb \
   && rm /tmp/stu_amd64.deb
 ```

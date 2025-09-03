@@ -3,24 +3,39 @@ library(future)
 library(furrr)
 library(purrr)
 
-args <- list()
-args$debug <- TRUE
-args$slug <- "tvinnereim"
-args$run <- 1
+read_theta_matrix <- function(args, settings) {
+    ##TODO: curini, chan, jankin
+    all_thetas <- purrr::map(settings, \(x) {
+        readRDS(tmmv.get_rds_filename(
+            x,
+            args$output_dir
+        ))$theta
+    })
+
+    all_hashes <- purrr::map_chr(settings, rlang::hash)
+    names(all_thetas) <- all_hashes
+    return(all_thetas)
+}
 
 calculate_cost <- function(args) {
-    .f <- function(combi, all_thetas, all_hashes, random_seed) {
+    .f <- function(combi, all_thetas, random_seed) {
         set.seed(random_seed)
+        all_hashes <- names(all_thetas)
         thetaa <- all_thetas[[all_hashes[combi[1]]]]
         thetab <- all_thetas[[all_hashes[combi[2]]]]
         tmmv.calculate_optimal_transport_cost(thetaa, thetab)
     }
 
-    ## TODO: Takano,
     settings <- tmmv.get_settings(full = TRUE)
+
+    if (args$slug == "takano") {
+        settings <- settings |>
+            purrr::keep(\(x) x$token_normalization != "stemming")
+    }
+
     if (args$debug) {
-        settings <- sample(settings, 3)
-        cat("DEBUG MODE: Only 3 randomly selected settings will be checked.\n")
+        settings <- sample(settings, 5)
+        cat("DEBUG MODE: Only 5 randomly selected settings will be checked.\n")
         cat("Rerun if you want more checks.\n")
     }
     args$output_dir <- here("intermediate", args$slug, "runs", args$run)
@@ -31,22 +46,15 @@ calculate_cost <- function(args) {
     allcombis_list <- purrr::map(seq_len(nrow(allcombis)), \(x) {
         allcombis[x, , drop = TRUE]
     })
-    ##TODO: curini, chan, jakin
-    all_thetas <- purrr::map(settings, \(x) {
-        readRDS(tmmv.get_rds_filename(
-            x,
-            args$output_dir
-        ))$theta
-    })
-    all_hashes <- purrr::map_chr(settings, rlang::hash)
-    names(all_thetas) <- all_hashes
+    print(length(allcombis_list))
+    all_thetas <- read_theta_matrix(args, settings)
+
     random_seed <- sample(-65535:65535, 1)
     ini_time <- Sys.time()
     cost <- furrr::future_map_dbl(
         .x = allcombis_list,
         .f = .f,
         all_thetas = all_thetas,
-        all_hashes = all_hashes,
         random_seed = random_seed,
         .progress = TRUE,
         .options = furrr_options(seed = NULL)
@@ -65,11 +73,15 @@ calculate_cost <- function(args) {
     output$result <- data.frame(i = node_i, j = node_j, cost = cost)
     output$seed <- random_seed
     output$settings <- settings
-    saveRDS(output, fs::path(output_dir, paste0(args$run, ".RDS")))
-    invisible(NULL)
+    return(output)
 }
 
 ## mod <- readRDS(tmmv.get_rds_filename(settings[[1]], args))
+
+args <- list()
+args$debug <- FALSE
+args$slug <- "takano"
+args$run <- 1
 
 if (args$debug) {
     plan(sequential)
@@ -77,7 +89,8 @@ if (args$debug) {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
 
-calculate_cost(args)
+
+res <- calculate_cost(args = args)
 
 ## saveRDS(output, "dev/tvinnereim.RDS")
 

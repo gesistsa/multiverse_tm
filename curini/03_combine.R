@@ -14,53 +14,17 @@ settings <- tmmv.get_settings(full = TRUE)
 
 tmmv.create_dir(args, ontop = "theta")
 
-get_theta_by_topic_name <- function(topic_name, mod) {
-    topic_index <- which(stringr::str_detect(
-        colnames(mod$mod$theta),
-        topic_name
-    ))
-    if (identical(topic_index, integer(0))) {
-        return(rep(0, nrow(mod$mod$theta)))
-    }
-    return(mod$mod$theta[, topic_index, drop = TRUE])
-}
-
 conduct_regression <- function(setting, args) {
     mod <- readRDS(tmmv.get_rds_filename(setting, args$output_dir))
 
-    theta <- rep(0, nrow(mod$mod$theta) * 3) |>
-        matrix(ncol = 3) |>
-        as.data.frame()
-
-    colnames(theta) <- c("multilateralism", "humanitarian_dimension", "war")
-
-    for (cnames in colnames(theta)) {
-        theta[, cnames] <- get_theta_by_topic_name(cnames, mod)
-    }
-
+    theta <- tmmv.process_curini_theta_matrix(mod$mod$theta)
     ## Should save also the docvars in mod; but well...
 
     current_dfm <- readRDS(tmmv.get_rds_filename(
         setting[1:3],
         here("intermediate", args$slug)
     ))
-
     reg_data <- cbind(theta, current_dfm@docvars)
-
-    ## from the original stata code
-
-    # gen multi100 = multilateralism/(multilateralism+humanitarian_dimensio+war)
-    # gen humi100 = humanitarian_dimensio/(multilateralism+humanitarian_dimensio+war)
-    # gen war100 = war/(multilateralism+humanitarian_dimensio+war)
-
-    reg_data <- reg_data |>
-        mutate(
-            t3 = multilateralism + humanitarian_dimension + war,
-            multi100 = multilateralism / t3,
-            humi100 = humanitarian_dimension / t3,
-            war100 = war / t3
-        ) |>
-        select(-t3)
 
     ## from the original stata code
     ## reg multi100 c.lr##c.lr gov year i.code, r
@@ -126,7 +90,7 @@ generate_conditional_effect <- function(res, hash) {
     .f = function(x, mod, data) {
         new_data <- data
         new_data$LR <- x
-        mean(predict(mod, new_data, type = "response"))
+        round(mean(predict(mod, new_data, type = "response")), 6)
     }
     data.frame(
         hash = hash,
@@ -147,6 +111,10 @@ output_path <- here::here(
     paste0("condit_", args$current_run, ".csv")
 )
 
-condit_effect <- purrr::map2(res, hashes, generate_conditional_effect) |>
+condit_effect <- purrr::map2(
+    res,
+    purrr::map_chr(settings, \(x) rlang::hash(x)),
+    generate_conditional_effect
+) |>
     purrr::list_rbind() |>
     write.csv(output_path, row.names = FALSE)

@@ -3,15 +3,39 @@ library(future)
 library(furrr)
 library(purrr)
 
+settings <- tmmv.get_settings(full = TRUE)
+
 read_theta_matrix <- function(args, settings) {
+    if (args$slug == "jankin") {
+        return(readRDS(here(
+            "intermediate",
+            args$slug,
+            "runs",
+            args$run,
+            "theta",
+            "theta.RDS"
+        )))
+    }
     ##TODO: curini, chan, jankin
-    all_thetas <- purrr::map(settings, \(x) {
-        readRDS(tmmv.get_rds_filename(
+    .f <- function(x, args) {
+        input <- readRDS(tmmv.get_rds_filename(
             x,
             args$output_dir
-        ))$theta
-    })
+        ))
+        if (args$slug == "curini") {
+            return(tmmv.process_curini_theta_matrix(
+                input$mod$theta,
+                df = FALSE
+            ))
+        }
+        if (args$slug != "chan") {
+            return(input$theta)
+        } else {
+            return(input$mod$theta)
+        }
+    }
 
+    all_thetas <- purrr::map(settings, .f, args = args)
     all_hashes <- purrr::map_chr(settings, rlang::hash)
     names(all_thetas) <- all_hashes
     return(all_thetas)
@@ -80,7 +104,7 @@ calculate_cost <- function(args) {
 
 args <- list()
 args$debug <- FALSE
-args$slug <- "takano"
+args$slug <- "curini"
 args$run <- 1
 
 if (args$debug) {
@@ -88,7 +112,6 @@ if (args$debug) {
 } else {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
-
 
 res <- calculate_cost(args = args)
 

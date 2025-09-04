@@ -108,9 +108,9 @@ if (args$debug) {
 for (slug in c("curini", "czymara", "takano", "tvinnereim")) {
     args$slug <- slug
     if (!args$debug) {
-        output_dir <- here::here("results", args$slug, "costs")
+        output_dir <- here::here("results", "cost", args$slug)
     } else {
-        output_dir <- here::here("debug_results", args$slug, "costs")
+        output_dir <- here::here("debug_results", "cost", args$slug)
     }
     fs::dir_create(output_dir, recurse = TRUE)
     calculate_cost(args = args) |>

@@ -96,7 +96,7 @@ calculate_cost <- function(args) {
 ## mod <- readRDS(tmmv.get_rds_filename(settings[[1]], args))
 
 args <- list()
-args$debug <- TRUE
+args$debug <- FALSE
 args$run <- 1
 
 if (args$debug) {

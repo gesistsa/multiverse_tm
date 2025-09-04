@@ -96,8 +96,7 @@ calculate_cost <- function(args) {
 ## mod <- readRDS(tmmv.get_rds_filename(settings[[1]], args))
 
 args <- list()
-args$debug <- FALSE
-args$slug <- "curini"
+args$debug <- TRUE
 args$run <- 1
 
 if (args$debug) {
@@ -106,14 +105,17 @@ if (args$debug) {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
 
-res <- calculate_cost(args = args)
-
-## if (!args$debug) {
-##     output_dir <- here::here("results", args$slug, "costs")
-## } else {
-##     output_dir <- here::here("debug_results", args$slug, "costs")
-## }
-## fs::dir_create(output_dir, recurse = TRUE)
+for (slug in c("chan", "curini", "czymara", "jankin", "takano", "tvinnereim")) {
+    args$slug <- slug
+    if (!args$debug) {
+        output_dir <- here::here("results", args$slug, "costs")
+    } else {
+        output_dir <- here::here("debug_results", args$slug, "costs")
+    }
+    fs::dir_create(output_dir, recurse = TRUE)
+    calculate_cost(args = args) |>
+        saveRDS(fs::path(output_dir, paste0(args$run, ".RDS")))
+}
 
 ## saveRDS(output, "dev/tvinnereim.RDS")
 

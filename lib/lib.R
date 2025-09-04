@@ -411,6 +411,11 @@ tmmv.calculate_optimal_transport_cost <- function(
     cor_method = "spearman",
     return_avg_cost = TRUE
 ) {
+    ## columns with zero SD will cause problems in cor calculation
+
+    theta1 <- theta1[, apply(theta1, 2, sd) != 0]
+    theta2 <- theta2[, apply(theta2, 2, sd) != 0]
+
     cost_matrix <- matrix(data = 0, nrow = ncol(theta1), ncol = ncol(theta2))
     for (i in seq_len(ncol(theta1))) {
         for (j in seq_len(ncol(theta2))) {

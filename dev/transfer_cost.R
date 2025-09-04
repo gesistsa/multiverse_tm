@@ -3,8 +3,6 @@ library(future)
 library(furrr)
 library(purrr)
 
-settings <- tmmv.get_settings(full = TRUE)
-
 read_theta_matrix <- function(args, settings) {
     if (args$slug == "jankin") {
         return(readRDS(here(
@@ -16,7 +14,6 @@ read_theta_matrix <- function(args, settings) {
             "theta.RDS"
         )))
     }
-    ##TODO: curini, chan, jankin
     .f <- function(x, args) {
         input <- readRDS(tmmv.get_rds_filename(
             x,
@@ -70,7 +67,7 @@ calculate_cost <- function(args) {
     allcombis_list <- purrr::map(seq_len(nrow(allcombis)), \(x) {
         allcombis[x, , drop = TRUE]
     })
-    print(length(allcombis_list))
+
     all_thetas <- read_theta_matrix(args, settings)
 
     random_seed <- sample(-65535:65535, 1)
@@ -85,16 +82,12 @@ calculate_cost <- function(args) {
     )
     cat("Elapsed time:\n")
     print(Sys.time() - ini_time)
-    if (!args$debug) {
-        output_dir <- here::here("results", args$slug, "costs")
-    } else {
-        output_dir <- here::here("debug_results", args$slug, "costs")
-    }
-    fs::dir_create(output_dir, recurse = TRUE)
     output <- list()
-    node_i <- purrr::map_int(allcombis_list, 1)
-    node_j <- purrr::map_int(allcombis_list, 2)
-    output$result <- data.frame(i = node_i, j = node_j, cost = cost)
+    output$result <- data.frame(
+        i = purrr::map_int(allcombis_list, 1),
+        j = purrr::map_int(allcombis_list, 2),
+        cost = cost
+    )
     output$seed <- random_seed
     output$settings <- settings
     return(output)
@@ -114,6 +107,13 @@ if (args$debug) {
 }
 
 res <- calculate_cost(args = args)
+
+## if (!args$debug) {
+##     output_dir <- here::here("results", args$slug, "costs")
+## } else {
+##     output_dir <- here::here("debug_results", args$slug, "costs")
+## }
+## fs::dir_create(output_dir, recurse = TRUE)
 
 ## saveRDS(output, "dev/tvinnereim.RDS")
 

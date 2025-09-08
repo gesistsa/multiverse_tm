@@ -411,6 +411,11 @@ tmmv.calculate_optimal_transport_cost <- function(
     cor_method = "spearman",
     return_avg_cost = TRUE
 ) {
+    ## columns with zero SD will cause problems in cor calculation
+
+    theta1 <- theta1[, apply(theta1, 2, sd) != 0]
+    theta2 <- theta2[, apply(theta2, 2, sd) != 0]
+
     cost_matrix <- matrix(data = 0, nrow = ncol(theta1), ncol = ncol(theta2))
     for (i in seq_len(ncol(theta1))) {
         for (j in seq_len(ncol(theta2))) {
@@ -435,4 +440,37 @@ tmmv.calculate_optimal_transport_cost <- function(
         return(sum(cost) / nrow(theta1))
     }
     sum(cost)
+}
+
+tmmv.process_curini_theta_matrix <- function(theta, df = TRUE) {
+    get_theta_by_topic_name <- function(topic_name, theta) {
+        topic_index <- which(stringr::str_detect(
+            colnames(theta),
+            topic_name
+        ))
+        if (identical(topic_index, integer(0))) {
+            return(rep(0, nrow(theta)))
+        }
+        return(theta[, topic_index, drop = TRUE])
+    }
+
+    output <- rep(0, nrow(theta) * 3) |>
+        matrix(ncol = 3)
+    colnames(output) <- c("multilateralism", "humanitarian_dimension", "war")
+    for (cnames in colnames(output)) {
+        output[, cnames] <- get_theta_by_topic_name(cnames, theta)
+    }
+    ## from the original stata code
+
+    # gen multi100 = multilateralism/(multilateralism+humanitarian_dimensio+war)
+    # gen humi100 = humanitarian_dimensio/(multilateralism+humanitarian_dimensio+war)
+    # gen war100 = war/(multilateralism+humanitarian_dimensio+war)
+
+    t3 <- apply(output, 1, sum)
+    output <- output / t3
+    colnames(output) <- c("multi100", "humi100", "war100")
+    if (df) {
+        return(as.data.frame(output))
+    }
+    output
 }

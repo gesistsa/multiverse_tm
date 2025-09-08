@@ -195,6 +195,14 @@ results/aggregated/${SLUG}/
     env RENV_PROFILE=dev Rscript -e "testthat::test_file('dev/lib_tests.R')"
 }
 
+## quick sync of renv.lock
+@renv:
+{
+    Rscript -e "renv::snapshot(prompt = FALSE)"
+    ## if the R packages weren't installed, you might still need to install them manually.
+    env RENV_PROFILE=dev Rscript -e "renv::snapshot(prompt = FALSE)"
+}
+
 @rmd:
 {
     Rscript -e "tmmv.cache_requirements()"

@@ -164,6 +164,7 @@ Packages <- c(
     "grid",
     "haven",
     "here",
+    "igraph",
     "jsonlite",
     "keyATM",
     "lexicon",
@@ -199,6 +200,7 @@ apt install -y \
     curl \
     make \
     cmake \
+    libglpk-dev \
     libarchive-dev \
     libcurl4-openssl-dev \
     libicu-dev \

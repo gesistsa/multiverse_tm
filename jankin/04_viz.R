@@ -21,14 +21,6 @@ dfms <- dfm_filenames |>
         }
     )
 
-multiverse <- readRDS(here(
-    "intermediate",
-    "jankin",
-    "runs",
-    "1",
-    "theta",
-    "theta.RDS"
-))
 
 reformat_theta_matrix <- function(x, setting_hash) {
     x <- as.data.frame(x)
@@ -45,6 +37,18 @@ reformat_theta_matrix <- function(x, setting_hash) {
 }
 
 future::plan(future::multisession, workers = getOption("tmmv.cores", 1))
+
+run <- 1
+
+multiverse <- readRDS(here(
+    "intermediate",
+    "jankin",
+    "runs",
+    run,
+    "theta",
+    "theta.RDS"
+))
+
 
 multiverse <- furrr::future_map2(
     multiverse,
@@ -71,47 +75,29 @@ stopifnot(length(unique(df_agg$Topic)) == 17)
 
 df_agg$Topic <- factor(
     df_agg$Topic,
-    levels = c(
-        "SDG1",
-        "SDG2",
-        "SDG3",
-        "SDG4",
-        "SDG5",
-        "SDG6",
-        "SDG7",
-        "SDG8",
-        "SDG9",
-        "SDG10",
-        "SDG12",
-        "SDG11",
-        "SDG13",
-        "SDG14",
-        "SDG15",
-        "SDG16",
-        "SDG17"
-    )
+    levels = names(tmmv.data[["jankin"]]$dict)
 )
-
 
 settings_df <- bind_rows(
     map(settings, as.data.frame, simplify = FALSE),
     .id = "setting_hash"
 )
 
+jankin_k <- as.character(
+    length(tmmv.data[["jankin"]]$dict) + tmmv.data[["jankin"]]$k
+)
+
 settings_df <- settings_df |>
     mutate(
-        K = case_match(k_setting, 1 ~ "18", 2 ~ "20", 3 ~ "22"),
-        model = if_else(alternative_model, "KeyATM", "SeededLDA")
+        K = jankin_k[k_setting],
+        model = if_else(
+            alternative_model,
+            tmmv.data[["jankin"]]$original_model,
+            tmmv.data[["jankin"]]$alternative_model
+        )
     )
 
-jankin_settings <- list(
-    token_normalization = "none",
-    stopword_removal = TRUE,
-    trimming = FALSE,
-    alternative_model = FALSE,
-    k_setting = 1,
-    iteration_setting = 1
-)
+jankin_settings <- tmmv.data[['jankin']]$anchor
 
 stopifnot(rlang::hash(jankin_settings) %in% names(settings))
 

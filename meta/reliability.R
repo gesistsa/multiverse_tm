@@ -14,7 +14,7 @@ generate_density <- function(slug) {
 }
 
 all_density <- purrr::map(
-    c("curini", "czymara", "takano", "tvinnereim"),
+    c("chan", "curini", "czymara", "jankin", "takano", "tvinnereim"),
     generate_density
 ) |>
     purrr::list_rbind()

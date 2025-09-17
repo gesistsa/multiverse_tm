@@ -16,6 +16,8 @@ for (setting in settings) {
     output[[hash]] <- current_mod$mod$theta
 }
 
+tmmv.create_dir(args, ontop = "theta")
+
 output_path <- here(
     "intermediate",
     args$slug,

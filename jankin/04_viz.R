@@ -8,7 +8,6 @@ library(purrr)
 settings <- tmmv.get_settings()
 names(settings) <- map_chr(settings, rlang::hash)
 
-
 dfm_filenames <- unique(map_chr(settings, \(x) rlang::hash(x[1:3])))
 
 dfms <- dfm_filenames |>
@@ -38,45 +37,49 @@ reformat_theta_matrix <- function(x, setting_hash) {
 
 future::plan(future::multisession, workers = getOption("tmmv.cores", 1))
 
-run <- 1
+aggregate_theta <- function(run) {
+    multiverse <- readRDS(here(
+        "intermediate",
+        "jankin",
+        "runs",
+        run,
+        "theta",
+        "theta.RDS"
+    ))
 
-multiverse <- readRDS(here(
-    "intermediate",
-    "jankin",
-    "runs",
-    run,
-    "theta",
-    "theta.RDS"
-))
-
-
-multiverse <- furrr::future_map2(
-    multiverse,
-    names(multiverse),
-    reformat_theta_matrix,
-    .progress = TRUE
-)
-
-df <- bind_rows(multiverse, .id = "setting_hash")
-
-# this step is performed by Jankins as well
-# get the mean topic proportions across all documents
-# for a given year
-df_agg <- df |>
-    group_by(setting_hash, year) |>
-    summarise(across(starts_with("SDG"), \(x) mean(x, na.rm = TRUE))) |>
-    pivot_longer(
-        cols = where(is.double),
-        names_to = "Topic",
-        values_to = "Proportion"
+    multiverse <- furrr::future_map2(
+        multiverse,
+        names(multiverse),
+        reformat_theta_matrix,
+        .progress = TRUE
     )
 
-stopifnot(length(unique(df_agg$Topic)) == 17)
+    df <- bind_rows(multiverse, .id = "setting_hash")
 
-df_agg$Topic <- factor(
-    df_agg$Topic,
-    levels = names(tmmv.data[["jankin"]]$dict)
-)
+    # this step is performed by Jankins as well
+    # get the mean topic proportions across all documents
+    # for a given year
+    df_agg <- df |>
+        group_by(setting_hash, year) |>
+        summarise(across(starts_with("SDG"), \(x) mean(x, na.rm = TRUE))) |>
+        pivot_longer(
+            cols = where(is.double),
+            names_to = "Topic",
+            values_to = "Proportion"
+        )
+
+    stopifnot(length(unique(df_agg$Topic)) == 17)
+
+    df_agg$Topic <- factor(
+        df_agg$Topic,
+        levels = names(tmmv.data[["jankin"]]$dict)
+    )
+    df_agg$run <- run
+    df_agg$id <- paste0(df_agg$run, "_", df_agg$setting_hash)
+    return(df_agg)
+}
+
+df_agg <- purrr::map(1:3, aggregate_theta) |> purrr::list_rbind()
 
 settings_df <- bind_rows(
     map(settings, as.data.frame, simplify = FALSE),
@@ -117,8 +120,8 @@ theme_settings <- theme(
 
 
 p_spaghetti_full <- df_agg |>
-    ggplot(aes(x = year, y = Proportion, group = setting_hash)) +
-    geom_line(alpha = 0.03) +
+    ggplot(aes(x = year, y = Proportion, group = id)) +
+    geom_line(alpha = 0.02) +
     geom_line(
         data = df_agg[df_agg$setting_hash == rlang::hash(jankin_settings), ],
         color = tmmv.colors$lightblue,
@@ -146,7 +149,7 @@ p_spaghetti_sdg13_16 <- df_agg |>
     ggplot(aes(
         x = year,
         y = Proportion,
-        group = setting_hash,
+        group = id,
     )) +
     geom_line(alpha = 0.03) +
     geom_line(

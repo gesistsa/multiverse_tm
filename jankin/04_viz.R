@@ -121,11 +121,11 @@ theme_settings <- theme(
 
 p_spaghetti_full <- df_agg |>
     ggplot(aes(x = year, y = Proportion, group = id)) +
-    geom_line(alpha = 0.02) +
+    geom_line(alpha = 0.01) +
     geom_line(
         data = df_agg[df_agg$setting_hash == rlang::hash(jankin_settings), ],
-        color = tmmv.colors$lightblue,
-        linewidth = 1,
+        color = tmmv.palette_safe$vermilion,
+        linewidth = 0.6,
     ) +
     theme_minimal() +
     theme_settings +
@@ -141,11 +141,12 @@ ggsave(
 )
 
 # Focus on same examples as Jankin et al
+# Reduce inequality within and among countries: SDG 10
 # Climate Change: SDG 13
 # inclusive societies: SDG 16
 
-p_spaghetti_sdg13_16 <- df_agg |>
-    filter(Topic %in% c("SDG13", "SDG16")) |>
+p_spaghetti_selected <- df_agg |>
+    filter(Topic %in% c("SDG10", "SDG13", "SDG16")) |>
     ggplot(aes(
         x = year,
         y = Proportion,
@@ -155,11 +156,11 @@ p_spaghetti_sdg13_16 <- df_agg |>
     geom_line(
         data = df_agg[
             df_agg$Topic %in%
-                c("SDG13", "SDG16") &
+                c("SDG10", "SDG13", "SDG16") &
                 df_agg$setting_hash == rlang::hash(jankin_settings),
         ],
-        color = tmmv.colors$lightblue,
-        linewidth = 1
+        color = tmmv.palette_safe$vermilion,
+        linewidth = 0.6
     ) +
     theme_minimal() +
     theme_settings +
@@ -167,8 +168,8 @@ p_spaghetti_sdg13_16 <- df_agg |>
     facet_wrap(~Topic)
 
 ggsave(
-    here("plots", "jankins_spaghetti_sdg13_16.png"),
-    plot = p_spaghetti_sdg13_16,
+    here("plots", "jankins_spaghetti_selected.png"),
+    plot = p_spaghetti_selected,
     width = 3000,
     height = 1500,
     units = "px"

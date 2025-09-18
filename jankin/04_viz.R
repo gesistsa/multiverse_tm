@@ -8,7 +8,6 @@ library(purrr)
 settings <- tmmv.get_settings()
 names(settings) <- map_chr(settings, rlang::hash)
 
-
 dfm_filenames <- unique(map_chr(settings, \(x) rlang::hash(x[1:3])))
 
 dfms <- dfm_filenames |>
@@ -21,14 +20,6 @@ dfms <- dfm_filenames |>
         }
     )
 
-multiverse <- readRDS(here(
-    "intermediate",
-    "jankin",
-    "runs",
-    "1",
-    "theta",
-    "theta.RDS"
-))
 
 reformat_theta_matrix <- function(x, setting_hash) {
     x <- as.data.frame(x)
@@ -46,72 +37,70 @@ reformat_theta_matrix <- function(x, setting_hash) {
 
 future::plan(future::multisession, workers = getOption("tmmv.cores", 1))
 
-multiverse <- furrr::future_map2(
-    multiverse,
-    names(multiverse),
-    reformat_theta_matrix,
-    .progress = TRUE
-)
+aggregate_theta <- function(run) {
+    multiverse <- readRDS(here(
+        "intermediate",
+        "jankin",
+        "runs",
+        run,
+        "theta",
+        "theta.RDS"
+    ))
 
-df <- bind_rows(multiverse, .id = "setting_hash")
-
-# this step is performed by Jankins as well
-# get the mean topic proportions across all documents
-# for a given year
-df_agg <- df |>
-    group_by(setting_hash, year) |>
-    summarise(across(starts_with("SDG"), \(x) mean(x, na.rm = TRUE))) |>
-    pivot_longer(
-        cols = where(is.double),
-        names_to = "Topic",
-        values_to = "Proportion"
+    multiverse <- furrr::future_map2(
+        multiverse,
+        names(multiverse),
+        reformat_theta_matrix,
+        .progress = TRUE
     )
 
-stopifnot(length(unique(df_agg$Topic)) == 17)
+    df <- bind_rows(multiverse, .id = "setting_hash")
 
-df_agg$Topic <- factor(
-    df_agg$Topic,
-    levels = c(
-        "SDG1",
-        "SDG2",
-        "SDG3",
-        "SDG4",
-        "SDG5",
-        "SDG6",
-        "SDG7",
-        "SDG8",
-        "SDG9",
-        "SDG10",
-        "SDG12",
-        "SDG11",
-        "SDG13",
-        "SDG14",
-        "SDG15",
-        "SDG16",
-        "SDG17"
+    # this step is performed by Jankins as well
+    # get the mean topic proportions across all documents
+    # for a given year
+    df_agg <- df |>
+        group_by(setting_hash, year) |>
+        summarise(across(starts_with("SDG"), \(x) mean(x, na.rm = TRUE))) |>
+        pivot_longer(
+            cols = where(is.double),
+            names_to = "Topic",
+            values_to = "Proportion"
+        )
+
+    stopifnot(length(unique(df_agg$Topic)) == 17)
+
+    df_agg$Topic <- factor(
+        df_agg$Topic,
+        levels = names(tmmv.data[["jankin"]]$dict)
     )
-)
+    df_agg$run <- run
+    df_agg$id <- paste0(df_agg$run, "_", df_agg$setting_hash)
+    return(df_agg)
+}
 
+df_agg <- purrr::map(1:3, aggregate_theta) |> purrr::list_rbind()
 
 settings_df <- bind_rows(
     map(settings, as.data.frame, simplify = FALSE),
     .id = "setting_hash"
 )
 
+jankin_k <- as.character(
+    length(tmmv.data[["jankin"]]$dict) + tmmv.data[["jankin"]]$k
+)
+
 settings_df <- settings_df |>
     mutate(
-        K = case_match(k_setting, 1 ~ "18", 2 ~ "20", 3 ~ "22"),
-        model = if_else(alternative_model, "KeyATM", "SeededLDA")
+        K = jankin_k[k_setting],
+        model = if_else(
+            alternative_model,
+            tmmv.data[["jankin"]]$original_model,
+            tmmv.data[["jankin"]]$alternative_model
+        )
     )
 
-jankin_settings <- list(
-    token_normalization = "none",
-    stopword_removal = TRUE,
-    trimming = FALSE,
-    alternative_model = FALSE,
-    k_setting = 1,
-    iteration_setting = 1
-)
+jankin_settings <- tmmv.data[['jankin']]$anchor
 
 stopifnot(rlang::hash(jankin_settings) %in% names(settings))
 
@@ -131,12 +120,12 @@ theme_settings <- theme(
 
 
 p_spaghetti_full <- df_agg |>
-    ggplot(aes(x = year, y = Proportion, group = setting_hash)) +
-    geom_line(alpha = 0.03) +
+    ggplot(aes(x = year, y = Proportion, group = id)) +
+    geom_line(alpha = 0.01) +
     geom_line(
         data = df_agg[df_agg$setting_hash == rlang::hash(jankin_settings), ],
-        color = tmmv.colors$lightblue,
-        linewidth = 1,
+        color = tmmv.palette_safe$vermilion,
+        linewidth = 0.6,
     ) +
     theme_minimal() +
     theme_settings +
@@ -152,25 +141,26 @@ ggsave(
 )
 
 # Focus on same examples as Jankin et al
+# Reduce inequality within and among countries: SDG 10
 # Climate Change: SDG 13
 # inclusive societies: SDG 16
 
-p_spaghetti_sdg13_16 <- df_agg |>
-    filter(Topic %in% c("SDG13", "SDG16")) |>
+p_spaghetti_selected <- df_agg |>
+    filter(Topic %in% c("SDG10", "SDG13", "SDG16")) |>
     ggplot(aes(
         x = year,
         y = Proportion,
-        group = setting_hash,
+        group = id,
     )) +
     geom_line(alpha = 0.03) +
     geom_line(
         data = df_agg[
             df_agg$Topic %in%
-                c("SDG13", "SDG16") &
+                c("SDG10", "SDG13", "SDG16") &
                 df_agg$setting_hash == rlang::hash(jankin_settings),
         ],
-        color = tmmv.colors$lightblue,
-        linewidth = 1
+        color = tmmv.palette_safe$vermilion,
+        linewidth = 0.6
     ) +
     theme_minimal() +
     theme_settings +
@@ -178,8 +168,8 @@ p_spaghetti_sdg13_16 <- df_agg |>
     facet_wrap(~Topic)
 
 ggsave(
-    here("plots", "jankins_spaghetti_sdg13_16.png"),
-    plot = p_spaghetti_sdg13_16,
+    here("plots", "jankins_spaghetti_selected.png"),
+    plot = p_spaghetti_selected,
     width = 3000,
     height = 1500,
     units = "px"

@@ -8,14 +8,20 @@ library(purrr)
 
 slug <- "curini"
 
-read.csv(here("results", "aggregated", slug, "1.csv")) |>
-    tmmv.plot_spec_curve(tmmv.data[[slug]])
+## read.csv(here("results", "aggregated", slug, "1.csv")) |>
+##     tmmv.plot_spec_curve(tmmv.data[[slug]])
 
 purrr::map(1:3, \(x) {
     read.csv(here("results", "aggregated", slug, paste0(x, ".csv")))
 }) |>
-    tmmv.plot_spec_curve(tmmv.data[[slug]])
+    tmmv.plot_spec_curve(tmmv.data[[slug]]) -> f
 
+ggsave(
+    here::here("plots", paste0(slug, "_spec.pdf")),
+    f,
+    width = 8,
+    height = 10
+)
 
 ## conditional effect plot
 
@@ -39,10 +45,12 @@ curini_hash <- rlang::hash(curini_setting)
 
 ## curini_hash %in% condit_effect$hash
 
-condit_effect |>
-    ggplot(aes(x = LR, y = pred_multi100, group = hash)) +
-    geom_line(alpha = 0.05) +
-    geom_line(data = condit_effect[condit_effect$hash == curini_hash, ]) +
-    xlab("LR") +
-    ylab(expression(theta)) +
-    theme_minimal()
+if (interactive()) {
+    condit_effect |>
+        ggplot(aes(x = LR, y = pred_multi100, group = hash)) +
+        geom_line(alpha = 0.05) +
+        geom_line(data = condit_effect[condit_effect$hash == curini_hash, ]) +
+        xlab("LR") +
+        ylab(expression(theta)) +
+        theme_minimal()
+}

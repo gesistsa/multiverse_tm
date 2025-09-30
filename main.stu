@@ -7,6 +7,13 @@ RUNS = {1 2 3}
 
 DEBUG = { }
 
+@plot_all: plots/ SLUGS
+{
+    for SLUG in $(cat SLUGS); do
+	Rscript ${SLUG}/04_viz.R
+    done
+}
+
 >deps.results: SLUGS RUNS
 {
     for SLUG in $(cat SLUGS); do
@@ -188,6 +195,11 @@ intermediate/${SLUG}/runs/
 results/aggregated/${SLUG}/
 {
     mkdir results/aggregated/${SLUG}/
+}
+
+plots/:
+{
+    mkdir -p plots
 }
 
 @test:

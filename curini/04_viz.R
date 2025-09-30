@@ -25,32 +25,35 @@ ggsave(
 
 ## conditional effect plot
 
-condit_effect <- read.csv(here::here(
-    "results",
-    "aggregated",
-    slug,
-    "condit_1.csv"
-))
-
-## find out currini's setting
-curini_setting <- list()
-curini_setting$token_normalization <- "stemming"
-curini_setting$stopword_removal <- TRUE
-curini_setting$trimming <- FALSE
-curini_setting$alternative_model <- FALSE
-curini_setting$k_setting <- 1
-curini_setting$iteration_setting <- 1
-
-curini_hash <- rlang::hash(curini_setting)
-
-## curini_hash %in% condit_effect$hash
-
-if (interactive()) {
-    condit_effect |>
-        ggplot(aes(x = LR, y = pred_multi100, group = hash)) +
-        geom_line(alpha = 0.05) +
-        geom_line(data = condit_effect[condit_effect$hash == curini_hash, ]) +
-        xlab("LR") +
-        ylab(expression(theta)) +
-        theme_minimal()
+.r <- function(i, slug) {
+    condit_effect <- read.csv(here::here(
+        "results",
+        "aggregated",
+        slug,
+        paste0("condit_", i, ".csv")
+    ))
+    condit_effect$i <- i
+    condit_effect$id <- paste0(condit_effect$i, "_", condit_effect$hash)
+    return(condit_effect)
 }
+
+condit_effect <- purrr::map(1:3, .r, slug = slug) |> purrr::list_rbind()
+
+curini_hash <- rlang::hash(tmmv.data$curini$anchor)
+
+condit_effect$alpha <- ifelse(condit_effect$hash == curini_hash, 1, 0.05)
+
+condit_effect |>
+    ggplot(aes(x = LR, y = pred_multi100, group = id, alpha = alpha)) +
+    geom_line() +
+    scale_alpha_identity() +
+    xlab("Left-right alignment") +
+    ylab(expression(theta)) +
+    theme_minimal() -> f
+
+ggsave(
+    here::here("plots", paste0(slug, "_spaghetti.pdf")),
+    f,
+    width = 8,
+    height = 10
+)

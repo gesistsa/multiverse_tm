@@ -133,10 +133,10 @@ p_spaghetti_full <- df_agg |>
     facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 ggsave(
-    here("plots", "jankins_spaghetti_full.png"),
+    here("plots", "jankins_spaghetti_full.pdf"),
     plot = p_spaghetti_full,
     width = 3000,
-    height = 4500,
+    height = 3500,
     units = "px"
 )
 
@@ -168,7 +168,7 @@ p_spaghetti_selected <- df_agg |>
     facet_wrap(~Topic)
 
 ggsave(
-    here("plots", "jankins_spaghetti_selected.png"),
+    here("plots", "jankins_spaghetti_selected.pdf"),
     plot = p_spaghetti_selected,
     width = 3000,
     height = 1500,
@@ -230,10 +230,10 @@ p_ribbon <- df_box |>
     facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 ggsave(
-    here("plots", "jankins_ribbon.png"),
+    here("plots", "jankins_ribbon.pdf"),
     plot = p_ribbon,
     width = 3500,
-    height = 4000,
+    height = 3500,
     units = "px"
 )
 
@@ -278,10 +278,10 @@ p_ribbon_models <- df_median_models |>
 
 
 ggsave(
-    here("plots", "jankins_ribbon_models.png"),
+    here("plots", "jankins_ribbon_models.pdf"),
     plot = p_ribbon_models,
     width = 3000,
-    height = 4500,
+    height = 3500,
     units = "px"
 )
 

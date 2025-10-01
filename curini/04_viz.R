@@ -41,12 +41,19 @@ condit_effect <- purrr::map(1:3, .r, slug = slug) |> purrr::list_rbind()
 
 curini_hash <- rlang::hash(tmmv.data$curini$anchor)
 
-condit_effect$alpha <- ifelse(condit_effect$hash == curini_hash, 1, 0.05)
+## condit_effect$alpha <- ifelse(condit_effect$hash == curini_hash, 1, 0.05)
 
 condit_effect |>
-    ggplot(aes(x = LR, y = pred_multi100, group = id, alpha = alpha)) +
-    geom_line() +
-    scale_alpha_identity() +
+    ggplot(aes(x = LR, y = pred_multi100, group = id)) +
+    geom_line(alpha = 0.05) +
+    geom_line(
+        data = condit_effect[
+            condit_effect$hash == rlang::hash(tmmv.data$curini$anchor),
+        ],
+        color = tmmv.palette_safe$vermilion,
+        linewidth = 0.8,
+    ) +
+
     xlab("Left-right alignment") +
     ylab(expression(theta)) +
     theme_minimal() -> f

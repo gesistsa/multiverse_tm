@@ -3,31 +3,35 @@ library(dplyr)
 library(ggplot2)
 
 ## because takano doesn't have the same size
-## we weight it so that the max eigenvalue is comparable
-calculate_pca <- function(slug, multiverse_size = 216) {
-    .f <- function(run, thetas, slug, multiverse_size = 216) {
-        df <- as.data.frame(thetas[[run]])
-        pca <- prcomp(df, scale = TRUE)
-        weight <- multiverse_size / ncol(df)
-        eigenvalues <- (pca$sdev^2) * weight
-        data.frame(
-            slug = slug,
-            run = run,
-            i = seq_along(eigenvalues),
-            eigenvalue = round(eigenvalues, 5)
-        )
-    }
-    thetas <- tmmv.read_thetas(slug)
-    purrr::map(seq_along(thetas), .f = .f, thetas = thetas, slug = slug) |>
-        purrr::list_rbind()
+## we weight it so that the max eigenvalue is comparable; 648 = 216 * 3 runs
+calculate_pca <- function(slug, multiverse_size = 648) {
+    df <- tmmv.read_thetas(slug) |>
+        purrr::map(as.data.frame) |>
+        purrr::list_cbind()
+    pca <- prcomp(df, scale = TRUE)
+    weight <- multiverse_size / ncol(df)
+    eigenvalues <- (pca$sdev^2) * weight
+    data.frame(
+        slug = slug,
+        i = seq_along(eigenvalues),
+        eigenvalue = round(eigenvalues, 5)
+    )
 }
 
 combined_pca <- purrr::map(names(tmmv.data), calculate_pca) |>
     purrr::list_rbind()
 
-dplyr::filter(combined_pca, i <= 10) |>
-    ggplot(aes(x = i, y = eigenvalue, color = slug)) +
+f <- dplyr::filter(combined_pca, i <= 10) |>
+    dplyr::rename(study = slug, rank = i) |>
+    ggplot(aes(x = rank, y = eigenvalue, color = study)) +
     geom_line(linewidth = 1) +
     scale_color_manual(values = as.character(tmmv.palette_safe)) +
-    facet_grid(cols = vars(run)) +
+    scale_x_continuous(breaks = seq(1, 10, 1)) +
     ggplot2::theme_minimal()
+
+ggsave(
+    here::here("plots", "meta_pca.pdf"),
+    f,
+    width = 8,
+    height = 8
+)

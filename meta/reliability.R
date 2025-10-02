@@ -20,5 +20,14 @@ all_density <- purrr::map(
     purrr::list_rbind()
 
 ## the figure is sort of misleading; but we can work on it later
-ggplot(all_density, aes(x = icc, y = slug)) +
-    geom_density_ridges(alpha = 0.5)
+
+all_density |>
+    dplyr::rename(study = slug) |>
+    ggplot(aes(x = icc)) +
+    geom_histogram(bins = 30) +
+    facet_grid(cols = vars(study)) +
+    ggplot2::theme_minimal() -> fig
+
+ggsave(here::here("plots", "meta_icc.pdf"), fig, width = 9, height = 4)
+
+## geom_density_ridges(alpha = 0.5)

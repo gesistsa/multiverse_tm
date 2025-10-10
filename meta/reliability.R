@@ -26,6 +26,8 @@ all_density |>
     ggplot(aes(x = icc)) +
     geom_histogram(bins = 30) +
     facet_grid(cols = vars(study)) +
+    xlab("Intraclass Correlation Coefficient") +
+    ylab("Count") +
     ggplot2::theme_minimal() -> fig
 
 ggsave(here::here("plots", "meta_icc.pdf"), fig, width = 9, height = 4)

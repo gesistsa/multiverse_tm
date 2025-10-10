@@ -20,6 +20,7 @@ estimates <- setdiff(names(tmmv.data), "jankin") |>
 fig <- ggplot(estimates, aes(Estimate)) +
     geom_histogram(bins = 30) +
     facet_grid(cols = vars(slug), scales = "free") +
+    ylab("Count") +
     ggplot2::theme_minimal()
 
 ggsave(here::here("plots", "meta_density.pdf"), fig, width = 8, height = 4)

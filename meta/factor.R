@@ -27,6 +27,8 @@ f <- dplyr::filter(combined_pca, i <= 10) |>
     geom_line(linewidth = 1) +
     scale_color_manual(values = as.character(tmmv.palette_safe)) +
     scale_x_continuous(breaks = seq(1, 10, 1)) +
+    xlab("Rank") +
+    ylab("Eigenvalue") +
     ggplot2::theme_minimal()
 
 ggsave(

@@ -159,8 +159,8 @@ tmmv.plot_spec_curve <- function(
         "Tok. Norm.",
         "Stopword Rem.",
         "Trim.",
-        "Model",
-        "k",
+        "Algorithm",
+        "K",
         "Iter."
     )
 
@@ -217,8 +217,8 @@ tmmv.plot_spec_curve <- function(
             "Tok. Norm." = token_normalization,
             "Stopword Rem." = stopword_removal,
             "Trim." = trimming,
-            "Model" = alternative_model,
-            "k" = k_setting,
+            "Algorithm" = alternative_model,
+            "K" = k_setting,
             "Iter." = iteration_setting
         ) |>
         tidyr::gather(key, value, all_of(choices)) |>

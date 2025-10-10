@@ -114,7 +114,7 @@ stopifnot(rlang::hash(jankin_settings) %in% names(settings))
 
 year_breaks <- scale_x_continuous(breaks = c(1946, 1960, 1980, 2000, 2022))
 theme_settings <- theme(
-    plot.background = element_rect("white"),
+    ## plot.background = element_rect("white"),
     legend.position = "bottom"
 )
 
@@ -130,6 +130,8 @@ p_spaghetti_full <- df_agg |>
     theme_minimal() +
     theme_settings +
     year_breaks +
+    ylab("Topic Proportion") +
+    xlab("Year") +
     facet_wrap(~Topic, ncol = 3, axes = "all_x")
 
 ggsave(
@@ -165,6 +167,8 @@ p_spaghetti_selected <- df_agg |>
     theme_minimal() +
     theme_settings +
     year_breaks +
+    ylab("Topic Proportion") +
+    xlab("Year") +
     facet_wrap(~Topic)
 
 ggsave(

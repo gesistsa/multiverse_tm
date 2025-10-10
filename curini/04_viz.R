@@ -55,7 +55,7 @@ condit_effect |>
     ) +
 
     xlab("Left-right alignment") +
-    ylab(expression(theta)) +
+    ylab("Topic proportion") +
     theme_minimal() -> f
 
 ggsave(

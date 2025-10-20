@@ -160,6 +160,7 @@ Packages <- c(
     "future",
     "ggplot2",
     "ggridges",
+    "grateful",
     "grDevices",
     "grid",
     "haven",
@@ -200,6 +201,7 @@ apt install -y \
     curl \
     make \
     cmake \
+    git \
     libglpk-dev \
     libarchive-dev \
     libcurl4-openssl-dev \

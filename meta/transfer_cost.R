@@ -105,7 +105,7 @@ if (args$debug) {
     plan(multisession, workers = getOption("tmmv.cores", 1))
 }
 
-for (slug in c("curini", "czymara", "takano", "tvinnereim")) {
+for (slug in c("czymara", "takano", "tvinnereim")) {
     args$slug <- slug
     if (!args$debug) {
         output_dir <- here::here("results", "cost", args$slug)

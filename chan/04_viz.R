@@ -9,7 +9,7 @@ slug <- "chan"
 purrr::map(1:3, \(x) {
     read.csv(here("results", "aggregated", slug, paste0(x, ".csv")))
 }) |>
-    tmmv.plot_spec_curve(tmmv.data[[slug]]) -> f
+    tmmv.plot_spec_curve(tmmv.data[[slug]], ylab = "Estimate [95% HDI]") -> f
 
 ggsave(
     here::here("plots", paste0(slug, "_spec.pdf")),

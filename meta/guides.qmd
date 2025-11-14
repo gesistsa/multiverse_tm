@@ -1,0 +1,316 @@
+---
+title: Multiverse analysis for topic modeling
+toc: true
+number-sections: true
+---
+
+::: {.callout-note}
+This is not a general tutorial on multiverse analysis. There are several guides on this already available. [^1]
+:::
+
+[^1]: For example: [Pipal et al.](https://cpipal.github.io/multiverse-tutorial/multiverse_tutorial.html)
+
+This guide serves as an explanation to the logic of applying multiverse analysis for topic modeling used in the current study. We did not use any special multiverse analysis library to implement our analysis. Instead, we programmed it almost from scratch in R, except using the functional programming library `purrr` and the hashing function `rlang::hash()`. This guide on one hand functions as the "annotated source code" to explain our code. On another hand, it helps researchers to understand multiverse analysis from first principles.
+
+In this guide, we will use Tvinereim as the example. Please note that unlike in the study, we do not consider "stochasticity" as an analytical path. If you would like to do that, please rerun the analysis. [^2]
+
+[^2]: We also remove many I/O operations in the original code, which are for optimization.
+
+# Generate settings for all universes
+
+Suppose all reasonable analytical paths are available (and have been preregistered), we can generate the Cartesian product of all analytical paths using `expand.grid()`.
+
+```{r}
+analytical_paths <- list(
+    token_normalization = c("none", "lemmatization", "stemming"),
+    stopword_removal = c(TRUE, FALSE),
+    trimming = c(TRUE, FALSE),
+    alternative_model = c(TRUE, FALSE),
+    k_setting = c(1, 2, 3), #K original, alt1, alt2
+    iteration_setting = c(1, 2, 3) #iter original, alt1, alt2    
+)
+
+settings_df <- expand.grid(analytical_paths, stringsAsFactors = FALSE)
+nrow(settings_df)
+```
+
+The output of `expand.grid()` is data frame. For easier manipulation, we convert the data frame to a list of lists called `settings` using `purrr::transpose()`.
+
+```{r}
+settings_df |> head()
+```
+
+```{r}
+settings <- settings_df |> purrr::transpose() 
+```
+
+`settings` is a list of `setting`. `settings` and `setting` can be subset in the following two ways. The subsetting of `setting` is important because the first three slots of a `setting` are solely for text preprocessing.
+
+```{r}
+settings[1:2]
+```
+
+```{r}
+settings[[1]][1:3]
+```
+
+# Generate all preprocessed document-term matrices
+
+There are actually 12 ways to process the documents.
+
+```{r}
+settings |> purrr::map(\(x) x[1:3]) |>
+    unique() |>
+    length()
+```
+
+We produce all these 12 document-term matrics.
+
+```{r}
+preprocessing_settings <- settings |>
+    purrr::map(\(x) x[1:3]) |>
+    unique()
+```
+
+## Reading data
+
+```{r}
+#| output: false
+#| warning: false
+library(here)
+library(readr)
+library(quanteda)
+library(udpipe)
+library(dplyr)
+```
+
+```{r}
+## the data is corrupted due to file encoding issues
+
+input <- iconv(
+    readLines(here("rawdata", "ncp-stm-data.csv")),
+    from = "latin1",
+    to = "UTF-8"
+) |>
+    paste(collapse = "\n") |>
+    readr::read_delim(delim = ";", show_col_types = FALSE) |>
+    na.omit()
+
+original_corpus <- corpus(input, text_field = "openanswer")
+```
+
+## Lemmatization
+
+Lemmatization is done with `udpipe`.
+
+```{r}
+norwegian_model <- udpipe_load_model(
+    file = here::here("rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe")
+)
+
+parsed_content <- udpipe_annotate(norwegian_model, original_corpus)
+parsed_content_df <- as.data.frame(parsed_content)
+parsed_content_df_fixed <- parsed_content_df
+
+parsed_content_df_fixed |>
+    group_by(doc_id) |>
+    summarize(content = paste(lemma, collapse = " ")) |>
+    mutate(doc_id = stringr::str_extract(doc_id, "[0-9]+")) |>
+    mutate(doc_id = as.numeric(doc_id)) |>
+    arrange(doc_id) -> lemma_df
+
+lemma_corpus <- corpus(lemma_df$content)
+docvars(lemma_corpus) <- docvars(original_corpus)
+docnames(lemma_corpus) <- docnames(original_corpus)
+```
+
+## Tokenization
+
+Please note that some code (e.g., the so-called "pretokenization") was from the original code by Tvinnereim.
+
+### Original (no lemmatization or stemming)
+
+```{r}
+original_toks <- tokens(
+    original_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+)
+```
+
+### Lemmatization
+
+```{r}
+## the lemmatizer left $ before puntuation. Need to remove it explicitly
+
+lemma_toks <- tokens(
+    lemma_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+) |>
+    tokens_remove("$", valuetype = "fixed")
+```
+
+### Stemming
+
+```{r}
+## Keep the original so-called "pre stemming" (very error prone, but we respect the original authors)
+
+do_pre_stemming <- function(oa) {
+    for (i in 1:length(oa)) {
+        oa[[i]] <- gsub("frem", "fram", oa[[i]])
+        oa[[i]] <- gsub("forurensing", "forurens", oa[[i]])
+        oa[[i]] <- gsub("forurensning", "forurens", oa[[i]])
+        oa[[i]] <- gsub("smelting", "smelt", oa[[i]])
+        oa[[i]] <- gsub("altid", "alltid", oa[[i]])
+        oa[[i]] <- gsub("arktisk", "arktis", oa[[i]])
+        oa[[i]] <- gsub("bekymring", "bekymr", oa[[i]])
+        oa[[i]] <- gsub("bekymringsfullt", "bekymr", oa[[i]])
+        oa[[i]] <- gsub("betydning", "bety", oa[[i]])
+        oa[[i]] <- gsub("betyr", "bety", oa[[i]])
+        oa[[i]] <- gsub("død", "dø", oa[[i]])
+        oa[[i]] <- gsub("dør", "dø", oa[[i]])
+        #  oa[[i]] <- gsub("endring", "endr", oa[[i]])
+        oa[[i]] <- gsub("enkelt", "enkel", oa[[i]])
+        oa[[i]] <- gsub("ekstremt", "ekstrem", oa[[i]])
+        oa[[i]] <- gsub("extrem", "ekstrem", oa[[i]])
+        oa[[i]] <- gsub("fleir", "fler", oa[[i]])
+        oa[[i]] <- gsub("flomm", "flom", oa[[i]])
+        oa[[i]] <- gsub("flomr", "flom", oa[[i]])
+        oa[[i]] <- gsub("forandring", "forandr", oa[[i]])
+        oa[[i]] <- gsub("fosilt", "fossil", oa[[i]])
+        oa[[i]] <- gsub("fossilt", "fossil", oa[[i]])
+        oa[[i]] <- gsub("fremtid", "framtid", oa[[i]])
+        oa[[i]] <- gsub("globaloppvarming", "global oppvarming", oa[[i]])
+        oa[[i]] <- gsub("godt", "god", oa[[i]])
+        oa[[i]] <- gsub("høgar", "høy", oa[[i]])
+        oa[[i]] <- gsub("høyer", "høy", oa[[i]])
+        oa[[i]] <- gsub("høyt", "høy", oa[[i]])
+        oa[[i]] <- gsub("konsekvens", "konsekv", oa[[i]])
+        oa[[i]] <- gsub("langt", "lang", oa[[i]])
+        oa[[i]] <- gsub("laver", "lav", oa[[i]])
+        oa[[i]] <- gsub("lavt", "lav", oa[[i]])
+        oa[[i]] <- gsub("meir", "mer", oa[[i]])
+        # oa[[i]] <- gsub("menneskeskapt", "menneskeskap", oa[[i]])
+        # oa[[i]] <- gsub("menneske", "mennesk", oa[[i]])
+        oa[[i]] <- gsub("overdrevent", "overdriv", oa[[i]])
+        oa[[i]] <- gsub("overdrev", "overdriv", oa[[i]])
+        oa[[i]] <- gsub("oson", "ozon", oa[[i]])
+        oa[[i]] <- gsub("ozonlag", "ozon", oa[[i]])
+        oa[[i]] <- gsub("politikern", "politiker", oa[[i]])
+        oa[[i]] <- gsub("reell", "reel", oa[[i]])
+        oa[[i]] <- gsub("reelt", "reel", oa[[i]])
+        oa[[i]] <- gsub("somr", "sommer", oa[[i]]) # exception: shorter to longer
+        oa[[i]] <- gsub("teknologisk", "teknologi", oa[[i]])
+        oa[[i]] <- gsub("temperaturendr", "temperaturforandr", oa[[i]])
+        oa[[i]] <- gsub("temperaturøkning", "temperaturstigning", oa[[i]])
+        oa[[i]] <- gsub("tempratur", "temperatur", oa[[i]]) # mis-spelling
+        oa[[i]] <- gsub("usikker", "usikk", oa[[i]])
+        oa[[i]] <- gsub("ustabilt", "ustabil", oa[[i]])
+        oa[[i]] <- gsub("utrydning", "utrydd", oa[[i]])
+        oa[[i]] <- gsub("utslepp", "utslipp", oa[[i]])
+        oa[[i]] <- gsub("uver", "uvær", oa[[i]])
+        oa[[i]] <- gsub("varmar", "varm", oa[[i]])
+        oa[[i]] <- gsub("varmerevåter", "varm våt", oa[[i]])
+        oa[[i]] <- gsub("varmer", "varm", oa[[i]])
+        oa[[i]] <- gsub("varmt", "varm", oa[[i]])
+        oa[[i]] <- gsub("vatn", "vann", oa[[i]])
+        oa[[i]] <- gsub("viktiger", "vikt", oa[[i]])
+        oa[[i]] <- gsub("viktigst", "vikt", oa[[i]])
+        oa[[i]] <- gsub("vinter", "vint", oa[[i]])
+        oa[[i]] <- gsub("vintr", "vint", oa[[i]])
+        oa[[i]] <- gsub("ødelagt", "ødel", oa[[i]])
+        oa[[i]] <- gsub("ødelegg", "ødel", oa[[i]])
+        oa[[i]] <- gsub("økend", "øke", oa[[i]])
+        oa[[i]] <- gsub("øker", "øke", oa[[i]])
+        oa[[i]] <- gsub("øket", "øke", oa[[i]])
+        oa[[i]] <- gsub("økning", "øke", oa[[i]])
+        oa[[i]] <- gsub("økt", "øke", oa[[i]])
+        oa[[i]] <- gsub("", "", oa[[i]])
+        oa[[i]] <- gsub("", "", oa[[i]])
+    }
+    return(oa)
+}
+
+prestemmed_toks <- do_pre_stemming(input$openanswer) |>
+    tokens(remove_punct = TRUE, remove_numbers = TRUE)
+
+docvars(prestemmed_toks) <- docvars(original_toks)
+docnames(prestemmed_toks) <- docnames(original_toks)
+```
+
+### Join the three together
+
+```{r}
+current_tokens_list <- list()
+current_tokens_list[["normal"]] <- original_toks
+current_tokens_list[["lemmatized"]] <- lemma_toks
+current_tokens_list[["prestemmed"]] <- prestemmed_toks
+```
+
+## Generate document-term matrices
+
+```{r}
+process_tokens <- function(setting, current_tokens_list) {
+    if (setting$token_normalization == "lemmatization") {
+        current_tokens <- current_tokens_list[["lemmatized"]]
+    } else if (setting$token_normalization == "none") {
+        current_tokens <- current_tokens_list[["normal"]]
+    } else {
+        current_tokens <- current_tokens_list[["prestemmed"]]
+    }
+    if (setting$stopword_removal) {
+        current_tokens <- current_tokens |>
+            tokens_remove(
+                stopwords("norwegian"),
+                case_insensitive = TRUE,
+                padding = FALSE,
+            )
+    }
+    if (setting$token_normalization == "stemming") {
+        current_tokens <- tokens_wordstem(
+            current_tokens,
+            language = "norwegian"
+        )
+    }
+    current_dfm <- dfm(current_tokens)
+    if (setting$trimming) {
+        current_dfm <- dfm_trim(
+            current_dfm,
+            min_docfreq = 6,
+            docfreq_type = "count"
+        )
+    }
+    return(current_dfm)
+}
+
+dfm_list <- purrr::map(preprocessing_settings,
+                       process_tokens,
+                       current_tokens_list = current_tokens_list)
+```
+
+In order to speed up the look up, we name each slot in `dfm_list` with the hash of the original `preprocessing_setting`.
+
+```{r}
+names(dfm_list) <- purrr::map_chr(preprocessing_settings,
+                                  rlang::hash)
+```
+
+So that we can quickly access the corresponding document-term matrix from a `setting`, e.g.,
+
+```{r}
+dfm_list[[rlang::hash(settings[[100]][1:3])]]
+```
+
+# Train topic models
+
+```{r}
+#| output: false
+#| warning: false
+library(keyATM)
+library(quanteda)
+library(stm)
+```
+

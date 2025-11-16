@@ -142,6 +142,16 @@ ggsave(
     units = "px"
 )
 
+ggsave(
+    here("plots", "jankins_spaghetti_full.jpg"),
+    plot = p_spaghetti_full,
+    width = 3000,
+    height = 3500,
+    units = "px",
+    bg = "white"
+)
+
+
 # Focus on same examples as Jankin et al
 # Reduce inequality within and among countries: SDG 10
 # Climate Change: SDG 13
@@ -178,6 +188,16 @@ ggsave(
     height = 1500,
     units = "px"
 )
+
+ggsave(
+    here("plots", "jankins_spaghetti_selected.jpg"),
+    plot = p_spaghetti_selected,
+    width = 3000,
+    height = 1500,
+    units = "px",
+    bg = "white"
+)
+
 
 # Create a mix of ribbon plot and a box plot
 # Caption:

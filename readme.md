@@ -155,6 +155,7 @@ Packages <- c(
     "brms",
     "cowplot",
     "dplyr",
+    "effectsize",
     "fs",
     "furrr",
     "future",
@@ -165,7 +166,6 @@ Packages <- c(
     "grid",
     "haven",
     "here",
-    "igraph",
     "jsonlite",
     "keyATM",
     "lexicon",
@@ -202,10 +202,10 @@ apt install -y \
     make \
     cmake \
     git \
-    libglpk-dev \
     libarchive-dev \
     libcurl4-openssl-dev \
     libicu-dev \
+    libuv1-dev \
     libxml2-dev \
     libssl-dev \
     pandoc \
@@ -223,7 +223,7 @@ There are options that one can customize; see `.Rprofile`.
 # License
 
 All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
-2025 `multiverse_tm` authors), except
+2026 `multiverse_tm` authors), except
 
 - [`lib/read_text_base.R`](lib/read_text_base.R) - GPL3
 - [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2

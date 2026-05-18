@@ -71,7 +71,7 @@ fig <- variance_decomposition |>
     ggplot2::theme_minimal()
 
 ggplot2::ggsave(
-    filename = here::here("plots", "variance_decomposition.pdf"),
+    filename = here::here("plots", "meta_variance_decomposition.pdf"),
     plot = fig,
     width = 6,
     height = 9

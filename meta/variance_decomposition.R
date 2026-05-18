@@ -58,7 +58,8 @@ variance_decomposition <- setdiff(names(tmmv.data), "jankin") |>
             "token_normalization" = "Token normalization",
             "stopword_removal" = "Stopword removal",
             "iteration_setting" = "Iteration",
-            "k_setting" = "K"
+            "k_setting" = "K",
+            "alternative_model" = "Algorithm"
         )
     )
 
@@ -73,6 +74,6 @@ fig <- variance_decomposition |>
 ggplot2::ggsave(
     filename = here::here("plots", "meta_variance_decomposition.pdf"),
     plot = fig,
-    width = 6,
-    height = 9
+    width = 8,
+    height = 10
 )

@@ -1,4 +1,8 @@
 ---
+title: Reproducibility of @curini:2021:CMU
+author: REDACTED 
+bibliography: ../../references.bib
+
 knitr:
   opts_chunk: 
     collapse: true
@@ -8,15 +12,17 @@ knitr:
       
 format:
   html:
-    embed-resources: true    
+    embed-resources: true
     code-annotations: "hover"
+    toc: true
+    toc-location: "right"
 ---
 
 # Background
 
-In Curini & Vignoli, the following regression table was reported (@fig-regression).
+In @curini:2021:CMU, the following regression table was reported (@fig-regression).
 
-![Original regression table in Curini & Vignoli (fair use)](regression.png){#fig-regression}
+![Original regression table in @curini:2021:CMU (fair use)](regression.png){#fig-regression}
 
 Specifically, for model 2, the regression coefficient for Left-Right is **0.823**. In our multiverse analysis, however, this positive coefficient was not returned. We adopted the following R code shared on Harvard Dataverse: [https://dataverse.harvard.edu/file.xhtml?fileId=4291432&version=1.0](https://dataverse.harvard.edu/file.xhtml?fileId=4291432&version=1.0). The code, in verbatim, is following:
 
@@ -144,11 +150,21 @@ write.csv(fit_slda, "scores_slda.csv") #<6>
 
 Please note also that the work space dump was also shared:  [https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0](https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0). In the dump, among other things, `corpus` and `myDfm` are included. In addition, the generated file `scores_slda.csv` is also shared.
 
-We were asked to investigate what causes the discrepancy (the reported positive value in Curini & Vignoli and the negative values in our multiverse analysis). Indeed, we adopted the code but also introduced several changes.
+We were asked to investigate what causes the discrepancy (the reported positive value in @curini:2021:CMU and the negative values in our multiverse analysis). Indeed, we adopted the code but also introduced several changes.
 
 1. We did not use Stata for the regression analysis.
 2. We did not run the code using the same R packages. Specifically, we used more recent `quanteda` and `seededlda` (the successor package of `quanteda.seededlda` by the same author); and also a more recent version of R.
 3. We used an Italian stemmer.
+
+# Plan
+
+In this investigation, we construct a Docker image using the following Dockerfile that should represent the similar, if not the same, the computational environment as what @curini:2021:CMU used for doing their analysis. 
+
+```Dockerfile
+{{< include Dockerfile >}}
+```
+
+With this Docker image, we launch a Docker container (Except Step 5) to run the original code and data shared by @curini:2021:CMU on Dataverse. We modify one thing at a time, until we find out the discrepancy in the estimate. We can then establish causal link between what has been changed and the irreproducibility of the originally reported estimate by @curini:2021:CMU, i.e. a positive estimate of **0.823**.
 
 # Step 1: Testing our translated R code for regression
 
@@ -158,7 +174,7 @@ In the original analysis, the fractional regression analysis was conducted with 
 reg multi100 c.lr##c.lr gov year i.code, r
 ```
 
-In the main analysis, we translated this Stata code to R. In the most basic analysis, we used the data shared by Curini (`scores_slda.csv`, which contains the precalculated results from seeded LDA) to conduct the same analysis using our R code. This tests that our translated R code for conducting fractional regression analysis does not cause the regression coefficient of LR turning negative.
+In the main analysis, we translated this Stata code to R. In the most basic analysis, we used the data shared by @curini:2021:CMU (`scores_slda.csv`, which contains the precalculated results from seeded LDA) to conduct the same analysis using our R code. This tests that our translated R code for conducting fractional regression analysis does not cause the regression coefficient of LR turning negative.
 
 ```{r filename="part1.R"}
 #| eval: false
@@ -284,9 +300,6 @@ load(here("rawdata/dfm.RData"))
 ## convert the pre quanteda 2 dfm to a modern data structure
 myDfm <- as.dfm(myDfm)
 
-cat("DFM version\n")
-print(myDfm@version)
-
 cat("Dimenions\n")
 print(dim(myDfm))
 
@@ -362,4 +375,4 @@ Using a modern version of `seededlda`, even with the same document-term matrix a
 
 # Summary
 
-The original code is not reproducible because of the following factors: (1) how the documents are tokenized, (2) stochastic instability, and (3) change in software; even the data and code is largely the same.
+The original estimate is not reproducible because of the following factors: (1) how the documents are tokenized, (2) stochastic instability, and (3) changes in software; even the data and code is largely the same.

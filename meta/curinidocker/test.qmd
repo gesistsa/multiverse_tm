@@ -150,7 +150,7 @@ We were asked to investigate what causes the discrepancy (the reported positive 
 2. We did not run the code using the same R packages. Specifically, we used more recent `quanteda` and `seededlda` (the successor package of `quanteda.seededlda` by the same author); and also a more recent version of R.
 3. We used an Italian stemmer.
 
-# Step 1: Testing our translated R code
+# Step 1: Testing our translated R code for regression
 
 In the original analysis, the fractional regression analysis was conducted with Stata using the following code.
 
@@ -173,7 +173,7 @@ Indeed, the regression coefficient of LR is still positive and exactly the same.
 
 # Step 2: Testing the original seedlda code
 
-As the original workspace dump was provided, we rerun here the analysis from the provided document-term matrix.
+As the regression code is not the reason for irreproducibility, it should be because of the text analysis step. As the original workspace dump was provided, we rerun here the analysis from the provided document-term matrix.
 
 ```{r filename="part2.R"}
 #| eval: false
@@ -218,9 +218,9 @@ It cannot be explained by the option of stemmer language setting. We attempted a
 docker compose run --remove-orphans --rm r36 Rscript --vanilla "meta/curinidocker/part3ita.R"
 ```
 
-In fact, we observed more missing terms. Based on the Italian stemming algorithm, many Italian terms in the original document-term matrix were not properly tokenized. For instance, "penso" (English: I think) should be tokenized to "pens". But it was tokenized into "penso" in the original document-term matrix. It is almost certain that the original authors would have used the default English stemmer to stem Italian texts. It can also be reflected in the terms in the dictionary for seeded LDA: Terms in the dictionary were assumed to be stemmed using the English stemmer.
+In fact, we observed more missing terms using the Italian stemmer. Based on the Italian stemming algorithm, many Italian terms of the original document-term matrix in the workspace dump were not properly tokenized. For instance, "penso" (English: I think) should be tokenized to "pens". But it was tokenized into "penso" in the original document-term matrix. 
 
-In addition, we also observed many terms in the original document-term matrix with incorrect encoding (e.g., "grazie<U+00E8>"). It *could* be due to the fact that the original authors did the tokenization on a machine that was not configured properly to handle Unicode (UTF-8).
+It is almost certain that the original authors would have used the default English stemmer to stem Italian texts. It can also be reflected in the terms in the dictionary for seeded LDA: Terms in the dictionary were assumed to be stemmed using the English stemmer. In addition, we also observed many terms in the original document-term matrix with incorrect encoding (e.g., "grazie<U+00E8>"). It *could* be due to the fact that the original authors did the tokenization on a machine that was not configured properly to handle Unicode (UTF-8).
 
 Nonetheless, the regression coefficient of LR is positive now but not the same.
 
@@ -230,7 +230,7 @@ A possible explanation would be the underlying R package for tokenization, `Snow
 
 Similarly, using the CRAN version of `quanteda` 1.5.1 or the Github version of 1.5.1 (which the original authors recommended) does not affect the tokenization.
 
-## Summary
+## Summary of this step
 
 The original code, even without introducing anything new, cannot reproducible the original finding, not least because of tokenization. We cannot (fully) explain the exact reason for irreproducibility of the original code. [^1] But one thing is clear: The regression coefficient changes drastically just by tweaking how one tokenizes or normalizes the texts. This part matches the findings of the multiverse analysis. Also, the original finding of a positive regression coefficient might well be an artefact of machine-specific idiosyncrasies, including how a (misconfigurated) computational environment handles Unicode. 
 
@@ -238,17 +238,128 @@ The original code, even without introducing anything new, cannot reproducible th
 
 # Step 4: Testing stochastic stability
 
+Taking the last reproducible code (Step 2), we test the stochastic stability by making the fixed random seed a parameter.
 
-# Testing modified dictionary
-
-The original dictionary has some interesting choices. We have to clean that up so that it can used in other token normalization situations.
-
-The original dictionary does use the wildcard character in some cases ("solidal*", therefore it will match both adjective *solidale*, *solidali*, *solidalmente*), but not in other ("comunit"). We have normalized all of these cases to using the wildcard character.
-
-```{bash}
-#docker compose run --remove-orphans --rm r36 Rscript --vanilla "meta/curinidocker/part3.R"
+```{r filename="part4.R"}
+#| eval: false
+{{< include  part4.R >}}
 ```
 
-This choice can affect the effect estimate. But the direction is still positive.
+1. We make the random seed a parameter. 
 
+We run the following with three different random seeds, which are selected similar to what we did in the multiverse analysis:
 
+```{r}
+set.seed(123)
+sample(-65535:65535, 3)
+```
+
+```{bash}
+docker compose run --remove-orphans --rm r36 Rscript --vanilla "meta/curinidocker/part4.R" -13973
+```
+
+```{bash}
+docker compose run --remove-orphans --rm r36 Rscript --vanilla "meta/curinidocker/part4.R" -7666
+```
+
+```{bash}
+docker compose run --remove-orphans --rm r36 Rscript --vanilla "meta/curinidocker/part4.R" -62550
+```
+
+From the three runs, we obtained very negative estimates (as negative as -0.99) only by switching to other random seeds. Therefore, the original positive estimate is not stochastically robust. This part matches the findings of the multiverse analysis.
+
+# Step 5: Step 2 but on a modern computational environment
+
+Please note that the following is not run under a Docker container (Note the `sessionInfo()`).
+
+```{r}
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(sandwich))
+suppressPackageStartupMessages(library(lmtest))
+suppressPackageStartupMessages(library(quanteda))
+suppressPackageStartupMessages(library(seededlda))
+
+load(here("rawdata/dfm.RData"))
+
+## convert the pre quanteda 2 dfm to a modern data structure
+myDfm <- as.dfm(myDfm)
+
+cat("DFM version\n")
+print(myDfm@version)
+
+cat("Dimenions\n")
+print(dim(myDfm))
+
+myDict <- dictionary(list(
+    multilateralism = c(
+        "multilateralism",
+        "comunit",
+        "responsabilit",
+        "alleanza",
+        "alleati",
+        "impegno",
+        "sicurezza",
+        "coalizione"
+    ),
+    humanitarian_dimension = c(
+        "democrazia",
+        "umani",
+        "democrazia",
+        "democratica",
+        "diritto",
+        "pace",
+        "solidariet",
+        "libert",
+        "pacific*",
+        "umanitaria",
+        "umanitari",
+        "solidal*"
+    ),
+    war = c(
+        "guerra",
+        "militare",
+        "bombardamenti",
+        "militari",
+        "costituzione",
+        "disarmo",
+        "chiarezza",
+        "violenza",
+        "bombe",
+        "rischi",
+        "vittime"
+    )
+))
+
+set.seed(123)
+
+slda <- textmodel_seededlda(
+    x = myDfm,
+    dictionary = myDict,
+    residual = 1,
+    verbose = FALSE
+)
+
+fit_slda <- fit[-c(1)]
+fit_slda$multilateralism <- slda$theta[,"multilateralism"]
+fit_slda$humanitarian_dimension <- slda$theta[,"humanitarian_dimension"]
+fit_slda$war <- slda$theta[,"war"]
+
+reg_data <- fit_slda
+
+reg_data$multi100 <- reg_data$multilateralism /
+    (reg_data$multilateralism + reg_data$humanitarian_dimension + reg_data$war)
+
+glmmod <- glm(
+    multi100 ~ LR + I(LR^2) + Gov + Year + as.factor(Party),
+    data = reg_data,
+    family = quasibinomial("logit")
+)
+print(coeftest(glmmod, vcov. = vcovHC(glmmod, type = "HC0")))
+print(sessionInfo())
+```
+
+Using a modern version of `seededlda`, even with the same document-term matrix and the same random seed, one cannot obtain exactly the same estimate.
+
+# Summary
+
+The original code is not reproducible because of the following factors: (1) how the documents are tokenized, (2) stochastic instability, and (3) change in software; even the data and code is largely the same.

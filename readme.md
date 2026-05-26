@@ -178,6 +178,7 @@ Packages <- c(
     "readr",
     "renv",
     "rlang",
+    "rmarkdown",
     "IshidaMotohiro/RMeCab@2a11093f6a69ee11584aa0e2e8b32a59d1b9f092",
     "sandwich",
     "seededlda",
@@ -219,6 +220,16 @@ apt install -y \
 # Options
 
 There are options that one can customize; see `.Rprofile`.
+
+# Notes about `meta/curinidocker`
+
+In order to run the reproducibility analysis of Curini and Vignoli
+(2021), Quarto and Docker must be installed.
+
+``` bash
+docker compose -f meta/curinidocker/compose.yaml build
+quarto render meta/curinidocker/index.qmd
+```
 
 # License
 
@@ -296,5 +307,5 @@ Change.” *Nature Climate Change* 5 (8): 744–47.
     `withr`, `clauswilke/colorblindr`, and `quarto`. Please read
     `dev/readme.md`
 
-[^2]: There are also additional dependencies for developers: quarto,
-    air, and git. Please read `dev/readme.md`
+[^2]: There are also additional dependencies for developers: air, and
+    git. Please read `dev/readme.md`

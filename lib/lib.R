@@ -366,7 +366,10 @@ tmmv.postprocess_effect_size_mod <- function(res, args) {
 }
 
 tmmv.cache_requirements <- function() {
-    rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
+    rpkgs <- setdiff(
+        sort(unique(renv::dependencies(quiet = TRUE)$Package)),
+        "quanteda.seededlda"
+    )
     system_requirements <- pak::pkg_sysreqs(setdiff(
         rpkgs,
         c("RMeCab", "colorblindr")

@@ -158,13 +158,13 @@ We were asked to investigate what causes the discrepancy (the reported positive 
 
 # Plan
 
-In this investigation, we construct a Docker image using the following Dockerfile that should represent the similar, if not the same, the computational environment as what @curini:2021:CMU used for doing their analysis. 
+In this investigation, we construct a Docker image using the following Dockerfile that should represent a similar, if not the same, computational environment as what @curini:2021:CMU was used for their analysis. 
 
 ```Dockerfile
 {{< include Dockerfile >}}
 ```
 
-With this Docker image, we launch a Docker container (Except Step 5) to run the original code and data shared by @curini:2021:CMU on Dataverse. We modify one thing at a time, until we find out the discrepancy in the estimate. We can then establish causal link between what has been changed and the irreproducibility of the originally reported estimate by @curini:2021:CMU, i.e. a positive estimate of **0.823**.
+With this Docker image, we launch a Docker container (Except Step 5) to run the original code and data shared by @curini:2021:CMU on Dataverse. We modify one thing at a time, until we find out the discrepancy in the estimate. We can then establish a causal link between what has been changed and the irreproducibility of the originally reported estimate by @curini:2021:CMU, i.e. a positive estimate of **0.823**.
 
 # Step 1: Testing our translated R code for regression
 
@@ -248,7 +248,7 @@ Similarly, using the CRAN version of `quanteda` 1.5.1 or the Github version of 1
 
 ## Summary of this step
 
-The original code, even without introducing anything new, cannot reproducible the original finding, not least because of tokenization. We cannot (fully) explain the exact reason for irreproducibility of the original code. [^1] But one thing is clear: The regression coefficient changes drastically just by tweaking how one tokenizes or normalizes the texts. This part matches the findings of the multiverse analysis. Also, the original finding of a positive regression coefficient might well be an artefact of machine-specific idiosyncrasies, including how a (misconfigurated) computational environment handles Unicode. 
+The original code, even without introducing anything new, cannot reproducible the original finding, not least because of tokenization. We cannot (fully) explain the reason for irreproducibility of the original code. [^1] But one thing is clear: The regression coefficient changes drastically just by tweaking how one tokenizes or normalizes the texts using the original code. This part matches the findings of the multiverse analysis. Also, the original finding of a positive regression coefficient might well be an artefact of machine-specific idiosyncrasies, including how a (misconfigurated) computational environment handles Unicode. 
 
 [^1]: We do not have any evidence of foul play.
 
@@ -372,6 +372,95 @@ print(sessionInfo())
 ```
 
 Using a modern version of `seededlda`, even with the same document-term matrix and the same random seed, one cannot obtain exactly the same estimate.
+
+# Step 6 (Partial): Seed words Dictionary
+
+In the main multiverse analysis, we modified the seed words with the wild card character. We attempted to run Step 2 but with the seed words corrected. However, it is not possible due to software issue (the underlying R package for handling topic modeling `topicmodels` cannot correctly allocate memory when the number of keywords is high).
+
+Here, we can only run this on a modern computational environment similar to Step 5.
+
+```{r}
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(sandwich))
+suppressPackageStartupMessages(library(lmtest))
+suppressPackageStartupMessages(library(quanteda))
+suppressPackageStartupMessages(library(seededlda))
+
+load(here("rawdata/dfm.RData"))
+
+## convert the pre quanteda 2 dfm to a modern data structure
+myDfm <- as.dfm(myDfm)
+
+cat("Dimenions\n")
+print(dim(myDfm))
+
+myDict <- dictionary(list( # <1>
+    multilateralism = c(
+        "multilateral*",
+        "comun*",
+        "respons*",
+        "alleanz*",
+        "alle*",
+        "impegn*",
+        "sicurezz*",
+        "coalizion*"
+    ),
+    humanitarian_dimension = c(
+        "democraz*",
+        "democrat*",
+        "uman*",
+        "diritt*",
+        "pac*",
+        "solidariet*",
+        "libert*",
+        "pacif*",
+        "umanitar*",
+        "solidal*"
+    ),
+    war = c(
+        "guerr*",
+        "milit*",
+        "bombard*",
+        "militar*",
+        "costitu*",
+        "disarm*",
+        "chiarezz*",
+        "violenz*",
+        "bomb*",
+        "risc*",
+        "vittim*"
+    )
+))
+
+set.seed(123)
+
+slda <- textmodel_seededlda(
+    x = myDfm,
+    dictionary = myDict,
+    residual = 1,
+    verbose = FALSE
+)
+
+fit_slda <- fit[-c(1)]
+fit_slda$multilateralism <- slda$theta[,"multilateralism"]
+fit_slda$humanitarian_dimension <- slda$theta[,"humanitarian_dimension"]
+fit_slda$war <- slda$theta[,"war"]
+
+reg_data <- fit_slda
+
+reg_data$multi100 <- reg_data$multilateralism /
+    (reg_data$multilateralism + reg_data$humanitarian_dimension + reg_data$war)
+
+glmmod <- glm(
+    multi100 ~ LR + I(LR^2) + Gov + Year + as.factor(Party),
+    data = reg_data,
+    family = quasibinomial("logit")
+)
+print(coeftest(glmmod, vcov. = vcovHC(glmmod, type = "HC0")))
+print(sessionInfo())
+```
+
+1. The dictionary is corrected with the wildcard character (asterisk).
 
 # Summary
 

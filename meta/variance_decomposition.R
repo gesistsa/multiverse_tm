@@ -3,6 +3,7 @@ library(dplyr)
 library(purrr)
 library(effectsize)
 library(ggplot2)
+library(forcats)
 
 .calculate <- function(slug) {
     raw_estimates <- purrr::map(1:3, \(x) {
@@ -40,7 +41,10 @@ library(ggplot2)
     unexplained_variance <- 1 - mod_summary$r.squared
 
     output <- rbind(
-        data.frame(Parameter = "Unexplained", Eta2 = unexplained_variance),
+        data.frame(
+            Parameter = "Stochasticity and other",
+            Eta2 = unexplained_variance
+        ),
         mod_eta2
     ) |>
         arrange(Eta2)
@@ -61,8 +65,10 @@ variance_decomposition <- setdiff(names(tmmv.data), "jankin") |>
             "k_setting" = "K",
             "alternative_model" = "Algorithm"
         )
+    ) |>
+    mutate(
+        Parameter = forcats::fct_relevel(Parameter, "Stochasticity and other")
     )
-
 
 fig <- variance_decomposition |>
     ggplot(aes(x = Eta2, y = Parameter)) +

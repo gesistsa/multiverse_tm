@@ -248,7 +248,7 @@ Similarly, using the CRAN version of `quanteda` 1.5.1 or the Github version of 1
 
 ## Summary of this step
 
-The original code, even without introducing anything new, cannot reproducible the original finding, not least because of tokenization. We cannot (fully) explain the reason for irreproducibility of the original code. [^1] But one thing is clear: The regression coefficient changes drastically just by tweaking how one tokenizes or normalizes the texts using the original code. This part matches the findings of the multiverse analysis. Also, the original finding of a positive regression coefficient might well be an artefact of machine-specific idiosyncrasies, including how a (misconfigurated) computational environment handles Unicode. 
+The original code, even without introducing anything new, cannot reproduce the original finding, not least because of tokenization. We cannot (fully) explain the reason for irreproducibility of the original code. [^1] But one thing is clear: The regression coefficient changes drastically just by tweaking how one tokenizes or normalizes the texts using the original code. This part matches the findings of the multiverse analysis. Also, the original finding of a positive regression coefficient might well be an artefact of machine-specific idiosyncrasies, including how a (misconfigurated) computational environment handles Unicode. 
 
 [^1]: We do not have any evidence of foul play.
 

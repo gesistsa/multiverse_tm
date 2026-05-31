@@ -3,5 +3,6 @@ intermediate
 readme.rmd
 results
 plots
+meta/curinidocker/*.R
 #| profile == "default"
 dev

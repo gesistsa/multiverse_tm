@@ -129,7 +129,16 @@ There are options that one can customize; see `.Rprofile`.
 
 [^1]: There are also additional dependencies for developers: `jsonlite`, `withr`, `clauswilke/colorblindr`, and `quarto`. Please read `dev/readme.md`
 
-[^2]: There are also additional dependencies for developers: quarto, air, and git. Please read `dev/readme.md`
+[^2]: There are also additional dependencies for developers: air, and git. Please read `dev/readme.md`
+
+# Notes about `meta/curinidocker`
+
+In order to run the reproducibility analysis of @curini:2021:CMU, Quarto and Docker must be installed.
+
+```bash
+docker compose -f meta/curinidocker/compose.yaml build
+quarto render meta/curinidocker/index.qmd
+```
 
 # License
 

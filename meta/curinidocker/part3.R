@@ -55,24 +55,26 @@ myDict <- dictionary(list(
 ))
 
 myDfm <- dfm(
-    corpus,
+    #<1>
+    corpus, #<1>
     remove = c(
-        stopwords("italian"),
-        "l",
-        "d",
-        "dell",
-        "dall",
-        "afganistan",
-        "libano",
-        "kosovo",
-        "iraq",
-        "libia",
-        "albania"
-    ),
-    tolower = TRUE,
-    stem = TRUE,
-    remove_punct = TRUE,
-    remove_numbers = TRUE
+        #<1>
+        stopwords("italian"), #<1>
+        "l", #<1>
+        "d", #<1>
+        "dell", #<1>
+        "dall", #<1>
+        "afganistan", #<1>
+        "libano", #<1>
+        "kosovo", #<1>
+        "iraq", #<1>
+        "libia", #<1>
+        "albania" #<1>
+    ), #<1>
+    tolower = TRUE, #<1>
+    stem = TRUE, #<1>
+    remove_punct = TRUE, #<1>
+    remove_numbers = TRUE #<1>
 ) #<1>
 
 cat("DFM version\n")

@@ -148,7 +148,7 @@ write.csv(fit_slda, "scores_slda.csv") #<6>
 5. The random seed is hardcoded to 123.
 6. The output is saved as `scores_slda.csv` for further analysis in Stata.
 
-Please note also that the work space dump was also shared:  [https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0](https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0). In the dump, among other things, `corpus` and `myDfm` are included. In addition, the generated file `scores_slda.csv` is also shared.
+Please note also that the work space dump was also shared:  [https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0](https://dataverse.harvard.edu/file.xhtml?fileId=4291438&version=1.0). In the dump, among other things, `corpus` and `myDfm` are included. In addition, the generated file `scores_slda.csv` was also shared.
 
 We were asked to investigate what causes the discrepancy (the reported positive value in @curini:2021:CMU and the negative values in our multiverse analysis). Indeed, we adopted the code but also introduced several changes.
 
@@ -226,7 +226,7 @@ It cannot be explained by the option of stemmer language setting. We attempted a
 {{< include  part3ita.R >}}
 ```
 
-1. The only line of code added compared to `part2ita.R`. It could be in the initialization file (e.g., `.Rprofile`).
+1. The only line of code added compared to `part3.R`. This line of code for setting an option could be in the initialization file (e.g., `.Rprofile`).
 
 ```{bash}
 #| code-fold: true

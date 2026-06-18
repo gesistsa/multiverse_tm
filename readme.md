@@ -111,13 +111,14 @@ their required datafiles:
   - Lemmatization model:
     [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
 - Jankin, Baturo, and Dasandi (2024): Data available via [Harvard
-  Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) and code via
-  [PRIO](https://www.prio.org/journals/jpr/replicationdata), see entry
-  at section 2025 (62) Issue 4.
+  Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) (Version 13) and code
+  via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see
+  entry at section 2025 (62) Issue 4.
   - Text data:
-    [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
-  - Meta data:
-    [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+    [`rawdata/ungd_files.RDS`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
+    Please note that the original file is processed using
+    `jankin/00_read.RDS`. The processed data is made available under CC0
+    (Public Domain).
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)
   - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)

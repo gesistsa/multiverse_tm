@@ -117,7 +117,7 @@ their required datafiles:
   - Text data:
     [`rawdata/ungd_files.RDS`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
     Please note that the original file is processed using
-    `jankin/00_read.RDS`. The processed data is made available under CC0
+    `jankin/00_read.R`. The processed data is made available under CC0
     (Public Domain).
 - Takano, Matsuo, and Kawano (2023): Data and code available via
   [OSF](https://osf.io/6ktey/)

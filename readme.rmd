@@ -79,9 +79,8 @@ All selected studies make the data and source code publicly available. The requi
   - Text / survey data: [`rawdata/Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034) (You must request it via GESIS BASIS)
   - Stop word list: [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
   - Lemmatization model: [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
-- @jankin:2024:W: Data available via [Harvard Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) and code via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see entry at section 2025 (62) Issue 4.
-  - Text data: [`rawdata/UNGDC_1946-2024.tar.gz`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
-  - Meta data: [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+- @jankin:2024:W: Data available via [Harvard Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) (Version 13) and code via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see entry at section 2025 (62) Issue 4.
+  - Text data: [`rawdata/ungd_files.RDS`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0) Please note that the original file is processed using `jankin/00_read.RDS`. The processed data is made available under CC0 (Public Domain).
 - @takano:2023:awe: Data and code available via [OSF](https://osf.io/6ktey/)
   - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
   - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)

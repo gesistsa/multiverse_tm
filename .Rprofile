@@ -1,5 +1,9 @@
 renv_available <- !identical(find.package("renv", quiet = TRUE, lib.loc = NULL), character(0))
 
+if (Sys.getenv("INSIDEDOCKER") == "" && !renv_available) {
+    warning("It appears that you have not initialized renv yet. Please install 'renv', run 'renv::activate()' and then 'renv::restore().")
+}
+
 if (Sys.getenv("INSIDEDOCKER") == "" && renv_available) {
     source("renv/activate.R")
 }

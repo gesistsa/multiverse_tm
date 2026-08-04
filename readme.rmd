@@ -65,12 +65,22 @@ There are two ways to manage your R environment so that the correct packages are
 
 ## Environment using renv
 
-### Linux
+### If you are using Windows
 
-Ensure `renv` (version >= 1.1.4, we tested with 1.1.5) and `pak`:
+::: {.callout-note}
+Although we expect the R scripts in this codebase to work across all platforms, it requires a lot of tooling outside of R (e.g., cURL, make) that is readily available on Unix-like systems. Your milage with Windows will vary and additional tweaking may be required. In case of doubt, we recommend using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
+:::
+
+Ensure [Rtools](https://cran.r-project.org/bin/windows/Rtools/) are installed.
+
+*Protip:* You can install RTools with winget. Open a PowerShell and enter `winget install rtools`
+
+### Restore the `renv` environment
+
+Ensure `renv` (version >= 1.1.4, we tested with 1.1.5):
 
 ```bash
-R -e 'install.packages(c("renv", "pak"))'
+R -e 'install.packages("renv")'
 ```
 
 Then you can activate and restore the environment in R by running:
@@ -79,16 +89,6 @@ Then you can activate and restore the environment in R by running:
 renv::activate()
 renv::restore()
 ```
-
-### Windows
-
-::: {.callout-note}
-Although we expect the R scripts in this codebase to work across all platforms, it requires a lot of tooling outside of R (e.g., cURL, make) that is readily available on Unix-like systems. Your milage with Windows will vary and additional tweaking may be required. In case of doubt, we recommend using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
-:::
-
-Ensure `renv` (version >= 1.1.4) and [Rtools](https://cran.r-project.org/bin/windows/Rtools/) are installed.
-
-*Protip:* You can install RTools with winget. Open a PowerShell and enter `winget install rtools`
 
 Installing `renv`:
 
@@ -114,7 +114,6 @@ renv::snapshot()
 
 This should update the `renv.lock` file with the new dependencies. Please also add the package you added to the section "Project Dependencies" at the bottom of this readme.
 
-
 # Docker
 
 ::: {.callout-warning}
@@ -135,8 +134,8 @@ Note that `docker compose up` currently runs the debug mode of the `takano` anal
 R dependencies are listed below [^1]:
 
 ```{r, echo = FALSE, results = "asis"}
-rpkgs <- jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$rpkgs
-cat(paste0("```r\nPackages <- c(\n",
+rpkgs <- setdiff(jsonlite::read_json(here::here("dev", "requirements.json"), simplifyVector = TRUE)$rpkgs, "pak")
+cat(paste0("```r\ninstall.packages(\"pak\")\nPackages <- c(\n",
            paste(paste0("    \"", rpkgs, "\""),
                  collapse = ",\n"), "\n)\n\npak::pkg_install(packages)\n```\n"))
 ```

@@ -1,5 +1,134 @@
 
 
+- [About](#about)
+  - [Abstract](#abstract)
+  - [Overview](#overview)
+- [Setup](#setup)
+  - [Environment using renv](#environment-using-renv)
+    - [Linux](#linux)
+    - [Windows](#windows)
+    - [Adding new dependencies](#adding-new-dependencies)
+- [Docker](#docker)
+- [Project Dependencies](#project-dependencies)
+- [Options](#options)
+- [Notes about `meta/curinidocker`](#notes-about-metacurinidocker)
+- [License](#license)
+- [References](#references)
+
+# About
+
+Replication repository for *Beyond beyond standardization: Studying
+robustness of empirical claims based on topic modeling through
+multiverse analysis*
+
+Published in *Communication Methods and Measures* ([DOI:
+10.1080/19312458.2026.2714769](https://doi.org/10.1080/19312458.2026.2714769))
+
+by: [Paul Balluff](https://orcid.org/0000-0001-9548-3225), [Christina
+Viehmann](https://orcid.org/0000-0001-6673-0987), [Maximilian
+Linde](https://orcid.org/0000-0001-8421-090X), [Yannik
+Peters](https://orcid.org/0009-0001-4879-5477), [Jun
+Sun](https://orcid.org/0000-0002-4789-7316), and [Chung-hong
+Chan](https://orcid.org/0000-0002-6232-7530)
+
+*All authors contributed to this project equally. The order of the names
+was determined by a random draw.*
+
+## Abstract
+
+> While topic modeling is widely used, some scholars have already
+> announced that the application of topic modeling in social science
+> research is impossible to standardize. Meanwhile, researchers have to
+> make numerous methodological decisions, yet base their empirical
+> claims on just one topic model. This raises the question of robustness
+> about those claims. In this study, we apply the framework of
+> preregistered multiverse analysis to evaluate the robustness of
+> previous empirical claims from six studies that were based on topic
+> modeling. Based on the Open Science materials of these six studies, we
+> slightly modify the original topic modeling procedures, such as
+> preprocessing, number of topic clusters, and topic modeling algorithm,
+> to other defensible choices and determine whether the empirical claims
+> remain consistent. Even though we observe that certain empirical
+> claims are more robust, most claims are distorted considerably by
+> changes to the modeling options. The contributions of this study are
+> twofold. First, we confirm that empirical claims based on just one
+> topic model might not be robust against numerous researchers degrees
+> of freedom. Second, we advocate a wider adoption of preregistered
+> multiverse analysis in social science research for checking the
+> robustness of empirical findings.
+
+## Overview
+
+For this study, we replicated 6 other studies that employed topic
+modeling. For each of them, we re-ran them with varying settings (648 in
+totoal) to build a multiverse. Next, we compare the original setting
+with the results of varying settings and plot them on various curves
+
+All selected studies make the data and source code publicly available.
+Therefore, we could often reuse major parts of the original code, but
+sometimes we reimplemented the original code, often in the interest of
+improving computing performance or refactoring shared functions into a
+common library. The required data files from each study should be in the
+`rawdata` directory. All files, except `rawdata/Corona-survey_fill.dta`,
+can be downloaded automatically by using `stu rawdata/<filename>`. For
+example, to download the text data for Curini and Vignoli (2021) use
+`stu rawdata/zip_texts.rar`. Below is a list of the selected studies and
+their required datafiles:
+
+- Chan et al. (2022): Data and code is available on
+  [OSF](https://osf.io/ycx6j/)
+  - Text data: [`rawdata/final_data.RDS`](https://osf.io/3hazf)
+- Curini and Vignoli (2021): Data and code is on [Harvard
+  Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LAXHS3)
+  - Text data:
+    [`rawdata/zip_texts.rar`](https://dataverse.harvard.edu/api/access/datafile/4291434)
+  - Meta data:
+    [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
+  - Lemmatization model:
+    [`rawdata/italian-isdt-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe)
+- Czymara et al. (2020): Data is available upon request via
+  [GESIS](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034),
+  source code repository is on
+  [Github](https://github.com/czymara/perceiving-COVID19-in-Germany) and
+  [OSF](https://osf.io/6s7rp/)
+  - Text / survey data:
+    [`rawdata/Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
+    (You must request it via GESIS BASIS)
+  - Stop word list:
+    [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
+  - Lemmatization model:
+    [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
+- Jankin et al. (2024): Data available via [Harvard
+  Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) (Version 13) and code
+  via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see
+  entry at section 2025 (62) Issue 4.
+  - Text data:
+    [`rawdata/ungd_files.RDS`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
+    Please note that the original file is processed using
+    `jankin/00_read.R`. The processed data is made available under CC0
+    (Public Domain).
+- Takano et al. (2023): Data and code available via
+  [OSF](https://osf.io/6ktey/)
+  - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
+  - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)
+- Tvinnereim and Fløttum (2015): Data and code availble via [Harvard
+  Dataverse](https://doi.org/10.7910/DVN/28689)
+  - Text data:
+    [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
+  - Lemmatization model:
+    [`rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe`](https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe)
+
+The code for each study is in a designated directory (last name of first
+author in lowercase letters). The remaining directories of the
+repository are:
+
+``` text
+├── dev     # additional code for development, testing, and debugging
+├── lib     # shared code for all studies and multiverse analysis
+├── meta    # additional analysis of the multiverse results
+└── results # results as found in the published study; used for plots
+```
+
 # Setup
 
 **Requires R 4.1.0 or newer** We tested our code on R 4.5.1 on Ubuntu
@@ -68,67 +197,13 @@ Now all packages should be installed for the virtual environment. If you
 need to add new dependencies, you can do the following:
 
 ``` r
-pak::pkg_install("<new package dependency")
+pak::pkg_install("<new package dependency>")
 renv::snapshot()
 ```
 
 This should update the `renv.lock` file with the new dependencies.
 Please also add the package you added to the section “Project
 Dependencies” at the bottom of this readme.
-
-# Studies and Data
-
-All selected studies make the data and source code publicly available.
-The required data files from each study should be in the `rawdata`
-directory. All files, except `rawdata/Corona-survey_fill.dta`, can be
-downloaded automatically by using `stu rawdata/<filename>`. For example,
-to download the text data for Curini and Vignoli (2021) use
-`stu rawdata/zip_texts.rar`. Below is a list of the selected studies and
-their required datafiles:
-
-- Chan, Zeng, and Schäfer (2022): Data and code is available on
-  [OSF](https://osf.io/ycx6j/)
-  - Text data: [`rawdata/final_data.RDS`](https://osf.io/3hazf)
-- Curini and Vignoli (2021): Data and code is on [Harvard
-  Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LAXHS3)
-  - Text data:
-    [`rawdata/zip_texts.rar`](https://dataverse.harvard.edu/api/access/datafile/4291434)
-  - Meta data:
-    [`rawdata/meta_table.tab`](https://dataverse.harvard.edu/api/access/datafile/4291441)
-  - Lemmatization model:
-    [`rawdata/italian-isdt-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/italian-isdt-ud-2.5-191206.udpipe)
-- Czymara, Langenkamp, and Cano (2020): Data is available upon request
-  via
-  [GESIS](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034),
-  source code repository is on
-  [Github](https://github.com/czymara/perceiving-COVID19-in-Germany) and
-  [OSF](https://osf.io/6s7rp/)
-  - Text / survey data:
-    [`rawdata/Corona-survey_full.dta`](https://search.gesis.org/research_data/SDN-10.7802-2034?doi=10.7802/2034)
-    (You must request it via GESIS BASIS)
-  - Stop word list:
-    [`rawdata/stopwords-de.txt`](https://raw.githubusercontent.com/czymara/perceiving-COVID19-in-Germany/refs/heads/master/in/stopwords-de.txt)
-  - Lemmatization model:
-    [`rawdata/rawdata/german-gsd-ud-2.5-191206.udpipe`](https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/german-gsd-ud-2.5-191206.udpipe)
-- Jankin, Baturo, and Dasandi (2024): Data available via [Harvard
-  Dataverse](https://doi.org/10.7910/DVN/0TJX8Y) (Version 13) and code
-  via [PRIO](https://www.prio.org/journals/jpr/replicationdata), see
-  entry at section 2025 (62) Issue 4.
-  - Text data:
-    [`rawdata/ungd_files.RDS`](https://dataverse.harvard.edu/file.xhtml?fileId=11095259&version=13.0)
-    Please note that the original file is processed using
-    `jankin/00_read.R`. The processed data is made available under CC0
-    (Public Domain).
-- Takano, Matsuo, and Kawano (2023): Data and code available via
-  [OSF](https://osf.io/6ktey/)
-  - Text data: [`rawdata/data_pilot_cleaned.csv`](https://osf.io/k6h39)
-  - Text data: [`rawdata/data_cleaned.csv`](https://osf.io/ecmt6)
-- Tvinnereim and Fløttum (2015): Data and code availble via [Harvard
-  Dataverse](https://doi.org/10.7910/DVN/28689)
-  - Text data:
-    [`rawdata/ncp-stm-data.csv`](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28689/KO9T0Z&version=1.2)
-  - Lemmatization model:
-    [`rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe`](https://github.com/bnosac/udpipe.models.ud/raw/refs/heads/master/models/norwegian-bokmaal-ud-2.1-20180111.udpipe)
 
 # Docker
 
@@ -246,8 +321,7 @@ All code is under a [European Union Public Licence 1.2](LICENSE.md) (©
 
 # References
 
-<div id="refs" class="references csl-bib-body hanging-indent"
-entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-chan:2022:WT" class="csl-entry">
 
@@ -280,7 +354,7 @@ Lockdown in Germany.” *European Societies* 23 (sup1): S68–81.
 
 Jankin, Slava, Alexander Baturo, and Niheer Dasandi. 2024. “Words to
 Unite Nations: The Complete United Nations General Debate Corpus,
-1946–Present.” *Journal of Peace Research*, November.
+1946–Present.” *Journal of Peace Research*, ahead of print, November.
 <https://doi.org/10.1177/00223433241275335>.
 
 </div>

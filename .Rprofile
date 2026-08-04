@@ -4,12 +4,18 @@ if (Sys.getenv("INSIDEDOCKER") == "" && renv_available) {
     source("renv/activate.R")
 }
 
-source(here::here("lib/lib.R"))
+here_available <- !identical(find.package("here", quiet = TRUE, lib.loc = NULL), character(0))
+
+if (!here_available) {
+    warning("Your computational environment might not be configurated correctly. Please retry or check!")
+} else {
+    source(here::here("lib/lib.R"))
+}
 
 ## Options for this project
 
 ## see ?renv::config
-options(renv.config.pak.enabled = TRUE)
+options(renv.config.pak.enabled = FALSE)
 
 ## # of cores for brms and co.
 options(tmmv.cores = 6)

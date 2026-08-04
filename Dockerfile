@@ -9,12 +9,12 @@ RUN curl -q -o /tmp/stu_amd64.deb -L https://github.com/kunegis/stu/releases/dow
   && dpkg -i /tmp/stu_amd64.deb \
   && rm /tmp/stu_amd64.deb
 
-RUN R -e 'install.packages(c("renv", "pak"), lib=.Library)'
+RUN R -e 'install.packages(c("remotes"), lib=.Library); remotes::install_github("cran/renv", ref = "1.1.5")'
 
 WORKDIR /root/multiverse_tm
 
 COPY renv.lock renv.lock
 
-RUN R -e "options(renv.config.pak.enabled = TRUE); renv::restore(lockfile = \"renv.lock\", library = .Library)"
+RUN R -e "renv::restore(lockfile = \"renv.lock\", library = .Library)"
 
 CMD ["stu", "@dockertest"]

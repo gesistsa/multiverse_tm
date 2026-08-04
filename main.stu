@@ -74,7 +74,7 @@ intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/02a
 
 rawdata/ungd_files.RDS:
 {
-    curl -L "https://gentle-belekoy-9de98e.netlify.app/ungd_files.RDS" -o rawdata/ungd_files.RDS
+    Rscript -e "tmmv.download_from_osf('jy3ht')"
     echo "9c44eb25e10cc81ca997e233bfc22e3c  rawdata/ungd_files.RDS"  | md5sum -c -
 }
 

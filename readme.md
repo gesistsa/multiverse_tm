@@ -5,8 +5,8 @@
   - [Overview](#overview)
 - [Setup](#setup)
   - [Environment using renv](#environment-using-renv)
-    - [Linux](#linux)
-    - [Windows](#windows)
+    - [If you are using Windows](#if-you-are-using-windows)
+    - [Restore the `renv` environment](#restore-the-renv-environment)
     - [Adding new dependencies](#adding-new-dependencies)
 - [Docker](#docker)
 - [Project Dependencies](#project-dependencies)
@@ -131,9 +131,9 @@ repository are:
 
 # Setup
 
-**Requires R 4.1.0 or newer** We tested our code on R 4.5.1 on Ubuntu
-Linux 22.04. [`stu`](https://github.com/kunegis/stu) was used to build
-the project.
+**Requires R 4.1.0 or newer** We tested our code on R 4.5 (pinned 4.5.0
+on Docker) on Ubuntu Linux 22.04.
+[`stu`](https://github.com/kunegis/stu) was used to build the project.
 
 There are two ways to manage your R environment so that the correct
 packages are installed:
@@ -145,23 +145,7 @@ packages are installed:
 
 ## Environment using renv
 
-### Linux
-
-Ensure `renv` (version \>= 1.1.4) and `pak` are installed:
-
-``` bash
-R -e 'install.packages(c("renv", "pak"))'
-```
-
-Then you can activate and restore the environment in R by running:
-
-``` r
-options(renv.config.pak.enabled = TRUE)
-renv::activate()
-renv::restore()
-```
-
-### Windows
+### If you are using Windows
 
 > [!NOTE]
 >
@@ -172,11 +156,26 @@ renv::restore()
 > doubt, we recommend using [Windows Subsystem for
 > Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux).
 
-Ensure `renv` (version \>= 1.1.4) and
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) are installed.
+Ensure [Rtools](https://cran.r-project.org/bin/windows/Rtools/) are
+installed.
 
 *Protip:* You can install RTools with winget. Open a PowerShell and
 enter `winget install rtools`
+
+### Restore the `renv` environment
+
+Ensure `renv` (version \>= 1.1.4, we tested with 1.1.5):
+
+``` bash
+R -e 'install.packages("renv")'
+```
+
+Then you can activate and restore the environment in R by running:
+
+``` r
+renv::activate()
+renv::restore()
+```
 
 Installing `renv`:
 
@@ -226,6 +225,7 @@ Note that `docker compose up` currently runs the debug mode of the
 R dependencies are listed below [^1]:
 
 ``` r
+install.packages("pak")
 Packages <- c(
     "archive",
     "brms",
@@ -249,7 +249,6 @@ Packages <- c(
     "lme4",
     "lmtest",
     "osfr",
-    "pak",
     "purrr",
     "quanteda",
     "readr",

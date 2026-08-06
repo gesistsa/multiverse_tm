@@ -8,10 +8,11 @@
     - [If you are using Windows](#if-you-are-using-windows)
     - [Restore the `renv` environment](#restore-the-renv-environment)
     - [Adding new dependencies](#adding-new-dependencies)
-- [Docker](#docker)
-- [Project Dependencies](#project-dependencies)
-- [Options](#options)
-- [Notes about `meta/curinidocker`](#notes-about-metacurinidocker)
+  - [Docker](#docker)
+  - [Project Dependencies](#project-dependencies)
+  - [Options](#options)
+- [Reproducing the results](#reproducing-the-results)
+  - [Notes about `meta/curinidocker`](#notes-about-metacurinidocker)
 - [License](#license)
 - [References](#references)
 
@@ -204,7 +205,7 @@ This should update the `renv.lock` file with the new dependencies.
 Please also add the package you added to the section “Project
 Dependencies” at the bottom of this readme.
 
-# Docker
+## Docker
 
 > [!WARNING]
 >
@@ -220,7 +221,7 @@ docker compose up
 Note that `docker compose up` currently runs the debug mode of the
 `takano` analysis.
 
-# Project Dependencies
+## Project Dependencies
 
 R dependencies are listed below [^1]:
 
@@ -293,14 +294,76 @@ apt install -y \
     mecab-ipadic-utf8
 ```
 
-# Options
+## Options
 
 There are options that one can customize; see `.Rprofile`.
 
-# Notes about `meta/curinidocker`
+# Reproducing the results
 
-In order to run the reproducibility analysis of Curini and Vignoli
-(2021), Quarto and Docker must be installed.
+The results are 14 figures in the manuscript. The general procedure is
+like this:
+
+``` text
+raw data -> intermediate files -> aggregated results -> figures
+                               -> figures
+```
+
+Intermediate files are document-term matrices, topic model objects, and
+Bayesian model objects. While most figures can be generated from
+aggregated results, some figures still require the intermediate files.
+
+Because of this, there are three levels of reproduction:
+
+1.  From raw data - reproduce the whole analysis from the datasets of
+    the six primary studies, it will generate all the intermediate files
+    from the ground up. The intermediate files will be generated with
+    some other random seeds.
+2.  From intermediate files - reproduce the analysis from our
+    intermediate files. Our intermediate files are available as binary
+    artefacts on Zenodo: <https://doi.org/10.5281/zenodo.21790776>
+    (52GB, please apply for access on Zenodo).
+3.  From aggregated results - reproduce the analysis from the aggregated
+    results on Github: `results/aggregated`.
+
+Level 1 can reproduce all 14 figures. But the analyses will be carried
+out with some other random seeds and therefore the figures might look
+slightly different. Also, on a computer with six parallel computing
+threads, the generation of all intermediate files would take weeks. In
+order to generate all intermediate files and some aggregated files, get
+all data files (see [Overview](#overview)) and run `stu`.
+
+Level 2 can reproduce all 14 figures *exactly*. With the intermediate
+files, some analyses (e.g., Figure 13) still take some time.
+
+Level 3 can only reproduce Figures 1–6, 9, 11, and 14. In other words,
+one cannot reproduce Figures 7, 8, 10, 12, 13 only with the aggregated
+results on Github.
+
+The figures and the commands to reproduce them are listed below.
+
+| Figure | File name | Level 3 ready? | Command |
+|----|----|----|----|
+| 1 | `plots/chan_spec.pdf` | Yes | `Rscript chan/04_viz.R` |
+| 2 | `plots/currini_spec.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 3 | `plots/czymara_spec.pdf` | Yes | `Rscript czymara/04_viz.R` |
+| 4 | `plots/takano_spec.pdf` | Yes | `Rscript takano/04_viz.R` |
+| 5 | `plots/tvinnereim_spec.pdf` | Yes | `Rscript tvinnereim/04_viz.R` |
+| 6 | `plots/curini_spaghetti.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 7 | `plots/jankins_spaghetti_full.pdf` | No | `Rscript jankins/04_viz.R` |
+| 8 | `plots/jankins_spaghetti_selected.pdf` | No | `Rscript jankins/04_viz.R` |
+| 9 | `plots/meta_density.pdf` | Yes | `Rscript meta/modality.R` |
+| 10 | `plots/meta_pca.pdf` | No | `Rscript meta/factor.R` |
+| 11 | `plots/meta_distribution_max_rho.pdf` | Yes | `Rscript meta/distribution_max_rho.R` |
+| 12 | `plots/meta_icc.pdf` | No | `Rscript meta/reliability.R` |
+| 13 | `plots/meta_cost.pdf` | No | `Rscript meta/transfer_cost.R; Rscript meta/transfer_cost_vis.R` |
+| 14 | `plots/meta_variance_decomposition.pdf` | Yes | `Rscript meta/variance_decomposition.R` |
+
+## Notes about `meta/curinidocker`
+
+In order to run the forensic analysis of Curini and Vignoli (2021) (see
+footnote 14 of the paper), Quarto and Docker (preferably in rootness
+mode) must be installed. One must have all the original data files from
+Curini and Vignoli (2021) in the `rawdata` directory.
 
 ``` bash
 docker compose -f meta/curinidocker/compose.yaml build

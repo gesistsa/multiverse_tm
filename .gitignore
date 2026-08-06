@@ -1,7 +1,7 @@
 rawdata
 intermediate
 debug
-plots
+plots/*.pdf
 deps.results
 RUNS
 SLUGS

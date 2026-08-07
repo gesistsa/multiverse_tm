@@ -103,52 +103,44 @@ tmmv.data$chan$dict <- list(
     )
 )
 
-## Note that the original does assume the text has been stemmed
-## I add * to communit, responsabilit, solidariet, libert (so that it will match e.g. comunità)
-## the original use all singular ("militare" has both singular and plural), except "alleati", "umani", "bombardamenti",
-## "bombe", "rischi", "vittime"
-## The singular terms have been added
-## for adjectives, only the feminine and plural: "umanitaria" and "unmanitari" (reduced to "umanitari*"; so that it can also capture
-## the musculine form "umanitario")
+## Note that the original does assume the text has been stemmed using an English stemmer.
+## We produce this by referring to the original terms (Table 2 of the original paper), stem them using an Italian stemmer,
+## and then add * to all stemmed terms.
 tmmv.data$curini$dict <- list(
     multilateralism = c(
-        "multilateralism",
-        "comunit*",
-        "responsabilit*",
-        "alleanza",
-        "alleati",
-        "impegno",
-        "sicurezza",
-        "coalizione"
+        "multilateral*",
+        "comun*",
+        "respons*",
+        "alleanz*",
+        "alle*",
+        "impegn*",
+        "sicurezz*",
+        "coalizion*"
     ),
     humanitarian_dimension = c(
-        "democrazia",
-        "umani",
-        "democrazia",
-        "democratica",
-        "diritto",
-        "pace",
+        "democraz*",
+        "democrat*",
+        "uman*",
+        "diritt*",
+        "pac*",
         "solidariet*",
-        "libert",
-        "pacific*",
-        "umanitari*",
+        "libert*",
+        "pacif*",
+        "umanitar*",
         "solidal*"
     ),
     war = c(
-        "guerra",
-        "militare",
-        "bombardamenti",
-        "militari",
-        "costituzione",
-        "disarmo",
-        "chiarezza",
-        "violenza",
-        "bombe",
-        "bomba",
-        "rischi",
-        "rischio",
-        "vittime",
-        "vittima"
+        "guerr*",
+        "milit*",
+        "bombard*",
+        "militar*",
+        "costitu*",
+        "disarm*",
+        "chiarezz*",
+        "violenz*",
+        "bomb*",
+        "risc*",
+        "vittim*"
     )
 )
 

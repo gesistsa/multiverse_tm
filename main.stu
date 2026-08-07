@@ -66,10 +66,16 @@ intermediate/chan/runs/$RUN/theta/theta: -p intermediate/chan/runs/$RUN chan/02a
 }
 
 # jankin
-@jankin_dfms: rawdata/jankin jankin/01_read.R $[DEBUG]
+@jankin_dfms: rawdata/undg_files.RDS jankin/01_read.R $[DEBUG]
     -p intermediate/jankin
 {
     Rscript jankin/01_read.R $DEBUG
+}
+
+rawdata/ungd_files.RDS:
+{
+    Rscript -e "tmmv.download_from_osf('jy3ht')"
+    echo "9c44eb25e10cc81ca997e233bfc22e3c  rawdata/ungd_files.RDS"  | md5sum -c -
 }
 
 rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
@@ -79,11 +85,12 @@ rawdata/jankin: rawdata/UNGDC_1946-2024.tar.gz
     find rawdata/jankin -name "._*" -delete
 }
 
-rawdata/UNGDC_1946-2024.tar.gz:
-{
-    curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
-    echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
-}
+# NOT WORKING ANYMORE
+# rawdata/UNGDC_1946-2024.tar.gz:
+# {
+#     curl -L "https://dataverse.harvard.edu/api/access/datafile/11095259?persistentId=doi:10.7910/DVN/0TJX8Y" -o rawdata/UNGDC_1946-2024.tar.gz
+#     echo "9154040616d65a3f612deae24bee447a  rawdata/UNGDC_1946-2024.tar.gz" | md5sum -c -
+# }
 
 # czymara
 @czymara_dfms: rawdata/stopwords-de.txt rawdata/german-gsd-ud-2.5-191206.udpipe czymara/01_read.R $[DEBUG]
@@ -240,4 +247,20 @@ plots/:
 {
     Rscript takano/01_read.R --debug
     Rscript takano/02_train.R --debug
+}
+
+## Probably you don't want to do this.
+@jankin_undg_files: rawdata/jankin
+{
+    Rscript jankin/00_read.R
+}
+
+@website:
+{
+    cp readme.rmd index.qmd
+    cp dev/_quarto.yaml _quarto.yaml
+    # quarto render
+    quarto publish gh-pages --no-prompt
+    rm index.qmd
+    rm _quarto.yaml
 }

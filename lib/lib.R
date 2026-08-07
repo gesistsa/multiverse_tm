@@ -212,7 +212,9 @@ tmmv.get_current <- function(
 
 #' return the column index in theta, which the column vector
 #' has the highest spearman's correlation with anchor_theta
-tmmv.find_anchor <- function(anchor_theta, theta) {
+#' by default (return_rho = FALSE), it returns the anchor index
+#' otherwise, it returns the maximun rho
+tmmv.find_anchor <- function(anchor_theta, theta, return_rho = FALSE) {
     stopifnot(length(anchor_theta) == nrow(theta))
     cor_coefs <- vapply(
         seq_len(ncol(theta)),
@@ -221,6 +223,9 @@ tmmv.find_anchor <- function(anchor_theta, theta) {
         },
         FUN.VALUE = numeric(1)
     )
+    if (return_rho) {
+        return(max(cor_coefs))
+    }
     return(which.max(cor_coefs))
 }
 
@@ -304,21 +309,33 @@ tmmv.get_effect_size_mod <- function(
         theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
         theta_diff_mean <- apply(theta_diff, 2, mean)
         anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- tmmv.find_anchor(
+            anchor_theta,
+            current_mod$theta,
+            return_rho = TRUE
+        )
         output <- data.frame(
             Estimate = theta_diff_mean[anchor_index],
             Q2.5 = theta_diff_quantile[1, anchor_index],
-            Q97.5 = theta_diff_quantile[2, anchor_index]
+            Q97.5 = theta_diff_quantile[2, anchor_index],
+            max_rho = max_rho
         )
         rownames(output) <- NULL
     } else {
         res <- .get_stm_estimate_func(current_mod)
         anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- tmmv.find_anchor(
+            anchor_theta,
+            current_mod$theta,
+            return_rho = TRUE
+        )
         output <- data.frame(
             Estimate = as.vector(res$means)[anchor_index],
             Q2.5 = res$cis[[anchor_index]][1],
-            Q97.5 = res$cis[[anchor_index]][2]
+            Q97.5 = res$cis[[anchor_index]][2],
+            max_rho = max_rho
         )
-        colnames(output) <- c("Estimate", "Q2.5", "Q97.5")
+        colnames(output) <- c("Estimate", "Q2.5", "Q97.5", "max_rho")
         rownames(output) <- NULL
     }
     output <- round(output, 6)
@@ -349,7 +366,10 @@ tmmv.postprocess_effect_size_mod <- function(res, args) {
 }
 
 tmmv.cache_requirements <- function() {
-    rpkgs <- sort(unique(renv::dependencies(quiet = TRUE)$Package))
+    rpkgs <- setdiff(
+        sort(unique(renv::dependencies(quiet = TRUE)$Package)),
+        "quanteda.seededlda"
+    )
     system_requirements <- pak::pkg_sysreqs(setdiff(
         rpkgs,
         c("RMeCab", "colorblindr")

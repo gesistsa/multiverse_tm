@@ -1,8 +1,12 @@
 rawdata
 intermediate
 debug
-plots
+plots/*.pdf
 deps.results
 RUNS
 SLUGS
 DEBUG
+/.quarto/
+**/*.quarto_ipynb
+/_site/
+/_book/

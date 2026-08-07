@@ -1,7 +1,7 @@
 FROM rocker/r-ver:4.5.0
 
 ## NOTE: Don't update this line by hand
-RUN apt update; apt install -y curl make cmake git libglpk-dev libarchive-dev libcurl4-openssl-dev libicu-dev libxml2-dev libssl-dev pandoc libx11-dev zlib1g-dev mecab libmecab-dev mecab-ipadic-utf8
+RUN apt update; apt install -y curl make cmake git libarchive-dev libcurl4-openssl-dev libicu-dev libuv1-dev libxml2-dev libssl-dev pandoc libx11-dev zlib1g-dev mecab libmecab-dev mecab-ipadic-utf8
 
 ARG STU_VERSION="2.7.85"
 
@@ -9,12 +9,12 @@ RUN curl -q -o /tmp/stu_amd64.deb -L https://github.com/kunegis/stu/releases/dow
   && dpkg -i /tmp/stu_amd64.deb \
   && rm /tmp/stu_amd64.deb
 
-RUN R -e 'install.packages(c("renv", "pak"), lib=.Library)'
+RUN R -e 'install.packages(c("remotes"), lib=.Library); remotes::install_github("cran/renv", ref = "1.1.5")'
 
 WORKDIR /root/multiverse_tm
 
 COPY renv.lock renv.lock
 
-RUN R -e "options(renv.config.pak.enabled = TRUE); renv::restore(lockfile = \"renv.lock\", library = .Library)"
+RUN R -e "renv::restore(lockfile = \"renv.lock\", library = .Library)"
 
 CMD ["stu", "@dockertest"]

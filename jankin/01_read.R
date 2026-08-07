@@ -3,23 +3,13 @@ settings <- tmmv.get_settings(full = FALSE, args = args)
 
 library(here)
 
-stopifnot(dir.exists(here("rawdata/jankin/TXT")))
+stopifnot(file.exists(here("rawdata/ungd_files.RDS")))
 
 library(quanteda)
 library(stringr)
 library(purrr)
 
-## Modified from the original RMD file
-
-ungd_files <- tmmv.read_text_base(
-    here("rawdata/jankin/TXT/"),
-    dvsep = "_",
-    docvarnames = c("Country", "Session", "Year")
-)
-
-ungd_files$doc_id <- str_replace(ungd_files$doc_id, ".txt", "") |>
-    str_replace("_\\d{2}", "")
-
+ungd_files <- readRDS(here("rawdata/ungd_files.RDS"))
 ungd_corpus <- corpus(ungd_files, text_field = "text")
 
 if (args$debug) {

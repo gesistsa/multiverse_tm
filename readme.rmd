@@ -1,10 +1,10 @@
 ---
-format: gfm
+title: README
 bibliography: references.bib
 toc: true
 ---
 
-# About 
+# About {.unnumbered}
 
 Replication repository for *Beyond beyond standardization: Studying robustness of empirical claims based on topic modeling through multiverse analysis* 
 
@@ -14,11 +14,11 @@ by: [Paul Balluff](https://orcid.org/0000-0001-9548-3225), [Christina Viehmann](
 
 *All authors contributed to this project equally. The order of the names was determined by a random draw.*
 
-## Abstract
+## Abstract  {.unnumbered}
 
 > While topic modeling is widely used, some scholars have already announced that the application of topic modeling in social science research is impossible to standardize. Meanwhile, researchers have to make numerous methodological decisions, yet base their empirical claims on just one topic model. This raises the question of robustness about those claims. In this study, we apply the framework of preregistered multiverse analysis to evaluate the robustness of previous empirical claims from six studies that were based on topic modeling. Based on the Open Science materials of these six studies, we slightly modify the original topic modeling procedures, such as preprocessing, number of topic clusters, and topic modeling algorithm, to other defensible choices and determine whether the empirical claims remain consistent. Even though we observe that certain empirical claims are more robust, most claims are distorted considerably by changes to the modeling options. The contributions of this study are twofold. First, we confirm that empirical claims based on just one topic model might not be robust against numerous researchers degrees of freedom. Second, we advocate a wider adoption of preregistered multiverse analysis in social science research for checking the robustness of empirical findings.
 
-## Overview
+## Overview  {.unnumbered}
 
 For this study, we replicated 6 other studies that employed topic modeling. For each of them, we re-ran them with varying settings (648 in totoal) to build a multiverse. Next, we compare the original setting with the results of varying settings and plot them on various curves
 
@@ -50,7 +50,8 @@ The code for each study is in a designated directory (last name of first author 
 ├── dev     # additional code for development, testing, and debugging
 ├── lib     # shared code for all studies and multiverse analysis
 ├── meta    # additional analysis of the multiverse results
-└── results # results as found in the published study; used for plots
+├── results # aggregated results as found in the published study; used for plots
+└── plots   # output directory of data visualization
 ```
 
 # Setup
@@ -221,10 +222,10 @@ quarto render meta/curinidocker/index.qmd
 
 All code is under a [European Union Public Licence 1.2](LICENSE.md) (© `r .format_date()` `multiverse_tm` authors), except
 
-* [`lib/read_text_base.R`](lib/read_text_base.R) - GPL3
-* [`lib/lemmatize_words.R`](lib/lemmatize_words.R) - GPL2
-* [`lib/plot_spec_curve.R`](lib/plot_spec_curve.R) - GPL3
-* [`lib/calculate_icc.R`](lib/calculate_icc.R) - GPL>=2
-* [`lib/check_keywords.R`](lib/check_keywords.R) - GPL3
+* `lib/read_text_base.R` - GPL3
+* `lib/lemmatize_words.R` - GPL2
+* `lib/plot_spec_curve.R` - GPL3
+* `lib/calculate_icc.R` - GPL>=2
+* `lib/check_keywords.R` - GPL3
 
 # References

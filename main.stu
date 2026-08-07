@@ -254,3 +254,13 @@ plots/:
 {
     Rscript jankin/00_read.R
 }
+
+@website:
+{
+    cp readme.rmd index.qmd
+    cp dev/_quarto.yaml _quarto.yaml
+    # quarto render
+    quarto publish gh-pages --no-prompt
+    rm index.qmd
+    rm _quarto.yaml
+}

@@ -1,0 +1,54 @@
+project:
+  type: book
+
+execute:
+  freeze: auto
+
+# affiliations:
+#   - id: gesiscss
+#     name: GESIS - Leibniz-Institut für Sozialwissenschaften
+#     department: Computational Social Science
+#     group: Transparent Social Analytics
+#   - id: gesisdss
+#     name: GESIS - Leibniz-Institut für Sozialwissenschaften
+#     department: Data Services for the Social Sciences
+#     group: Metadata Standards and Interoperability
+
+book:
+  title: "Beyond Beyond Standardization: Online Appendix"
+  author:
+    - name: Paul Balluff
+      orcid: 0000-0001-9548-3225
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+    - name: Christina Viehmann
+      orcid: 0000-0001-6673-0987
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+    - name: Maximilian Linde
+      orcid: 0000-0001-8421-090X
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+    - name: Yannik Peters
+      orcid: 0009-0001-4879-5477
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+    - name: Jun Sun
+      orcid: 0000-0002-4789-7316
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+    - name: Chung-hong Chan
+      orcid: 0000-0002-6232-7530
+      affiliations:
+        - GESIS - Leibniz-Institut für Sozialwissenschaften
+  chapters:
+    - index.qmd
+    - meta/curinidocker/index.qmd
+    - meta/guides.qmd
+  sidebar:
+    logo: https://raw.githubusercontent.com/gesistsa/.github/refs/heads/main/tsa_logo.png
+    search: false
+    footer: "[DOI](https://doi.org/10.1080/19312458.2026.2714769)\n\n
+    [Preregistration](https://doi.org/10.17605/OSF.IO/4G5BU)\n\n
+    [Zenodo](https://doi.org/10.5281/zenodo.21790776)\n\n
+    [Github](https://github.com/gesistsa/multiverse_tm)"

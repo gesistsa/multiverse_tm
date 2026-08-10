@@ -1,0 +1,632 @@
+---
+title: "Multiverse analysis for topic modeling: A walkthrough of the procedure"
+# toc: true
+# number-sections: true
+bibliography: ../references.bib
+
+knitr:
+  opts_chunk: 
+    collapse: true
+    comment: "#>" 
+    R.options:
+      knitr.graphics.auto_pdf: true
+
+format:
+  html:
+    embed-resources: true
+    code-annotations: "hover"
+    toc: true
+    toc-location: "right"
+---
+
+::: {.callout-note}
+This is not a general tutorial on multiverse analysis. There are several guides on this already available. [^1]
+:::
+
+[^1]: For example: the tutorial by @pipal:2022:IYH : <https://cpipal.github.io/multiverse-tutorial/multiverse_tutorial.html>
+
+This guide serves as an explanation to the logic of applying multiverse analysis for topic modeling used in the current study. We did not use any special multiverse analysis library to implement our analysis. Instead, we developed it almost from scratch in R, except using the functional programming library `purrr` and the hashing function `rlang::hash()`. This guide on one hand functions as the "annotated source code" to explain our code. On another hand, it helps researchers to understand multiverse analysis from first principles.
+
+In this guide, we will use @tvinnereim:2015:E as the example. Please note that unlike in the study, we do not consider "stochasticity" as an analytical path. If you would like to do that, please rerun the analysis. [^2]
+
+[^2]: In comparison to the original code, we also remove many I/O operations, which are for optimization.
+
+## Generate settings for all universes
+
+Suppose all reasonable analytical paths are available (and have been preregistered), one can generate the Cartesian product of all analytical paths using `expand.grid()`.
+
+```{r}
+analytical_paths <- list(
+    token_normalization = c("none", "lemmatization", "stemming"),
+    stopword_removal = c(TRUE, FALSE),
+    trimming = c(TRUE, FALSE),
+    alternative_model = c(TRUE, FALSE),
+    k_setting = c(1, 2, 3), #K original, alt1, alt2
+    iteration_setting = c(1, 2, 3) #iter original, alt1, alt2    
+)
+
+settings_df <- expand.grid(analytical_paths, stringsAsFactors = FALSE)
+nrow(settings_df)
+```
+
+The output of `expand.grid()` is data frame. For easier manipulation, the data frame is converted to a list of lists called `settings` using `purrr::transpose()`.
+
+```{r}
+settings_df |> head()
+```
+
+```{r}
+settings <- settings_df |> purrr::transpose() 
+```
+
+`settings` is a list of `setting`. `settings` and `setting` can be subset in the following two ways. The subsetting of `setting` is important because the first three slots of a `setting` are solely for text preprocessing.
+
+```{r}
+settings[1:2]
+```
+
+```{r}
+settings[[1]][1:3]
+```
+
+## Generate all preprocessed document-term matrices
+
+There are actually 12 ways to process the documents.
+
+```{r}
+settings |> purrr::map(\(x) x[1:3]) |>
+    unique() |>
+    length()
+```
+
+All these 12 document-term matrics will be generated.
+
+```{r}
+preprocessing_settings <- settings |>
+    purrr::map(\(x) x[1:3]) |>
+    unique()
+```
+
+### Reading data
+
+```{r}
+#| output: false
+#| warning: false
+library(here)
+library(readr)
+library(quanteda)
+library(udpipe)
+library(dplyr)
+```
+
+```{r}
+## the data is corrupted due to file encoding issues
+
+input <- iconv(
+    readLines(here("rawdata", "ncp-stm-data.csv")),
+    from = "latin1",
+    to = "UTF-8"
+) |>
+    paste(collapse = "\n") |>
+    readr::read_delim(delim = ";", show_col_types = FALSE) |>
+    na.omit()
+
+original_corpus <- corpus(input, text_field = "openanswer")
+original_corpus
+```
+
+### Lemmatization
+
+Lemmatization is done with `udpipe`.
+
+```{r}
+norwegian_model <- udpipe_load_model(
+    file = here::here("rawdata/norwegian-bokmaal-ud-2.1-20180111.udpipe")
+)
+
+parsed_content <- udpipe_annotate(norwegian_model, original_corpus)
+parsed_content_df <- as.data.frame(parsed_content)
+parsed_content_df_fixed <- parsed_content_df
+
+parsed_content_df_fixed |>
+    group_by(doc_id) |>
+    summarize(content = paste(lemma, collapse = " ")) |>
+    mutate(doc_id = stringr::str_extract(doc_id, "[0-9]+")) |>
+    mutate(doc_id = as.numeric(doc_id)) |>
+    arrange(doc_id) -> lemma_df
+
+lemma_corpus <- corpus(lemma_df$content)
+docvars(lemma_corpus) <- docvars(original_corpus)
+docnames(lemma_corpus) <- docnames(original_corpus)
+```
+
+### Tokenization
+
+Please note that some code (e.g., the so-called "pretokenization") was from the original code by @tvinnereim:2015:E.
+
+#### Original (no lemmatization or stemming)
+
+```{r}
+original_toks <- tokens(
+    original_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+)
+```
+
+#### Lemmatization
+
+```{r}
+## the lemmatizer left $ before puntuation. Need to remove it explicitly
+
+lemma_toks <- tokens(
+    lemma_corpus,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    include_docvars = TRUE
+) |>
+    tokens_remove("$", valuetype = "fixed")
+```
+
+#### Stemming
+
+```{r}
+## Keep the original so-called "pre stemming" (very error prone, but we respect the original authors)
+
+do_pre_stemming <- function(oa) {
+    for (i in 1:length(oa)) {
+        oa[[i]] <- gsub("frem", "fram", oa[[i]])
+        oa[[i]] <- gsub("forurensing", "forurens", oa[[i]])
+        oa[[i]] <- gsub("forurensning", "forurens", oa[[i]])
+        oa[[i]] <- gsub("smelting", "smelt", oa[[i]])
+        oa[[i]] <- gsub("altid", "alltid", oa[[i]])
+        oa[[i]] <- gsub("arktisk", "arktis", oa[[i]])
+        oa[[i]] <- gsub("bekymring", "bekymr", oa[[i]])
+        oa[[i]] <- gsub("bekymringsfullt", "bekymr", oa[[i]])
+        oa[[i]] <- gsub("betydning", "bety", oa[[i]])
+        oa[[i]] <- gsub("betyr", "bety", oa[[i]])
+        oa[[i]] <- gsub("død", "dø", oa[[i]])
+        oa[[i]] <- gsub("dør", "dø", oa[[i]])
+        #  oa[[i]] <- gsub("endring", "endr", oa[[i]])
+        oa[[i]] <- gsub("enkelt", "enkel", oa[[i]])
+        oa[[i]] <- gsub("ekstremt", "ekstrem", oa[[i]])
+        oa[[i]] <- gsub("extrem", "ekstrem", oa[[i]])
+        oa[[i]] <- gsub("fleir", "fler", oa[[i]])
+        oa[[i]] <- gsub("flomm", "flom", oa[[i]])
+        oa[[i]] <- gsub("flomr", "flom", oa[[i]])
+        oa[[i]] <- gsub("forandring", "forandr", oa[[i]])
+        oa[[i]] <- gsub("fosilt", "fossil", oa[[i]])
+        oa[[i]] <- gsub("fossilt", "fossil", oa[[i]])
+        oa[[i]] <- gsub("fremtid", "framtid", oa[[i]])
+        oa[[i]] <- gsub("globaloppvarming", "global oppvarming", oa[[i]])
+        oa[[i]] <- gsub("godt", "god", oa[[i]])
+        oa[[i]] <- gsub("høgar", "høy", oa[[i]])
+        oa[[i]] <- gsub("høyer", "høy", oa[[i]])
+        oa[[i]] <- gsub("høyt", "høy", oa[[i]])
+        oa[[i]] <- gsub("konsekvens", "konsekv", oa[[i]])
+        oa[[i]] <- gsub("langt", "lang", oa[[i]])
+        oa[[i]] <- gsub("laver", "lav", oa[[i]])
+        oa[[i]] <- gsub("lavt", "lav", oa[[i]])
+        oa[[i]] <- gsub("meir", "mer", oa[[i]])
+        # oa[[i]] <- gsub("menneskeskapt", "menneskeskap", oa[[i]])
+        # oa[[i]] <- gsub("menneske", "mennesk", oa[[i]])
+        oa[[i]] <- gsub("overdrevent", "overdriv", oa[[i]])
+        oa[[i]] <- gsub("overdrev", "overdriv", oa[[i]])
+        oa[[i]] <- gsub("oson", "ozon", oa[[i]])
+        oa[[i]] <- gsub("ozonlag", "ozon", oa[[i]])
+        oa[[i]] <- gsub("politikern", "politiker", oa[[i]])
+        oa[[i]] <- gsub("reell", "reel", oa[[i]])
+        oa[[i]] <- gsub("reelt", "reel", oa[[i]])
+        oa[[i]] <- gsub("somr", "sommer", oa[[i]]) # exception: shorter to longer
+        oa[[i]] <- gsub("teknologisk", "teknologi", oa[[i]])
+        oa[[i]] <- gsub("temperaturendr", "temperaturforandr", oa[[i]])
+        oa[[i]] <- gsub("temperaturøkning", "temperaturstigning", oa[[i]])
+        oa[[i]] <- gsub("tempratur", "temperatur", oa[[i]]) # mis-spelling
+        oa[[i]] <- gsub("usikker", "usikk", oa[[i]])
+        oa[[i]] <- gsub("ustabilt", "ustabil", oa[[i]])
+        oa[[i]] <- gsub("utrydning", "utrydd", oa[[i]])
+        oa[[i]] <- gsub("utslepp", "utslipp", oa[[i]])
+        oa[[i]] <- gsub("uver", "uvær", oa[[i]])
+        oa[[i]] <- gsub("varmar", "varm", oa[[i]])
+        oa[[i]] <- gsub("varmerevåter", "varm våt", oa[[i]])
+        oa[[i]] <- gsub("varmer", "varm", oa[[i]])
+        oa[[i]] <- gsub("varmt", "varm", oa[[i]])
+        oa[[i]] <- gsub("vatn", "vann", oa[[i]])
+        oa[[i]] <- gsub("viktiger", "vikt", oa[[i]])
+        oa[[i]] <- gsub("viktigst", "vikt", oa[[i]])
+        oa[[i]] <- gsub("vinter", "vint", oa[[i]])
+        oa[[i]] <- gsub("vintr", "vint", oa[[i]])
+        oa[[i]] <- gsub("ødelagt", "ødel", oa[[i]])
+        oa[[i]] <- gsub("ødelegg", "ødel", oa[[i]])
+        oa[[i]] <- gsub("økend", "øke", oa[[i]])
+        oa[[i]] <- gsub("øker", "øke", oa[[i]])
+        oa[[i]] <- gsub("øket", "øke", oa[[i]])
+        oa[[i]] <- gsub("økning", "øke", oa[[i]])
+        oa[[i]] <- gsub("økt", "øke", oa[[i]])
+        oa[[i]] <- gsub("", "", oa[[i]])
+        oa[[i]] <- gsub("", "", oa[[i]])
+    }
+    return(oa)
+}
+
+prestemmed_toks <- do_pre_stemming(input$openanswer) |>
+    tokens(remove_punct = TRUE, remove_numbers = TRUE)
+
+docvars(prestemmed_toks) <- docvars(original_toks)
+docnames(prestemmed_toks) <- docnames(original_toks)
+```
+
+#### Join the three together
+
+```{r}
+current_tokens_list <- list()
+current_tokens_list[["normal"]] <- original_toks
+current_tokens_list[["lemmatized"]] <- lemma_toks
+current_tokens_list[["prestemmed"]] <- prestemmed_toks
+```
+
+### Generate document-term matrices
+
+```{r}
+process_tokens <- function(setting, current_tokens_list) {
+    if (setting$token_normalization == "lemmatization") {
+        current_tokens <- current_tokens_list[["lemmatized"]]
+    } else if (setting$token_normalization == "none") {
+        current_tokens <- current_tokens_list[["normal"]]
+    } else {
+        current_tokens <- current_tokens_list[["prestemmed"]]
+    }
+    if (setting$stopword_removal) {
+        current_tokens <- current_tokens |>
+            tokens_remove(
+                stopwords("norwegian"),
+                case_insensitive = TRUE,
+                padding = FALSE,
+            )
+    }
+    if (setting$token_normalization == "stemming") {
+        current_tokens <- tokens_wordstem(
+            current_tokens,
+            language = "norwegian"
+        )
+    }
+    current_dfm <- dfm(current_tokens)
+    if (setting$trimming) {
+        current_dfm <- dfm_trim(
+            current_dfm,
+            min_docfreq = 6,
+            docfreq_type = "count"
+        )
+    }
+    return(current_dfm)
+}
+
+dfm_list <- purrr::map(preprocessing_settings,
+                       process_tokens,
+                       current_tokens_list = current_tokens_list)
+```
+
+In order to speed up the look up, each slot in `dfm_list` is named with the hash of the original `preprocessing_setting`.
+
+```{r}
+names(dfm_list) <- purrr::map_chr(preprocessing_settings,
+                                  rlang::hash)
+```
+
+So that one can quickly access the corresponding document-term matrix from a `setting`, e.g.,
+
+```{r}
+dfm_list[[rlang::hash(settings[[100]][1:3])]]
+```
+
+## Train topic models
+
+```{r}
+#| output: false
+#| warning: false
+library(keyATM)
+library(quanteda)
+library(stm)
+```
+
+The function `train_model` is built that accepts one `setting` and `dfm_list` and do the topic modeling for each `setting` in `settings`.
+
+```{r}
+#' This function unifies the theta so that the output theta always
+#' has the same nrow as current_dfm
+#' The raison d'être is that stm discards empty rows sliently
+#' But doesn't retain the rownames
+unify_theta <- function(mod, trimmed_dfm, current_dfm) {
+    theta <- mod$theta
+    rownames(theta) <- docnames(trimmed_dfm)
+
+    excluded_docs <- setdiff(docnames(current_dfm), docnames(trimmed_dfm))
+    k <- ncol(theta)
+    fake_theta <- matrix(
+        rep(1 / k, length(excluded_docs) * k),
+        nrow = length(excluded_docs),
+        ncol = k
+    )
+    rownames(fake_theta) <- excluded_docs
+    final_theta <- rbind(theta, fake_theta)
+
+    final_theta <- final_theta[
+        match(rownames(current_dfm), rownames(final_theta)),
+    ]
+    return(final_theta)
+}
+
+train_model <- function(setting, dfm_list) {
+    current_dfm <- dfm_list[[rlang::hash(setting[1:3])]]
+
+    # iteration settings for original algorithm (STM) and
+    # alternative (Weighted LDA)
+    original_iter <- c(100, round(100 * 0.8), round(100 * 1.2))
+    alternative_iter <- c(2000, round(2000 * 0.8), round(2000 * 1.2))
+
+    ## translate `setting` to actual topic model parameters `current`
+    k <- c(4 , 3, 5)[setting$k_setting]
+    if (!setting$alternative) {
+        iter <- original_iter[setting$iteration_setting]
+    } else {
+        iter <- alternative_iter[setting$iteration_setting]
+    }
+    random_seed <- sample(-65535:65535, 1)
+    
+    output <- list()
+    output$random_seed <- random_seed
+    output$setting <- setting
+
+    set.seed(random_seed)
+
+    ## STM drops rows silently, we do it here explicitly
+    rowsum_priv <- apply(current_dfm, 1, sum)
+    trimmed_dfm <- current_dfm[rowsum_priv != 0, ]
+
+    if (!setting$alternative_model) {
+        output$mod <- stm(
+            trimmed_dfm,
+            K = k,
+            init.type = "LDA", # See note above
+            max.em.its = iter,
+            prevalence = ~ concern + humanmade + efficacy + edu3 + gender + age,
+            verbose = FALSE,
+            data = trimmed_dfm@docvars
+        )
+    } else {
+        keyATM_docs <- keyATM_read(texts = trimmed_dfm)
+
+        output$mod <- weightedLDA(
+            docs = keyATM_docs,
+            number_of_topics = k,
+            model = "covariates",
+            model_settings = list(
+                covariates_data = trimmed_dfm@docvars,
+                covariates_formula = ~ concern +
+                    humanmade +
+                    efficacy +
+                    edu3 +
+                    gender +
+                    age
+            ),
+            options = list(
+                iterations = iter,
+                verbose = FALSE
+            )
+        )
+    }
+    output$theta <- unify_theta(output$mod, trimmed_dfm, current_dfm)
+    output$docvars <- trimmed_dfm@docvars
+    return(output)
+}
+```
+
+Then, the topic modeling for all `settings` is executed.
+
+```r
+models <- purrr::map(settings, train_model, dfm_list = dfm_list, .progress = TRUE)
+names(models) <- purrr::map_chr(settings,
+                                rlang::hash)
+```
+
+```{r}
+#| include: false
+
+## The above takes forever. Let's read from the records
+args <- tmmv.parse_args_train(slug = "tvinnereim", .current_run = 1)
+
+.read <- function(setting, args) {
+    readRDS(tmmv.get_rds_filename(
+        setting,
+        here::here(args$output_dir)
+    ))
+}
+
+models <- purrr::map(settings, .read, args = args)
+names(models) <- purrr::map_chr(settings,
+                                rlang::hash)
+
+rm(args)
+rm(.read)
+```
+
+## Anchor
+
+This `setting` represents the original setting used in @tvinnereim:2015:E. It is named `anchor_setting`.
+
+```{r}
+anchor_setting <- list(token_normalization = "stemming",
+                       stopword_removal = TRUE,
+                       trimming = TRUE,
+                       alternative_model = FALSE,
+                       k_setting = 1, 
+                       iteration_setting = 1)
+
+```
+
+This `anchor setting` is used to extract the model trained with this setting.
+
+```{r}
+anchor_mod <- models[[rlang::hash(anchor_setting)]]
+```
+
+And then the anchor model is used to perform exactly the same analysis that @tvinnereim:2015:E did, namely, to find out the most distinguish topic cluster that is associated with age. And then extract the vector of topic proportion as `anchor_theta` ($G_{:,A}$ in the article). 
+
+```{r}
+est <- stm::estimateEffect(
+    ~ concern + edu3 + gender + age,
+    stmobj = anchor_mod$mod,
+    metadata = anchor_mod$docvars
+    )
+
+max_topic_index <- which.max(
+    purrr::map_dbl(est$parameters, \(x) {
+        mean(purrr::map_dbl(x, \(y) y$est["age"]))
+    })
+)
+anchor_theta <- anchor_mod$theta[, max_topic_index]
+```
+
+Suppose there is another $\theta$ from another topic model.
+
+```{r}
+another_mod <- models[[1]]
+theta <- another_mod$theta
+```
+
+The idea of anchoring is to find out the column vector in $\theta$ that has the maximum correlation with `anchor_theta` (See equation 2 in the article). So that one can use that column vector to represent the setting used for training this model.
+
+```{r}
+cor_coefs <- vapply(
+    seq_len(ncol(theta)),
+    FUN = function(x) {
+        cor(anchor_theta, theta[, x], method = "spearman")
+    },
+    FUN.VALUE = numeric(1)
+)
+cor_coefs
+```
+
+Therefore, the column vector that can be used to represent this model is: `theta[,which.max(cor_coefs)]`.
+
+## Generate estimates
+
+With all the topic models trained, one can then generate estimates of the estimand. As stated in the paper, the estimand of interest is "the modeled difference in $\theta_{:,k}$ across age groups." To make it easier to do this for all trained topic models, the analyses are wrapped into functions.
+
+```{r}
+.get_keyatm_strata_topic_func <- function(current_mod) {
+    keyATM::by_strata_DocTopic(
+        current_mod$mod,
+        by_var = "age",
+        by_values = c(3, 4),
+        labels = c(3, 4)
+    )
+}
+
+.get_stm_estimate_func <- function(current_mod) {
+    stm::estimateEffect(
+        ~ concern + humanmade + efficacy + edu3 + gender + age,
+        stmobj = current_mod$mod,
+        metadata = current_mod$docvars
+    ) |>
+        plot(
+            covariate = "age",
+            model = current_mod$mod,
+            method = "difference",
+            cov.value1 = 4,
+            cov.value2 = 3,
+            omit.plot = TRUE
+        )
+}
+
+get_effect_size_mod <- function(
+    current_mod,
+    anchor_theta,
+    args,
+    .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func
+    ) {
+    setting <- current_mod$setting
+    set.seed(current_mod$random_seed)
+    k <- ncol(current_mod$theta)
+    if (setting$alternative_model) {
+        strata_topic <- .get_keyatm_strata_topic_func(current_mod)
+        theta1 <- strata_topic$theta[[1]]
+        theta2 <- strata_topic$theta[[2]]
+        theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
+        theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
+        theta_diff_mean <- apply(theta_diff, 2, mean)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- tmmv.find_anchor(
+            anchor_theta,
+            current_mod$theta,
+            return_rho = TRUE
+        )
+        output <- data.frame(
+            Estimate = theta_diff_mean[anchor_index],
+            Q2.5 = theta_diff_quantile[1, anchor_index],
+            Q97.5 = theta_diff_quantile[2, anchor_index],
+            max_rho = max_rho
+        )
+        rownames(output) <- NULL
+    } else {
+        res <- .get_stm_estimate_func(current_mod)
+        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- tmmv.find_anchor(
+            anchor_theta,
+            current_mod$theta,
+            return_rho = TRUE
+        )
+        output <- data.frame(
+            Estimate = as.vector(res$means)[anchor_index],
+            Q2.5 = res$cis[[anchor_index]][1],
+            Q97.5 = res$cis[[anchor_index]][2],
+            max_rho = max_rho
+        )
+        colnames(output) <- c("Estimate", "Q2.5", "Q97.5", "max_rho")
+        rownames(output) <- NULL
+    }
+    output <- round(output, 6)
+    estimate <- cbind(as.data.frame(setting), output)
+    theta <- current_mod$theta[, anchor_index]
+    return(list(estimate = estimate, theta = theta))
+}
+```
+
+And then execute it via `purrr::map`.
+
+
+```{r}
+estimates <- purrr::map(
+    models,
+    get_effect_size_mod,
+    anchor_theta = anchor_theta,
+    args = args,
+    .get_keyatm_strata_topic_func = .get_keyatm_strata_topic_func,
+    .get_stm_estimate_func = .get_stm_estimate_func)
+```
+
+The output is joined as one data frame.
+
+```{r}
+estimates_df <- estimates |>
+    purrr::map("estimate") |>
+    purrr::list_rbind()
+head(estimates_df)
+```
+
+## Visualize
+
+For visualization, a customized visualization function is used. See `lib/plot_spec_curve.R`, which is based on the visualization function in the R package `specr` by @specr).
+
+```{r}
+source(here::here("lib/plot_spec_curve.R"))
+```
+
+```{r}
+tmmv.plot_spec_curve(estimates_df)
+```
+
+## References
+

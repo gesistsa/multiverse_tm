@@ -19,20 +19,8 @@ anchor_mod <- readRDS(tmmv.get_rds_filename(
 
 set.seed(anchor_mod$random_seed)
 
-## This in the original source is kind of unexplained
-
-## univdummy <- as.numeric(meta$edu3==3)
-## print(univdummy)
-## summary(univdummy)
-## table(meta$edu3, univdummy)
-## meta$univdummy <- univdummy
-
-## but let's do it anyway
-
-anchor_mod$docvars$univdummy <- as.numeric(anchor_mod$docvars$edu3 == 3)
-
 est <- stm::estimateEffect(
-    ~ concern + univdummy + gender + age,
+    ~ concern + edu3 + gender + age,
     stmobj = anchor_mod$mod,
     metadata = anchor_mod$docvars
 )

@@ -1,5 +1,5 @@
 services:
-  r:
+  multiverse_tm:
     build:
       context: .
       dockerfile: Dockerfile

@@ -213,15 +213,24 @@ Dependencies” at the bottom of this readme.
 >
 > Building the docker image can take up to 10 minutes ☠️ ☠️ ☠️
 
-The entire analysis can be run with Docker by using
+To build the docker image, run this
 
 ``` bash
 docker compose build
-docker compose up
 ```
 
-Note that `docker compose up` currently runs the debug mode of the
-`takano` analysis.
+To run the pipeline (or part of the pipeline) inside a Docker container,
+e.g.,
+
+``` bash
+# run the @dockertest target in main.stu
+docker compose run --remove-orphans --rm multiverse_tm stu @dockertest
+```
+
+``` bash
+# run the visualization directly, see the section on reproducing the results
+docker compose run --remove-orphans --rm multiverse_tm Rscript chan/04_viz.R
+```
 
 ## Project Dependencies
 

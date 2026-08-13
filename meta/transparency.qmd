@@ -21,14 +21,14 @@ filters:
 
 ::: {.timeline .vertical}
 
-::: {.event data-label="2026-06-26"}
+::: {.event data-label="2025-06-26"}
 Puzzled by a finding in @jankin:2024:W, two authors experimented with the idea of multiverse analysis for topic modeling.
 
 *Artefact:* [First git commit](https://github.com/gesistsa/multiverse_tm/commit/5569edb81516776dab458c9ac280885a1d9d2a0c) in a private repository. See also Footnote 8 in the manuscript.
 
 :::
 
-::: {.event data-label="2026-06-30"}
+::: {.event data-label="2025-06-30"}
 After an internal presentation of the idea to the research team, more authors joined the project. The team developed the initial idea into a systematic investigation. Guided by @pipal:2022:IYH, the team worked on a registration.
 :::
 

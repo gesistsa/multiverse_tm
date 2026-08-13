@@ -175,11 +175,6 @@ prep <- estimateEffect(1:4 ~ concern+univdummy+gender+age,
 In the original analysis, we also entered this as a binary variable in the anchoring procedure. We fixed it in the code *after acceptance* to not follow this in our code ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/b5cc318b476f2e3de0b63340cfa3d3daf6f8f708)). The reason was that the binary dummy was only used for another visualization. We tested that entering education as numerical variable or binary dummy does not influence the anchoring and therefore also not influence the subsequent effect estimation of `age`.
 
 ```{r}
-library(here)
-library(readr)
-library(quanteda)
-library(udpipe)
-library(dplyr)
 library(stm)
 
 args <- tmmv.parse_args_train(slug = "tvinnereim", .current_run = 1)

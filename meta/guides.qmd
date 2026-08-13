@@ -515,6 +515,25 @@ Therefore, the column vector that can be used to represent this model is: `theta
 With all the topic models trained, one can then generate estimates of the estimand. As stated in the paper, the estimand of interest is "the modeled difference in $\theta_{:,k}$ across age groups." To make it easier to do this for all trained topic models, the analyses are wrapped into functions.
 
 ```{r}
+#' return the column index in theta, which the column vector
+#' has the highest spearman's correlation with anchor_theta
+#' by default (return_rho = FALSE), it returns the anchor index
+#' otherwise, it returns the maximun rho
+find_anchor <- function(anchor_theta, theta, return_rho = FALSE) {
+    stopifnot(length(anchor_theta) == nrow(theta))
+    cor_coefs <- vapply(
+        seq_len(ncol(theta)),
+        FUN = function(x) {
+            cor(anchor_theta, theta[, x], method = "spearman")
+        },
+        FUN.VALUE = numeric(1)
+    )
+    if (return_rho) {
+        return(max(cor_coefs))
+    }
+    return(which.max(cor_coefs))
+}
+
 .get_keyatm_strata_topic_func <- function(current_mod) {
     keyATM::by_strata_DocTopic(
         current_mod$mod,
@@ -557,8 +576,8 @@ get_effect_size_mod <- function(
         theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
         theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
         theta_diff_mean <- apply(theta_diff, 2, mean)
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        max_rho <- tmmv.find_anchor(
+        anchor_index <- find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- find_anchor(
             anchor_theta,
             current_mod$theta,
             return_rho = TRUE
@@ -572,8 +591,8 @@ get_effect_size_mod <- function(
         rownames(output) <- NULL
     } else {
         res <- .get_stm_estimate_func(current_mod)
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        max_rho <- tmmv.find_anchor(
+        anchor_index <- find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- find_anchor(
             anchor_theta,
             current_mod$theta,
             return_rho = TRUE

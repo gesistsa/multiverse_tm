@@ -45,6 +45,7 @@ book:
     - index.qmd
     - meta/curinidocker/index.qmd
     - meta/guides.qmd
+    - meta/transparency.qmd
   sidebar:
     logo: https://raw.githubusercontent.com/gesistsa/.github/refs/heads/main/tsa_logo.png
     search: false

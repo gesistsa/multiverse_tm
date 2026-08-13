@@ -133,7 +133,7 @@ Second, in the original preregistration, we based on @denny:2018:TPF and @maier:
 
 ### Italian dictionary in @curini:2021:CMU
 
-The Italian dictionary for @curini:2021:CMU was modified during the course of the study. The modification was to make the dictionary also applicable to the stemming and the lemmatization cases (e.g., *democrazia* to *democraz**).
+The Italian dictionary for @curini:2021:CMU was modified during the course of the study. The modification was to make the dictionary also applicable to the stemming and the lemmatization cases (e.g., *democrazia* to *democraz\**).
 
 The change led to a rerun. The binary artefacts of the previous run before the change were preserved as `intermediate/curini/oldruns` on Zenodo.
 

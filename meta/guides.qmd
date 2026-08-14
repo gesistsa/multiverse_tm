@@ -641,6 +641,18 @@ For visualization, a customized visualization function is used. See `lib/plot_sp
 
 ```{r}
 source(here::here("lib/plot_spec_curve.R"))
+
+
+# Best to use for plots with 2 colors
+# (orange and purple)
+# Do NOT use if there are more than 4 overlapping items
+tmmv.colors <- list(
+    orange = "#F08741",
+    berrypurple = "#642878",
+    lightblue = "#1E8CC8",
+    yellow = "#FAD205",
+    pink = "#D20064"
+)
 ```
 
 ```{r}

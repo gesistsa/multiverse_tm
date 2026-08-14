@@ -172,7 +172,76 @@ prep <- estimateEffect(1:4 ~ concern+univdummy+gender+age,
                        uncertainty = "Global")
 ```
 
-In the original analysis, we also entered this as a binary variable in the anchoring procedure. We fixed it in the code *after acceptance* to not follow this in our code ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/b5cc318b476f2e3de0b63340cfa3d3daf6f8f708)). The reason was that the binary dummy was only used for another visualization. We tested that entering education as numerical variable or binary dummy does not influence the anchoring and therefore also not influence the subsequent effect estimation of `age`. See the file `meta/impact148.R`.
+In the original analysis, we also entered this as a binary variable in the anchoring procedure. We fixed it in the code *after acceptance* to not follow this in our code ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/b5cc318b476f2e3de0b63340cfa3d3daf6f8f708)). The reason was that the binary dummy was only used for another visualization. We tested that entering education as numerical variable or binary dummy does not influence the anchoring and therefore also not influence the subsequent effect estimation of `age`.
+
+```{r}
+library(stm)
+
+args <- tmmv.parse_args_train(slug = "tvinnereim", .current_run = 1)
+
+analytical_paths <- list(
+    token_normalization = c("none", "lemmatization", "stemming"),
+    stopword_removal = c(TRUE, FALSE),
+    trimming = c(TRUE, FALSE),
+    alternative_model = c(TRUE, FALSE),
+    k_setting = c(1, 2, 3), #K original, alt1, alt2
+    iteration_setting = c(1, 2, 3) #iter original, alt1, alt2    
+)
+
+settings_df <- expand.grid(analytical_paths, stringsAsFactors = FALSE)
+
+settings <- settings_df |> purrr::transpose() 
+
+
+.read <- function(setting, args) {
+    readRDS(tmmv.get_rds_filename(
+        setting,
+        here::here(args$output_dir)
+    ))
+}
+
+models <- purrr::map(settings, .read, args = args)
+names(models) <- purrr::map_chr(settings,
+                                rlang::hash)
+
+anchor_setting <- list(token_normalization = "stemming",
+                       stopword_removal = TRUE,
+                       trimming = TRUE,
+                       alternative_model = FALSE,
+                       k_setting = 1, 
+                       iteration_setting = 1)
+
+anchor_mod <- models[[rlang::hash(anchor_setting)]]
+
+.gen_anchor <- function(anchor_mod, edu3 = TRUE) {
+    if (edu3) {
+        est <- stm::estimateEffect(
+    ~ concern + edu3 + gender + age,
+    stmobj = anchor_mod$mod,
+    metadata = anchor_mod$docvars
+    )
+    } else {
+        anchor_mod$docvars$univdummy <- as.numeric(anchor_mod$docvars$edu3 == 3)
+        est <- stm::estimateEffect(
+    ~ concern + univdummy + gender + age,
+    stmobj = anchor_mod$mod,
+    metadata = anchor_mod$docvars
+    )
+    }
+    max_topic_index <- which.max(
+    purrr::map_dbl(est$parameters, \(x) {
+        mean(purrr::map_dbl(x, \(y) y$est["age"]))
+    })
+    )
+
+    return(anchor_mod$theta[, max_topic_index])
+}
+
+
+## the anchors are the same
+stopifnot(identical(.gen_anchor(anchor_mod, edu3 = TRUE),
+                    .gen_anchor(anchor_mod, edu3 = FALSE)))
+```
 
 ## Additional discourses
 

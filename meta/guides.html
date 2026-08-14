@@ -4266,7 +4266,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#reading-data" id="toc-reading-data" class="nav-link" data-scroll-target="#reading-data"><span class="header-section-number">3.2.1</span> Reading data</a></li>
   <li><a href="#lemmatization" id="toc-lemmatization" class="nav-link" data-scroll-target="#lemmatization"><span class="header-section-number">3.2.2</span> Lemmatization</a></li>
-  <li><a href="#tokenization" id="toc-tokenization" class="nav-link" data-scroll-target="#tokenization"><span class="header-section-number">3.2.3</span> Tokenization</a></li>
+  <li><a href="#token-normalization" id="toc-token-normalization" class="nav-link" data-scroll-target="#token-normalization"><span class="header-section-number">3.2.3</span> Token normalization</a></li>
   <li><a href="#generate-document-term-matrices" id="toc-generate-document-term-matrices" class="nav-link" data-scroll-target="#generate-document-term-matrices"><span class="header-section-number">3.2.4</span> Generate document-term matrices</a></li>
   </ul></li>
   <li><a href="#train-topic-models" id="toc-train-topic-models" class="nav-link" data-scroll-target="#train-topic-models"><span class="header-section-number">3.3</span> Train topic models</a></li>
@@ -4352,58 +4352,60 @@ Note
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>settings <span class="ot">&lt;-</span> settings_df <span class="sc">|&gt;</span> purrr<span class="sc">::</span><span class="fu">transpose</span>() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>settings</code> is a list of <code>setting</code>. <code>settings</code> and <code>setting</code> can be subset in the following two ways. The subsetting of <code>setting</code> is important because the first three slots of a <code>setting</code> are solely for text preprocessing.</p>
+<p><code>settings</code> is a list containing each combination of settings. <code>settings</code> and each singular item from <code>settings</code> can be subset in the following two ways. The subsetting of an item of <code>settings</code> is important because the first three slots from a set of settings are solely for text preprocessing.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>settings[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$token_normalization</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "none"</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$stopword_removal</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$trimming</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$alternative_model</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$k_setting</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$iteration_setting</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first two items</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>settings[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$token_normalization</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "none"</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$stopword_removal</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$trimming</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$alternative_model</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$k_setting</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]$iteration_setting</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$token_normalization</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "lemmatization"</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$stopword_removal</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$trimming</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$alternative_model</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$k_setting</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$iteration_setting</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$token_normalization</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "lemmatization"</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$stopword_removal</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$trimming</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$alternative_model</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$k_setting</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]$iteration_setting</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>settings[[<span class="dv">1</span>]][<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $token_normalization</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "none"</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $stopword_removal</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $trimming</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first item, first three slots</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>settings[[<span class="dv">1</span>]][<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $token_normalization</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "none"</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $stopword_removal</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $trimming</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="generate-all-preprocessed-document-term-matrices" class="level2" data-number="3.2">
@@ -4476,23 +4478,22 @@ Note
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>parsed_content <span class="ot">&lt;-</span> <span class="fu">udpipe_annotate</span>(norwegian_model, original_corpus)</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>parsed_content_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(parsed_content)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>parsed_content_df_fixed <span class="ot">&lt;-</span> parsed_content_df</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>parsed_content_df_fixed <span class="sc">|&gt;</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(doc_id) <span class="sc">|&gt;</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">content =</span> <span class="fu">paste</span>(lemma, <span class="at">collapse =</span> <span class="st">" "</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">doc_id =</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(doc_id, <span class="st">"[0-9]+"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">doc_id =</span> <span class="fu">as.numeric</span>(doc_id)) <span class="sc">|&gt;</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(doc_id) <span class="ot">-&gt;</span> lemma_df</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>lemma_corpus <span class="ot">&lt;-</span> <span class="fu">corpus</span>(lemma_df<span class="sc">$</span>content)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">docvars</span>(lemma_corpus) <span class="ot">&lt;-</span> <span class="fu">docvars</span>(original_corpus)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">docnames</span>(lemma_corpus) <span class="ot">&lt;-</span> <span class="fu">docnames</span>(original_corpus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>parsed_content_df <span class="sc">|&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(doc_id) <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">content =</span> <span class="fu">paste</span>(lemma, <span class="at">collapse =</span> <span class="st">" "</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">doc_id =</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(doc_id, <span class="st">"[0-9]+"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">doc_id =</span> <span class="fu">as.numeric</span>(doc_id)) <span class="sc">|&gt;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(doc_id) <span class="ot">-&gt;</span> lemma_df</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>lemma_corpus <span class="ot">&lt;-</span> <span class="fu">corpus</span>(lemma_df<span class="sc">$</span>content)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">docvars</span>(lemma_corpus) <span class="ot">&lt;-</span> <span class="fu">docvars</span>(original_corpus)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">docnames</span>(lemma_corpus) <span class="ot">&lt;-</span> <span class="fu">docnames</span>(original_corpus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="tokenization" class="level3" data-number="3.2.3">
-<h3 data-number="3.2.3" class="anchored" data-anchor-id="tokenization"><span class="header-section-number">3.2.3</span> Tokenization</h3>
-<p>Please note that some code (e.g., the so-called “pretokenization”) was from the original code by <span class="citation" data-cites="tvinnereim:2015:E">Tvinnereim and Fløttum (<a href="#ref-tvinnereim:2015:E" role="doc-biblioref">2015</a>)</span>.</p>
+<section id="token-normalization" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="token-normalization"><span class="header-section-number">3.2.3</span> Token normalization</h3>
+<p>To realize all tokenization scenarios, three different ways of tokenization of the corpus were conducted: original (no lemmatization or stemming), lemmatization, and stemming. Please note that some code (e.g., the so-called “pretokenization”) was from the original code by <span class="citation" data-cites="tvinnereim:2015:E">Tvinnereim and Fløttum (<a href="#ref-tvinnereim:2015:E" role="doc-biblioref">2015</a>)</span>, which converts some Norwegian terms and typos (e.g., <em>globaloppvarming</em> to <em>global oppvarming</em>, <em>tempratur</em> to <em>temperatur</em>).</p>
 <section id="original-no-lemmatization-or-stemming" class="level4" data-number="3.2.3.1">
 <h4 data-number="3.2.3.1" class="anchored" data-anchor-id="original-no-lemmatization-or-stemming"><span class="header-section-number">3.2.3.1</span> Original (no lemmatization or stemming)</h4>
 <div class="cell">
@@ -4688,7 +4689,7 @@ Note
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' This function unifies the theta so that the output theta always</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' has the same nrow as current_dfm</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' The raison d'être is that stm discards empty rows sliently</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' The raison d'être is that stm discards empty rows silently</span></span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' But doesn't retain the rownames</span></span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>unify_theta <span class="ot">&lt;-</span> <span class="cf">function</span>(mod, trimmed_dfm, current_dfm) {</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    theta <span class="ot">&lt;-</span> mod<span class="sc">$</span>theta</span>
@@ -4774,7 +4775,7 @@ Note
 <span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(output)</span>
 <span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Then, the topic modeling for all <code>settings</code> is executed.</p>
+<p>Then, the topic modeling for all <code>settings</code> is executed. This step roughly takes six hours.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(settings, train_model, <span class="at">dfm_list =</span> dfm_list, <span class="at">.progress =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(models) <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(settings,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                                rlang<span class="sc">::</span>hash)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -4814,7 +4815,7 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>another_mod <span class="ot">&lt;-</span> models[[<span class="dv">1</span>]]</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> another_mod<span class="sc">$</span>theta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The idea of anchoring is to find out the column vector in <span class="math inline">\(\theta\)</span> that has the maximum correlation with <code>anchor_theta</code> (See equation 2 in the article). So that one can use that column vector to represent the setting used for training this model.</p>
+<p><code>theta</code> (<span class="math inline">\(\theta\)</span>) is a matrix with <span class="math inline">\(k\)</span> columns (total number of topics), that has topic proportions of all topics from a topic model solution resulting from a different set of settings. The idea of anchoring is to find out the column vector in <span class="math inline">\(\theta\)</span> that has the maximum correlation with <code>anchor_theta</code> (See equation 2 in the article), which most likely represents the original author’s solution. So that one can use that column vector to represent the setting used for training this model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>cor_coefs <span class="ot">&lt;-</span> <span class="fu">vapply</span>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seq_len</span>(<span class="fu">ncol</span>(theta)),</span>
@@ -4832,83 +4833,102 @@ Note
 <h2 data-number="3.5" class="anchored" data-anchor-id="generate-estimates"><span class="header-section-number">3.5</span> Generate estimates</h2>
 <p>With all the topic models trained, one can then generate estimates of the estimand. As stated in the paper, the estimand of interest is “the modeled difference in <span class="math inline">\(\theta_{:,k}\)</span> across age groups.” To make it easier to do this for all trained topic models, the analyses are wrapped into functions.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>.get_keyatm_strata_topic_func <span class="ot">&lt;-</span> <span class="cf">function</span>(current_mod) {</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    keyATM<span class="sc">::</span><span class="fu">by_strata_DocTopic</span>(</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        current_mod<span class="sc">$</span>mod,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">by_var =</span> <span class="st">"age"</span>,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">by_values =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>),</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">labels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>)</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>.get_stm_estimate_func <span class="ot">&lt;-</span> <span class="cf">function</span>(current_mod) {</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    stm<span class="sc">::</span><span class="fu">estimateEffect</span>(</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>        <span class="sc">~</span> concern <span class="sc">+</span> humanmade <span class="sc">+</span> efficacy <span class="sc">+</span> edu3 <span class="sc">+</span> gender <span class="sc">+</span> age,</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">stmobj =</span> current_mod<span class="sc">$</span>mod,</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">metadata =</span> current_mod<span class="sc">$</span>docvars</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(</span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">covariate =</span> <span class="st">"age"</span>,</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> current_mod<span class="sc">$</span>mod,</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">"difference"</span>,</span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">cov.value1 =</span> <span class="dv">4</span>,</span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">cov.value2 =</span> <span class="dv">3</span>,</span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">omit.plot =</span> <span class="cn">TRUE</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>get_effect_size_mod <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    current_mod,</span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    anchor_theta,</span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    args,</span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    .get_keyatm_strata_topic_func,</span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    .get_stm_estimate_func</span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    ) {</span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    setting <span class="ot">&lt;-</span> current_mod<span class="sc">$</span>setting</span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set.seed</span>(current_mod<span class="sc">$</span>random_seed)</span>
-<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">ncol</span>(current_mod<span class="sc">$</span>theta)</span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (setting<span class="sc">$</span>alternative_model) {</span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>        strata_topic <span class="ot">&lt;-</span> <span class="fu">.get_keyatm_strata_topic_func</span>(current_mod)</span>
-<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>        theta1 <span class="ot">&lt;-</span> strata_topic<span class="sc">$</span>theta[[<span class="dv">1</span>]]</span>
-<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>        theta2 <span class="ot">&lt;-</span> strata_topic<span class="sc">$</span>theta[[<span class="dv">2</span>]]</span>
-<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>        theta_diff <span class="ot">&lt;-</span> theta2[, <span class="fu">seq_len</span>(k)] <span class="sc">-</span> theta1[, <span class="fu">seq_len</span>(k)]</span>
-<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>        theta_diff_quantile <span class="ot">&lt;-</span> <span class="fu">apply</span>(theta_diff, <span class="dv">2</span>, quantile, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
-<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>        theta_diff_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(theta_diff, <span class="dv">2</span>, mean)</span>
-<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>        anchor_index <span class="ot">&lt;-</span> <span class="fu">tmmv.find_anchor</span>(anchor_theta, current_mod<span class="sc">$</span>theta)</span>
-<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>        max_rho <span class="ot">&lt;-</span> <span class="fu">tmmv.find_anchor</span>(</span>
-<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>            anchor_theta,</span>
-<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>            current_mod<span class="sc">$</span>theta,</span>
-<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>            <span class="at">return_rho =</span> <span class="cn">TRUE</span></span>
-<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>        output <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>            <span class="at">Estimate =</span> theta_diff_mean[anchor_index],</span>
-<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q2.5 =</span> theta_diff_quantile[<span class="dv">1</span>, anchor_index],</span>
-<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q97.5 =</span> theta_diff_quantile[<span class="dv">2</span>, anchor_index],</span>
-<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>            <span class="at">max_rho =</span> max_rho</span>
-<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(output) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>        res <span class="ot">&lt;-</span> <span class="fu">.get_stm_estimate_func</span>(current_mod)</span>
-<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>        anchor_index <span class="ot">&lt;-</span> <span class="fu">tmmv.find_anchor</span>(anchor_theta, current_mod<span class="sc">$</span>theta)</span>
-<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>        max_rho <span class="ot">&lt;-</span> <span class="fu">tmmv.find_anchor</span>(</span>
-<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>            anchor_theta,</span>
-<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>            current_mod<span class="sc">$</span>theta,</span>
-<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>            <span class="at">return_rho =</span> <span class="cn">TRUE</span></span>
-<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>        output <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>            <span class="at">Estimate =</span> <span class="fu">as.vector</span>(res<span class="sc">$</span>means)[anchor_index],</span>
-<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q2.5 =</span> res<span class="sc">$</span>cis[[anchor_index]][<span class="dv">1</span>],</span>
-<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q97.5 =</span> res<span class="sc">$</span>cis[[anchor_index]][<span class="dv">2</span>],</span>
-<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>            <span class="at">max_rho =</span> max_rho</span>
-<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>        <span class="fu">colnames</span>(output) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>, <span class="st">"Q2.5"</span>, <span class="st">"Q97.5"</span>, <span class="st">"max_rho"</span>)</span>
-<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(output) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">&lt;-</span> <span class="fu">round</span>(output, <span class="dv">6</span>)</span>
-<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>    estimate <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">as.data.frame</span>(setting), output)</span>
-<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    theta <span class="ot">&lt;-</span> current_mod<span class="sc">$</span>theta[, anchor_index]</span>
-<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">estimate =</span> estimate, <span class="at">theta =</span> theta))</span>
-<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' return the column index in theta, which the column vector</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' has the highest spearman's correlation with anchor_theta</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' by default (return_rho = FALSE), it returns the anchor index</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' otherwise, it returns the maximun rho</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>find_anchor <span class="ot">&lt;-</span> <span class="cf">function</span>(anchor_theta, theta, <span class="at">return_rho =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">length</span>(anchor_theta) <span class="sc">==</span> <span class="fu">nrow</span>(theta))</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    cor_coefs <span class="ot">&lt;-</span> <span class="fu">vapply</span>(</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">seq_len</span>(<span class="fu">ncol</span>(theta)),</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">FUN =</span> <span class="cf">function</span>(x) {</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cor</span>(anchor_theta, theta[, x], <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">FUN.VALUE =</span> <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (return_rho) {</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(<span class="fu">max</span>(cor_coefs))</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">which.max</span>(cor_coefs))</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>.get_keyatm_strata_topic_func <span class="ot">&lt;-</span> <span class="cf">function</span>(current_mod) {</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    keyATM<span class="sc">::</span><span class="fu">by_strata_DocTopic</span>(</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>        current_mod<span class="sc">$</span>mod,</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">by_var =</span> <span class="st">"age"</span>,</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">by_values =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>),</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">labels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>.get_stm_estimate_func <span class="ot">&lt;-</span> <span class="cf">function</span>(current_mod) {</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    stm<span class="sc">::</span><span class="fu">estimateEffect</span>(</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>        <span class="sc">~</span> concern <span class="sc">+</span> humanmade <span class="sc">+</span> efficacy <span class="sc">+</span> edu3 <span class="sc">+</span> gender <span class="sc">+</span> age,</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">stmobj =</span> current_mod<span class="sc">$</span>mod,</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">metadata =</span> current_mod<span class="sc">$</span>docvars</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>            <span class="at">covariate =</span> <span class="st">"age"</span>,</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> current_mod<span class="sc">$</span>mod,</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">"difference"</span>,</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>            <span class="at">cov.value1 =</span> <span class="dv">4</span>,</span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">cov.value2 =</span> <span class="dv">3</span>,</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>            <span class="at">omit.plot =</span> <span class="cn">TRUE</span></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>get_effect_size_mod <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>    current_mod,</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>    anchor_theta,</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>    args,</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>    .get_keyatm_strata_topic_func,</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>    .get_stm_estimate_func</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    ) {</span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>    setting <span class="ot">&lt;-</span> current_mod<span class="sc">$</span>setting</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set.seed</span>(current_mod<span class="sc">$</span>random_seed)</span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">ncol</span>(current_mod<span class="sc">$</span>theta)</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (setting<span class="sc">$</span>alternative_model) {</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>        strata_topic <span class="ot">&lt;-</span> <span class="fu">.get_keyatm_strata_topic_func</span>(current_mod)</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>        theta1 <span class="ot">&lt;-</span> strata_topic<span class="sc">$</span>theta[[<span class="dv">1</span>]]</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>        theta2 <span class="ot">&lt;-</span> strata_topic<span class="sc">$</span>theta[[<span class="dv">2</span>]]</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>        theta_diff <span class="ot">&lt;-</span> theta2[, <span class="fu">seq_len</span>(k)] <span class="sc">-</span> theta1[, <span class="fu">seq_len</span>(k)]</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>        theta_diff_quantile <span class="ot">&lt;-</span> <span class="fu">apply</span>(theta_diff, <span class="dv">2</span>, quantile, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>        theta_diff_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(theta_diff, <span class="dv">2</span>, mean)</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>        anchor_index <span class="ot">&lt;-</span> <span class="fu">find_anchor</span>(anchor_theta, current_mod<span class="sc">$</span>theta)</span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        max_rho <span class="ot">&lt;-</span> <span class="fu">find_anchor</span>(</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>            anchor_theta,</span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>            current_mod<span class="sc">$</span>theta,</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>            <span class="at">return_rho =</span> <span class="cn">TRUE</span></span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>        output <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>            <span class="at">Estimate =</span> theta_diff_mean[anchor_index],</span>
+<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q2.5 =</span> theta_diff_quantile[<span class="dv">1</span>, anchor_index],</span>
+<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q97.5 =</span> theta_diff_quantile[<span class="dv">2</span>, anchor_index],</span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>            <span class="at">max_rho =</span> max_rho</span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(output) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>        res <span class="ot">&lt;-</span> <span class="fu">.get_stm_estimate_func</span>(current_mod)</span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>        anchor_index <span class="ot">&lt;-</span> <span class="fu">find_anchor</span>(anchor_theta, current_mod<span class="sc">$</span>theta)</span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a>        max_rho <span class="ot">&lt;-</span> <span class="fu">find_anchor</span>(</span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>            anchor_theta,</span>
+<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>            current_mod<span class="sc">$</span>theta,</span>
+<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>            <span class="at">return_rho =</span> <span class="cn">TRUE</span></span>
+<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a>        output <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a>            <span class="at">Estimate =</span> <span class="fu">as.vector</span>(res<span class="sc">$</span>means)[anchor_index],</span>
+<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q2.5 =</span> res<span class="sc">$</span>cis[[anchor_index]][<span class="dv">1</span>],</span>
+<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>            <span class="at">Q97.5 =</span> res<span class="sc">$</span>cis[[anchor_index]][<span class="dv">2</span>],</span>
+<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>            <span class="at">max_rho =</span> max_rho</span>
+<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">colnames</span>(output) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>, <span class="st">"Q2.5"</span>, <span class="st">"Q97.5"</span>, <span class="st">"max_rho"</span>)</span>
+<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(output) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">&lt;-</span> <span class="fu">round</span>(output, <span class="dv">6</span>)</span>
+<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>    estimate <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">as.data.frame</span>(setting), output)</span>
+<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a>    theta <span class="ot">&lt;-</span> current_mod<span class="sc">$</span>theta[, anchor_index]</span>
+<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">estimate =</span> estimate, <span class="at">theta =</span> theta))</span>
+<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And then execute it via <code>purrr::map</code>.</p>
 <div class="cell">

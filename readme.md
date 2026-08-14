@@ -355,11 +355,11 @@ The figures and the commands to reproduce them are listed below.
 | Figure | File name | Level 3 ready? | Command |
 |----|----|----|----|
 | 1 | `plots/chan_spec.pdf` | Yes | `Rscript chan/04_viz.R` |
-| 2 | `plots/currini_spec.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 2 | `plots/curini_spec.pdf` | Yes | `Rscript curini/04_viz.R` |
 | 3 | `plots/czymara_spec.pdf` | Yes | `Rscript czymara/04_viz.R` |
 | 4 | `plots/takano_spec.pdf` | Yes | `Rscript takano/04_viz.R` |
 | 5 | `plots/tvinnereim_spec.pdf` | Yes | `Rscript tvinnereim/04_viz.R` |
-| 6 | `plots/curini_spaghetti.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 6 | `plots/curini_spaghetti.pdf` | Yes | `Rscript curini/04_viz.R` |
 | 7 | `plots/jankins_spaghetti_full.pdf` | No | `Rscript jankins/04_viz.R` |
 | 8 | `plots/jankins_spaghetti_selected.pdf` | No | `Rscript jankins/04_viz.R` |
 | 9 | `plots/meta_density.pdf` | Yes | `Rscript meta/modality.R` |

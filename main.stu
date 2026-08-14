@@ -264,3 +264,13 @@ plots/:
     rm index.qmd
     rm _quarto.yaml
 }
+
+@websitetest:
+{
+    cp readme.rmd index.qmd
+    cp dev/_quarto.yaml _quarto.yaml
+    # quarto render
+    quarto render
+    rm index.qmd
+    rm _quarto.yaml
+}

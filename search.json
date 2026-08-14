@@ -44,7 +44,7 @@
     "href": "index.html#docker",
     "title": "Beyond Beyond Standardization: Online Appendix",
     "section": "1.2 Docker",
-    "text": "1.2 Docker\n\n\n\n\n\n\nWarning\n\n\n\nBuilding the docker image can take up to 10 minutes ☠️ ☠️ ☠️\n\n\nThe entire analysis can be run with Docker by using\ndocker compose build\ndocker compose up\nNote that docker compose up currently runs the debug mode of the takano analysis.",
+    "text": "1.2 Docker\n\n\n\n\n\n\nWarning\n\n\n\nBuilding the docker image can take up to 10 minutes ☠️ ☠️ ☠️\n\n\nTo build the docker image, run this\ndocker compose build\nTo run the pipeline (or part of the pipeline) inside a Docker container, e.g.,\n# run the @dockertest target in main.stu\ndocker compose run --remove-orphans --rm multiverse_tm stu @dockertest\n# run the visualization directly, see the section on reproducing the results\ndocker compose run --remove-orphans --rm multiverse_tm Rscript chan/04_viz.R",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>README</span>"
     ]
@@ -287,6 +287,66 @@
     "text": "For example: the tutorial by Pipal et al. (2022) : https://cpipal.github.io/multiverse-tutorial/multiverse_tutorial.html↩︎\nIn comparison to the original code, we also remove many I/O operations, which are for optimization.↩︎",
     "crumbs": [
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Multiverse analysis for topic modeling: A walkthrough of the procedure</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html",
+    "href": "meta/transparency.html",
+    "title": "4  Research Transparency Report",
+    "section": "",
+    "text": "4.1 Timeline",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html#timeline",
+    "href": "meta/transparency.html#timeline",
+    "title": "4  Research Transparency Report",
+    "section": "",
+    "text": "Puzzled by a finding in Jankin et al. (2024), two authors experimented with the idea of multiverse analysis for topic modeling.\nArtefact: First git commit in a private repository. See also Footnote 8 in the manuscript.\n\n\nAfter an internal presentation of the idea to the research team, more authors joined the project. The team developed the initial idea into a systematic investigation. Guided by Pipal et al. (2022), the team worked on a registration.\n\n\nThe protocol was preregistered on OSF as an open end preregisration.\nArtefact: Preregistration on Open Science Framework (OSF)\n\n\nFirst active phase of the research.\n\n\nFirst draft was submitted for the ICA Conference (Computational Methods Division).\n\n\nFirst submission to Communication Methods and Measures (CMM).\n\n\nICA submission was accepted\n\n\nFirst decision from CMM: Revise and resubmit\n\n\nSecond active phase of the research.\nArtefacts:\nThe following were developed based on the comments and queries from the reviewers.\n\nThe forensic investigation of the reproducibility of Curini and Vignoli (2021). (Git commit)\nThe variance decomposition analysis in Coda. (Git commit)\nThe distribution \\(\\rho\\) in Coda. (Git commit)\n\nBased on the forensic investigation, we identified issues with the dictionary of Curini and Vignoli (2021), which was fixed. (Git commit) (See below) This also led to a rerun of the multiverse analysis of Curini and Vignoli (2021). We have kept the old binary artefacts. (intermediate/curini/oldruns)\n\n\nPresentation at the ICA Conference.\n\n\nICA computational methods division best paper award.\n\n\nRevised version #1 submitted to CMM.\n\n\nSecond decision from CMM: Revise and resubmit.\n\n\nRevised version #2 submitted to CMM.\n\n\nFinal decision from CMM: Accept.\n\n\nGit repository made public.\n\n\nBinary artefacts deployed on Zenodo.\nArtefact: Zenodo\n\n\nOnline appendix website made public.\nArtefact: Website\n\n\nFixed an inconsistency in the code. (See below)\nArtefact: Git commit",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html#preregistration-deviations",
+    "href": "meta/transparency.html#preregistration-deviations",
+    "title": "4  Research Transparency Report",
+    "section": "4.2 Preregistration deviations",
+    "text": "4.2 Preregistration deviations\n(Also reported in the manuscript)\nThe current investigation was deviated from the preregistration in the following two ways. First, in the original preregistration, we included an additional inclusion criterion: “Studies represent a diverse selection of cases, such as text genres or domains as well as covering different languages.” This criterion was practically not used because the second criterion was too restrictive and we could not include enough studies with complete code and data. Using the typology of Lakens (2024), this deviation is an unforeseen event. The impact of this deviation should be negligible, as we did not reject any primary study because of text genres, domains, or languages.\nSecond, in the original preregistration, we based on Denny and Spirling (2018) and Maier et al. (2018) and included stemming as a considered analytical path. As mentioned above, this analytical path was not considered for Takano et al. (2023) because stemming is not possible for the Japanese language. Using the typology of Lakens (2024), this deviation is a violation of untested assumption. We incorrectly assumed in the preregistration that any text can be stemmed. The impact of this deviation is relatively higher, as that makes the multiverse size not comparable between that of Takano et al. (2023) and the rest of the five cases.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html#other-deviations",
+    "href": "meta/transparency.html#other-deviations",
+    "title": "4  Research Transparency Report",
+    "section": "4.3 Other deviations",
+    "text": "4.3 Other deviations\n\n4.3.1 Italian dictionary in Curini and Vignoli (2021)\nThe Italian dictionary for Curini and Vignoli (2021) was modified during the course of the study. The modification was to make the dictionary also applicable to the stemming and the lemmatization cases (e.g., democrazia to democraz*).\nThe change led to a rerun. The binary artefacts of the previous run before the change were preserved as intermediate/curini/oldruns on Zenodo.\n\n\n4.3.2 Dummy variable in Tvinnereim and Fløttum (2015)\nTvinnereim and Fløttum (2015) entered education as numerical variable (edu3) in the topic modeling, i.e.,\n# Select the 4 best models out of 20 runs (see Vignette, pp. 8-9)\nncpSelect2 &lt;- selectModel(out$documents,\n                          out$vocab,\n                          K=4,\n                          prevalence =~ meta$concern+meta$humanmade+meta$efficacy+meta$edu3+meta$gender+meta$age, \n                          max.em.its=100, \n                          data=out$meta,\n                          runs=20,\n                          seed=5926696) #, emtol=1)\nHowever, the variable was entered as a dummy variable in the effect estimation.\n# Figures\n# Co-variation with demographics and concern\n# Generate education binary: university or not\nunivdummy &lt;- as.numeric(meta$edu3==3)\nprint(univdummy)  \nsummary(univdummy)\ntable(meta$edu3, univdummy)\nmeta$univdummy &lt;- univdummy\n\n# Figure 1: Topical prevalence over co-variates\nprep &lt;- estimateEffect(1:4 ~ concern+univdummy+gender+age, \n                       ncpPrevFit,\n                       meta=meta, \n                       uncertainty = \"Global\")\nIn the original analysis, we also entered this as a binary variable in the anchoring procedure. We fixed it in the code after acceptance to not follow this in our code (Git commit). The reason was that the binary dummy was only used for another visualization. We tested that entering education as numerical variable or binary dummy does not influence the anchoring and therefore also not influence the subsequent effect estimation of age.\n\nlibrary(stm)\n#&gt; stm v1.3.7 successfully loaded. See ?stm for help. \n#&gt;  Papers, resources, and other materials at structuraltopicmodel.com\n\nargs &lt;- tmmv.parse_args_train(slug = \"tvinnereim\", .current_run = 1)\n\nanalytical_paths &lt;- list(\n    token_normalization = c(\"none\", \"lemmatization\", \"stemming\"),\n    stopword_removal = c(TRUE, FALSE),\n    trimming = c(TRUE, FALSE),\n    alternative_model = c(TRUE, FALSE),\n    k_setting = c(1, 2, 3), #K original, alt1, alt2\n    iteration_setting = c(1, 2, 3) #iter original, alt1, alt2    \n)\n\nsettings_df &lt;- expand.grid(analytical_paths, stringsAsFactors = FALSE)\n\nsettings &lt;- settings_df |&gt; purrr::transpose() \n\n\n.read &lt;- function(setting, args) {\n    readRDS(tmmv.get_rds_filename(\n        setting,\n        here::here(args$output_dir)\n    ))\n}\n\nmodels &lt;- purrr::map(settings, .read, args = args)\nnames(models) &lt;- purrr::map_chr(settings,\n                                rlang::hash)\n\nanchor_setting &lt;- list(token_normalization = \"stemming\",\n                       stopword_removal = TRUE,\n                       trimming = TRUE,\n                       alternative_model = FALSE,\n                       k_setting = 1, \n                       iteration_setting = 1)\n\nanchor_mod &lt;- models[[rlang::hash(anchor_setting)]]\n\n.gen_anchor &lt;- function(anchor_mod, edu3 = TRUE) {\n    if (edu3) {\n        est &lt;- stm::estimateEffect(\n    ~ concern + edu3 + gender + age,\n    stmobj = anchor_mod$mod,\n    metadata = anchor_mod$docvars\n    )\n    } else {\n        anchor_mod$docvars$univdummy &lt;- as.numeric(anchor_mod$docvars$edu3 == 3)\n        est &lt;- stm::estimateEffect(\n    ~ concern + univdummy + gender + age,\n    stmobj = anchor_mod$mod,\n    metadata = anchor_mod$docvars\n    )\n    }\n    max_topic_index &lt;- which.max(\n    purrr::map_dbl(est$parameters, \\(x) {\n        mean(purrr::map_dbl(x, \\(y) y$est[\"age\"]))\n    })\n    )\n\n    return(anchor_mod$theta[, max_topic_index])\n}\n\n\n## the anchors are the same\nstopifnot(identical(.gen_anchor(anchor_mod, edu3 = TRUE),\n                    .gen_anchor(anchor_mod, edu3 = FALSE)))",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html#additional-discourses",
+    "href": "meta/transparency.html#additional-discourses",
+    "title": "4  Research Transparency Report",
+    "section": "4.4 Additional discourses",
+    "text": "4.4 Additional discourses\nSome ideas in the current study were developed in parallel to Linde et al. (2026) (currently as preprint).",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
+    ]
+  },
+  {
+    "objectID": "meta/transparency.html#references",
+    "href": "meta/transparency.html#references",
+    "title": "4  Research Transparency Report",
+    "section": "4.5 References",
+    "text": "4.5 References\n\n\n\n\nCurini, Luigi, and Valerio Vignoli. 2021. “Committed Moderates and Uncommitted Extremists: Ideological Leaning and Parties’ Narratives on Military Interventions in Italy.” Foreign Policy Analysis 17 (3). https://doi.org/10.1093/fpa/orab016.\n\n\nDenny, Matthew J., and Arthur Spirling. 2018. “Text Preprocessing for Unsupervised Learning: Why It Matters, When It Misleads, and What to Do about It.” Political Analysis 26 (2): 168–89. https://doi.org/10.1017/pan.2017.44.\n\n\nJankin, Slava, Alexander Baturo, and Niheer Dasandi. 2024. “Words to Unite Nations: The Complete United Nations General Debate Corpus, 1946–Present.” Journal of Peace Research, ahead of print, November. https://doi.org/10.1177/00223433241275335.\n\n\nLakens, Daniël. 2024. “When and How to Deviate from a Preregistration.” Collabra: Psychology 10 (1). https://doi.org/10.1525/collabra.117094.\n\n\nLinde, Maximilian, Jun Sun, Paul Balluff, Danica Radovanović, and Chung-hong Chan. 2026. Making Uncertainty Visible: Multiverse Analysis for Robust Computational Social Science. arXiv. https://doi.org/10.48550/ARXIV.2605.19745.\n\n\nMaier, Daniel, A. Waldherr, P. Miltner, et al. 2018. “Applying LDA Topic Modeling in Communication Research: Toward a Valid and Reliable Methodology.” Communication Methods and Measures 12 (2-3): 93–118. https://doi.org/10.1080/19312458.2018.1430754.\n\n\nPipal, Christian, Hyunjin Song, and Hajo G. Boomgaarden. 2022. “If You Have Choices, Why Not Choose (and Share) All of Them? A Multiverse Approach to Understanding News Engagement on Social Media.” Digital Journalism, March, 1–21. https://doi.org/10.1080/21670811.2022.2036623.\n\n\nTakano, Ryota, Akiko Matsuo, and Kazuaki Kawano. 2023. “Development of a Japanese Version of the Awe Experience Scale (AWE-s): A Structural Topic Modeling Approach.” F1000Research 12: 515. https://doi.org/10.12688/f1000research.134275.2.\n\n\nTvinnereim, Endre, and Kjersti Fløttum. 2015. “Explaining Topic Prevalence in Answers to Open-Ended Survey Questions about Climate Change.” Nature Climate Change 5 (8): 744–47. https://doi.org/10.1038/nclimate2663.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Transparency Report</span>"
     ]
   }
 ]

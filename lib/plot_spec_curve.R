@@ -17,7 +17,11 @@ tmmv.plot_spec_curve <- function(
     ylab = "Estimate [95% Conf. I.]",
     k = NULL,
     model_names = NULL,
-    color_partb = is.data.frame(results)
+    color_partb = is.data.frame(results),
+    color_below = "#1E8CC8",
+    color_cross = "darkgrey",
+    color_above = "#F08741",
+    color_na = "#642878"
 ) {
     .process_data_plot_spec_curve <- function(results, anchor) {
         output <- list() # should have results_plotting, results, axis_breaks, axis_labels
@@ -109,10 +113,10 @@ tmmv.plot_spec_curve <- function(
     plot_a <- processed_data$results_plotting |>
         dplyr::mutate(
             color = dplyr::case_when(
-                Q2.5 > 0 ~ tmmv.colors[["orange"]],
-                Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
-                is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
-                TRUE ~ "darkgrey"
+                Q2.5 > 0 ~ color_above,
+                Q97.5 < 0 ~ color_below,
+                is.na(Estimate) ~ color_na,
+                TRUE ~ color_cross
             ),
             alpha = ifelse(anchor, 0.9, 0.2)
         ) |>
@@ -176,14 +180,14 @@ tmmv.plot_spec_curve <- function(
         results_plotting_b <- results_plotting_b |>
             dplyr::mutate(
                 color = dplyr::case_when(
-                    Q2.5 > 0 ~ tmmv.colors[["orange"]],
-                    Q97.5 < 0 ~ tmmv.colors[["lightblue"]],
-                    is.na(Estimate) ~ tmmv.colors[["berrypurple"]],
-                    TRUE ~ "darkgrey"
+                    Q2.5 > 0 ~ color_above,
+                    Q97.5 < 0 ~ color_below,
+                    is.na(Estimate) ~ color_na,
+                    TRUE ~ color_cross
                 )
             )
     } else {
-        results_plotting_b$color <- "darkgrey"
+        results_plotting_b$color <- color_cross
     }
 
     plot_b <- results_plotting_b |>

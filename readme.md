@@ -336,6 +336,16 @@ Because of this, there are three levels of reproduction:
 3.  From aggregated results - reproduce the analysis from the aggregated
     results on Github: `results/aggregated`.
 
+> [!WARNING]
+>
+> If you would like to use our provided intermediate files on Zenodo,
+> make sure that you are not using `rlang` version 1.3.0 or above. The
+> reason is that [a new hashing
+> algorithm](https://github.com/r-lib/rlang/blob/d0e9d81baa937ba7a4cf981dd027229b0229c096/NEWS.md?plain=1#L11-L13)
+> was introduced in version 1.3.0 and that makes all existing hashed
+> file names invalid. Please use the `renv` or Docker environment
+> documented above (which `rlang` was pinned at version 1.1.6).
+
 Level 1 can reproduce all 14 figures. But the analyses will be carried
 out with some other random seeds and therefore the figures might look
 slightly different. Also, on a computer with six parallel computing
@@ -355,11 +365,11 @@ The figures and the commands to reproduce them are listed below.
 | Figure | File name | Level 3 ready? | Command |
 |----|----|----|----|
 | 1 | `plots/chan_spec.pdf` | Yes | `Rscript chan/04_viz.R` |
-| 2 | `plots/currini_spec.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 2 | `plots/curini_spec.pdf` | Yes | `Rscript curini/04_viz.R` |
 | 3 | `plots/czymara_spec.pdf` | Yes | `Rscript czymara/04_viz.R` |
 | 4 | `plots/takano_spec.pdf` | Yes | `Rscript takano/04_viz.R` |
 | 5 | `plots/tvinnereim_spec.pdf` | Yes | `Rscript tvinnereim/04_viz.R` |
-| 6 | `plots/curini_spaghetti.pdf` | Yes | `Rscript currini/04_viz.R` |
+| 6 | `plots/curini_spaghetti.pdf` | Yes | `Rscript curini/04_viz.R` |
 | 7 | `plots/jankins_spaghetti_full.pdf` | No | `Rscript jankins/04_viz.R` |
 | 8 | `plots/jankins_spaghetti_selected.pdf` | No | `Rscript jankins/04_viz.R` |
 | 9 | `plots/meta_density.pdf` | Yes | `Rscript meta/modality.R` |

@@ -1,0 +1,250 @@
+---
+title: "Research Transparency Report"
+bibliography: ../references.bib
+knitr:
+  opts_chunk: 
+    collapse: true
+    comment: "#>" 
+    R.options:
+      knitr.graphics.auto_pdf: true
+format:
+  html:
+    embed-resources: true
+    code-annotations: "hover"
+    toc: true
+    toc-location: "right"
+filters:
+  - timeline
+---
+
+## Timeline
+
+::: {.timeline .vertical}
+
+::: {.event data-label="2025-06-26"}
+Puzzled by a finding in @jankin:2024:W, two authors experimented with the idea of multiverse analysis for topic modeling.
+
+*Artefact:* [First git commit](https://github.com/gesistsa/multiverse_tm/commit/5569edb81516776dab458c9ac280885a1d9d2a0c) in a private repository. See also Footnote 8 in the manuscript.
+
+:::
+
+::: {.event data-label="2025-06-30"}
+After an internal presentation of the idea to the research team, more authors joined the project. The team developed the initial idea into a systematic investigation. Guided by @pipal:2022:IYH, the team worked on a registration.
+:::
+
+::: {.event data-label="2025-07-09"}
+The protocol was preregistered on OSF as an open end preregisration.
+
+*Artefact:* [Preregistration on Open Science Framework (OSF)](https://osf.io/4g5bu/)
+:::
+
+::: {.event data-label="2025-07-09 to 2025-10-17"}
+First active phase of the research.
+:::
+
+::: {.event data-label="2025-10-17"}
+First draft was submitted for the ICA Conference (Computational Methods Division).
+:::
+
+::: {.event data-label="2025-11-14"}
+First submission to *Communication Methods and Measures* (CMM).
+:::
+
+::: {.event data-label="2026-01-15"}
+ICA submission was accepted
+:::
+
+::: {.event data-label="2026-03-03"}
+First decision from CMM: Revise and resubmit
+:::
+
+::: {.event data-label="2026-03-03 to 2026-06-23"}
+Second active phase of the research.
+
+*Artefacts:*
+
+The following were developed based on the comments and queries from the reviewers.
+
+* The forensic investigation of the reproducibility of @curini:2021:CMU. ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/c9fc3597d93f781441e366345c32e52f46bac796))
+* The variance decomposition analysis in Coda. ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/4339a4fdabf33647e8dc4e9ee3ac699bd5260b21))
+* The distribution $\rho$ in Coda. ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/2c33df44f5c5bbe18637badd964818288e7cac07))
+
+Based on the forensic investigation, we identified issues with the dictionary of @curini:2021:CMU, which was fixed. ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/77e8c95c31cd970a88b2ce707d613a155d0f6ec5)) (See below) This also led to a rerun of the multiverse analysis of @curini:2021:CMU. We have kept the old binary artefacts. (`intermediate/curini/oldruns`)
+:::
+
+::: {.event data-label="2026-06-05"}
+Presentation at the ICA Conference.
+:::
+
+::: {.event data-label="2026-06-07"}
+ICA computational methods division best paper award.
+:::
+
+::: {.event data-label="2026-06-23"}
+Revised version #1 submitted to CMM.
+:::
+
+::: {.event data-label="2026-07-23"}
+Second decision from CMM: Revise and resubmit.
+:::
+
+::: {.event data-label="2026-07-29"}
+Revised version #2 submitted to CMM.
+:::
+
+::: {.event data-label="2026-08-03"}
+Final decision from CMM: Accept.
+:::
+
+::: {.event data-label="2026-08-04"}
+Git repository made public.
+:::
+
+::: {.event data-label="2026-08-06"}
+Binary artefacts deployed on Zenodo.
+
+*Artefact:* [Zenodo](https://doi.org/10.5281/zenodo.21790777)
+:::
+
+::: {.event data-label="2026-08-07"}
+Online appendix website made public.
+
+*Artefact:* [Website](https://gesistsa.github.io/multiverse_tm/)
+:::
+
+::: {.event data-label="2026-08-12"}
+Fixed an inconsistency in the code. (See below)
+
+*Artefact:* [Git commit](https://github.com/gesistsa/multiverse_tm/commit/b5cc318b476f2e3de0b63340cfa3d3daf6f8f708)
+
+:::
+
+:::
+
+## Preregistration deviations
+
+*(Also reported in the manuscript)*
+
+The current investigation was deviated from the preregistration in the following two ways. First, in the original preregistration, we included an additional inclusion criterion: "Studies represent a diverse selection of cases, such as text genres or domains as well as covering different languages." This criterion was practically not used because the second criterion was too restrictive and we could not include enough studies with complete code and data. Using the typology of @lakens:2024:WHD, this deviation is an unforeseen event. The impact of this deviation should be negligible, as we did not reject any primary study because of text genres, domains, or languages.
+
+Second, in the original preregistration, we based on @denny:2018:TPF and @maier:2018:ALT and included stemming as a considered analytical path. As mentioned above, this analytical path was not considered for @takano:2023:awe because stemming is not possible for the Japanese language. Using the typology of @lakens:2024:WHD, this deviation is a violation of untested assumption. We incorrectly assumed in the preregistration that any text can be stemmed. The impact of this deviation is relatively higher, as that makes the multiverse size not comparable between that of @takano:2023:awe and the rest of the five cases.
+
+## Other deviations
+
+### Italian dictionary in @curini:2021:CMU
+
+The Italian dictionary for @curini:2021:CMU was modified during the course of the study. The modification was to make the dictionary also applicable to the stemming and the lemmatization cases (e.g., *democrazia* to *democraz\**).
+
+The change led to a rerun. The binary artefacts of the previous run before the change were preserved as `intermediate/curini/oldruns` on Zenodo.
+
+### Dummy variable in @tvinnereim:2015:E
+
+@tvinnereim:2015:E entered education as numerical variable (`edu3`) in the topic modeling, i.e.,
+
+```r
+# Select the 4 best models out of 20 runs (see Vignette, pp. 8-9)
+ncpSelect2 <- selectModel(out$documents,
+                          out$vocab,
+                          K=4,
+                          prevalence =~ meta$concern+meta$humanmade+meta$efficacy+meta$edu3+meta$gender+meta$age, 
+                          max.em.its=100, 
+                          data=out$meta,
+                          runs=20,
+                          seed=5926696) #, emtol=1)
+```
+
+However, the variable was entered as a dummy variable in the effect estimation.
+
+```r
+# Figures
+# Co-variation with demographics and concern
+# Generate education binary: university or not
+univdummy <- as.numeric(meta$edu3==3)
+print(univdummy)  
+summary(univdummy)
+table(meta$edu3, univdummy)
+meta$univdummy <- univdummy
+
+# Figure 1: Topical prevalence over co-variates
+prep <- estimateEffect(1:4 ~ concern+univdummy+gender+age, 
+                       ncpPrevFit,
+                       meta=meta, 
+                       uncertainty = "Global")
+```
+
+In the original analysis, we also entered this as a binary variable in the anchoring procedure. We fixed it in the code *after acceptance* to not follow this in our code ([Git commit](https://github.com/gesistsa/multiverse_tm/commit/b5cc318b476f2e3de0b63340cfa3d3daf6f8f708)). The reason was that the binary dummy was only used for another visualization. We tested that entering education as numerical variable or binary dummy does not influence the anchoring and therefore also not influence the subsequent effect estimation of `age`.
+
+```{r}
+library(stm)
+
+args <- tmmv.parse_args_train(slug = "tvinnereim", .current_run = 1)
+
+analytical_paths <- list(
+    token_normalization = c("none", "lemmatization", "stemming"),
+    stopword_removal = c(TRUE, FALSE),
+    trimming = c(TRUE, FALSE),
+    alternative_model = c(TRUE, FALSE),
+    k_setting = c(1, 2, 3), #K original, alt1, alt2
+    iteration_setting = c(1, 2, 3) #iter original, alt1, alt2    
+)
+
+settings_df <- expand.grid(analytical_paths, stringsAsFactors = FALSE)
+
+settings <- settings_df |> purrr::transpose() 
+
+
+.read <- function(setting, args) {
+    readRDS(tmmv.get_rds_filename(
+        setting,
+        here::here(args$output_dir)
+    ))
+}
+
+models <- purrr::map(settings, .read, args = args)
+names(models) <- purrr::map_chr(settings,
+                                rlang::hash)
+
+anchor_setting <- list(token_normalization = "stemming",
+                       stopword_removal = TRUE,
+                       trimming = TRUE,
+                       alternative_model = FALSE,
+                       k_setting = 1, 
+                       iteration_setting = 1)
+
+anchor_mod <- models[[rlang::hash(anchor_setting)]]
+
+.gen_anchor <- function(anchor_mod, edu3 = TRUE) {
+    if (edu3) {
+        est <- stm::estimateEffect(
+    ~ concern + edu3 + gender + age,
+    stmobj = anchor_mod$mod,
+    metadata = anchor_mod$docvars
+    )
+    } else {
+        anchor_mod$docvars$univdummy <- as.numeric(anchor_mod$docvars$edu3 == 3)
+        est <- stm::estimateEffect(
+    ~ concern + univdummy + gender + age,
+    stmobj = anchor_mod$mod,
+    metadata = anchor_mod$docvars
+    )
+    }
+    max_topic_index <- which.max(
+    purrr::map_dbl(est$parameters, \(x) {
+        mean(purrr::map_dbl(x, \(y) y$est["age"]))
+    })
+    )
+
+    return(anchor_mod$theta[, max_topic_index])
+}
+
+
+## the anchors are the same
+stopifnot(identical(.gen_anchor(anchor_mod, edu3 = TRUE),
+                    .gen_anchor(anchor_mod, edu3 = FALSE)))
+```
+
+## Additional discourses
+
+Some ideas in the current study were developed in parallel to @linde:2026:MUV (currently as preprint).
+
+## References

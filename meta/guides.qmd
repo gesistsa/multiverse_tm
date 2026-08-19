@@ -59,13 +59,15 @@ settings_df |> head()
 settings <- settings_df |> purrr::transpose() 
 ```
 
-`settings` is a list of `setting`. `settings` and `setting` can be subset in the following two ways. The subsetting of `setting` is important because the first three slots of a `setting` are solely for text preprocessing.
+`settings` is a list containing each combination of settings. `settings` and each singular item from `settings` can be subset in the following two ways. The subsetting of an item of `settings` is important because the first three slots from a set of settings are solely for text preprocessing.
 
 ```{r}
+# first two items
 settings[1:2]
 ```
 
 ```{r}
+# first item, first three slots
 settings[[1]][1:3]
 ```
 
@@ -126,9 +128,8 @@ norwegian_model <- udpipe_load_model(
 
 parsed_content <- udpipe_annotate(norwegian_model, original_corpus)
 parsed_content_df <- as.data.frame(parsed_content)
-parsed_content_df_fixed <- parsed_content_df
 
-parsed_content_df_fixed |>
+parsed_content_df |>
     group_by(doc_id) |>
     summarize(content = paste(lemma, collapse = " ")) |>
     mutate(doc_id = stringr::str_extract(doc_id, "[0-9]+")) |>
@@ -140,9 +141,9 @@ docvars(lemma_corpus) <- docvars(original_corpus)
 docnames(lemma_corpus) <- docnames(original_corpus)
 ```
 
-### Tokenization
+### Token normalization
 
-Please note that some code (e.g., the so-called "pretokenization") was from the original code by @tvinnereim:2015:E.
+To realize all tokenization scenarios, three different ways of tokenization of the corpus were conducted: original (no lemmatization or stemming), lemmatization, and stemming. Please note that some code (e.g., the so-called "pretokenization") was from the original code by @tvinnereim:2015:E,  which converts some Norwegian terms and typos (e.g., *globaloppvarming* to *global oppvarming*, *tempratur* to *temperatur*).
 
 #### Original (no lemmatization or stemming)
 
@@ -335,7 +336,7 @@ The function `train_model` is built that accepts one `setting` and `dfm_list` an
 ```{r}
 #' This function unifies the theta so that the output theta always
 #' has the same nrow as current_dfm
-#' The raison d'être is that stm discards empty rows sliently
+#' The raison d'être is that stm discards empty rows silently
 #' But doesn't retain the rownames
 unify_theta <- function(mod, trimmed_dfm, current_dfm) {
     theta <- mod$theta
@@ -422,7 +423,7 @@ train_model <- function(setting, dfm_list) {
 }
 ```
 
-Then, the topic modeling for all `settings` is executed.
+Then, the topic modeling for all `settings` is executed. This step roughly takes six hours.
 
 ```r
 models <- purrr::map(settings, train_model, dfm_list = dfm_list, .progress = TRUE)
@@ -495,7 +496,7 @@ another_mod <- models[[1]]
 theta <- another_mod$theta
 ```
 
-The idea of anchoring is to find out the column vector in $\theta$ that has the maximum correlation with `anchor_theta` (See equation 2 in the article). So that one can use that column vector to represent the setting used for training this model.
+`theta` ($\theta$) is a matrix with $k$ columns (total number of topics), that has topic proportions of all topics from a topic model solution resulting from a different set of settings. The idea of anchoring is to find out the column vector in $\theta$ that has the maximum correlation with `anchor_theta` (See equation 2 in the article), which most likely represents the original author's solution. So that one can use that column vector to represent the setting used for training this model.
 
 ```{r}
 cor_coefs <- vapply(
@@ -515,6 +516,25 @@ Therefore, the column vector that can be used to represent this model is: `theta
 With all the topic models trained, one can then generate estimates of the estimand. As stated in the paper, the estimand of interest is "the modeled difference in $\theta_{:,k}$ across age groups." To make it easier to do this for all trained topic models, the analyses are wrapped into functions.
 
 ```{r}
+#' return the column index in theta, which the column vector
+#' has the highest spearman's correlation with anchor_theta
+#' by default (return_rho = FALSE), it returns the anchor index
+#' otherwise, it returns the maximun rho
+find_anchor <- function(anchor_theta, theta, return_rho = FALSE) {
+    stopifnot(length(anchor_theta) == nrow(theta))
+    cor_coefs <- vapply(
+        seq_len(ncol(theta)),
+        FUN = function(x) {
+            cor(anchor_theta, theta[, x], method = "spearman")
+        },
+        FUN.VALUE = numeric(1)
+    )
+    if (return_rho) {
+        return(max(cor_coefs))
+    }
+    return(which.max(cor_coefs))
+}
+
 .get_keyatm_strata_topic_func <- function(current_mod) {
     keyATM::by_strata_DocTopic(
         current_mod$mod,
@@ -557,8 +577,8 @@ get_effect_size_mod <- function(
         theta_diff <- theta2[, seq_len(k)] - theta1[, seq_len(k)]
         theta_diff_quantile <- apply(theta_diff, 2, quantile, c(0.025, 0.975))
         theta_diff_mean <- apply(theta_diff, 2, mean)
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        max_rho <- tmmv.find_anchor(
+        anchor_index <- find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- find_anchor(
             anchor_theta,
             current_mod$theta,
             return_rho = TRUE
@@ -572,8 +592,8 @@ get_effect_size_mod <- function(
         rownames(output) <- NULL
     } else {
         res <- .get_stm_estimate_func(current_mod)
-        anchor_index <- tmmv.find_anchor(anchor_theta, current_mod$theta)
-        max_rho <- tmmv.find_anchor(
+        anchor_index <- find_anchor(anchor_theta, current_mod$theta)
+        max_rho <- find_anchor(
             anchor_theta,
             current_mod$theta,
             return_rho = TRUE

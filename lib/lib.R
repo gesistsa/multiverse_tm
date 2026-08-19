@@ -131,9 +131,9 @@ tmmv.get_settings <- function(full = TRUE, args = NULL, .nothing_quit = TRUE) {
         trimming = c(TRUE, FALSE)
     )
     if (full) {
-        settings$alternative_model = c(TRUE, FALSE)
-        settings$k_setting = c(1, 2, 3) #K original, alt1, alt2
-        settings$iteration_setting = c(1, 2, 3) #iter original, alt1, alt2
+        settings$alternative_model <- c(TRUE, FALSE)
+        settings$k_setting <- c(1, 2, 3) #K original, alt1, alt2
+        settings$iteration_setting <- c(1, 2, 3) #iter original, alt1, alt2
     }
     output <- purrr::transpose(expand.grid(settings, stringsAsFactors = FALSE))
     ## no filtering
@@ -231,7 +231,7 @@ tmmv.find_anchor <- function(anchor_theta, theta, return_rho = FALSE) {
 
 #' This function unifies the theta so that the output theta always
 #' has the same nrow as current_dfm
-#' The raison d'être is that stm discards empty rows sliently
+#' The raison d'être is that stm discards empty rows silently
 #' But doesn't retain the rownames
 tmmv.unify_theta <- function(mod, trimmed_dfm, current_dfm) {
     theta <- mod$theta

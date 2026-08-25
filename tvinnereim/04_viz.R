@@ -17,3 +17,13 @@ ggsave(
     width = 8,
     height = 10
 )
+
+ggsave(
+    here::here("plots", paste0(slug, "_spec.jpg")),
+    f,
+    width = 8,
+    height = 10,
+    units = "in",
+    bg = "white",
+    dpi = 600
+)

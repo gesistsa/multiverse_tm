@@ -23,6 +23,17 @@ ggsave(
     height = 10
 )
 
+ggsave(
+    here::here("plots", paste0(slug, "_spec.jpg")),
+    f,
+    width = 8,
+    height = 10,
+    bg = "white",
+    unit = "in",
+    dpi = 600
+)
+
+
 ## conditional effect plot
 
 .r <- function(i, slug) {
@@ -63,4 +74,14 @@ ggsave(
     f,
     width = 8,
     height = 10
+)
+
+ggsave(
+    here::here("plots", paste0(slug, "_spaghetti.jpg")),
+    f,
+    width = 8,
+    height = 10,
+    units = "in",
+    bg = "white",
+    dpi = 600
 )

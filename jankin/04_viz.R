@@ -145,12 +145,14 @@ ggsave(
 ggsave(
     here("plots", "jankins_spaghetti_full.jpg"),
     plot = p_spaghetti_full,
-    width = 3000,
-    height = 3500,
+    ## width = 3000,
+    ## height = 3500,
+    width = 4800,
+    height = 3500 * (4800 / 3000),
     units = "px",
-    bg = "white"
+    bg = "white",
+    dpi = 600
 )
-
 
 # Focus on same examples as Jankin et al
 # Reduce inequality within and among countries: SDG 10
@@ -185,17 +187,20 @@ ggsave(
     here("plots", "jankins_spaghetti_selected.pdf"),
     plot = p_spaghetti_selected,
     width = 3000,
-    height = 1500,
+    height = 1500 * (4800 / 3000),
     units = "px"
 )
 
 ggsave(
     here("plots", "jankins_spaghetti_selected.jpg"),
     plot = p_spaghetti_selected,
-    width = 3000,
-    height = 1500,
+    width = 4800,
+    height = 1500 * (4800 / 3000),
+    ## width = 3000,
+    ## height = 1500,
     units = "px",
-    bg = "white"
+    bg = "white",
+    dpi = 600
 )
 
 
